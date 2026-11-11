@@ -1,6 +1,7 @@
-import { IconButton } from '@cake-admin/cakeand';
-import { Bell, Search } from 'lucide-react';
+import { Counter, IconButton } from '@cake-admin/cakeand';
+import { Bell, MoreHorizontal, Search } from 'lucide-react';
 
+import { useAppState } from '../app/AppState';
 import avatarGlyph from '../assets/shell/icon-avatar.svg';
 import {
   AvatarButton,
@@ -17,10 +18,11 @@ import {
 import { WindowControls } from './WindowControls';
 
 /**
- * Empty shell header: search field, utility slots, and decorative window chrome.
- * Top-bar controls use HelloPC IconButton size="xs" (24px).
+ * Shell header utilities. Preserves TokenHub chrome; wires notifications + reset.
  */
 export function AppHeader() {
+  const { unreadCount, setPanel, openTemplates } = useAppState();
+
   return (
     <HeaderBar>
       <HeaderCenter>
@@ -32,7 +34,9 @@ export function AppHeader() {
             type="search"
             placeholder="Search"
             aria-label="Search"
-            readOnly
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') openTemplates();
+            }}
           />
         </SearchField>
       </HeaderCenter>
@@ -46,9 +50,24 @@ export function AppHeader() {
               size="xs"
               intent="secondary"
               variant="ghost"
-              onClick={(event) => event.preventDefault()}
+              onClick={() => setPanel('notifications')}
             />
-            <NotificationDot aria-hidden />
+            {unreadCount > 0 && (
+              <>
+                <NotificationDot aria-hidden />
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: 1,
+                    height: 1,
+                    overflow: 'hidden',
+                    clip: 'rect(0 0 0 0)',
+                  }}
+                >
+                  <Counter count={unreadCount} />
+                </span>
+              </>
+            )}
           </NotificationWrap>
 
           <AvatarButton
@@ -58,6 +77,15 @@ export function AppHeader() {
           >
             <img src={avatarGlyph} alt="" width={16} height={16} />
           </AvatarButton>
+
+          <IconButton
+            label="More application actions"
+            icon={<MoreHorizontal />}
+            size="xs"
+            intent="secondary"
+            variant="ghost"
+            onClick={() => setPanel('reset')}
+          />
         </UtilityCluster>
 
         <WindowControls />

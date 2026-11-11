@@ -95,6 +95,7 @@ export const MainColumn = styled.div`
   min-width: 0;
   min-height: 0;
   height: 100%;
+  overflow: hidden;
 `;
 
 export const HeaderBar = styled.header`
@@ -239,7 +240,7 @@ export const WorkspaceSurface = styled.main`
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
   background: var(--color-surfaces-on-container-high);
 `;
 

@@ -1,4 +1,4 @@
-import type { DemoSnapshot, ReportRecord } from '../../product/types';
+import type { Automation, DemoSnapshot, ReportRecord } from '../../product/types';
 import {
   buildAustraliaPages,
   buildEnglandPages,
@@ -19,7 +19,7 @@ function englandReport(): ReportRecord {
     team: 'England',
     period: 'Entire tournament',
     audience: 'Analyst',
-    demoSources: [
+    sourceLabels: [
       'Women’s World Cup 2023 match data',
       'Team performance data',
       'Player performance data',
@@ -37,6 +37,15 @@ function englandReport(): ReportRecord {
     ],
     chat: [],
     schedule: null,
+    compare: {
+      enabled: true,
+      leftTeam: 'England',
+      rightTeam: 'Spain',
+      leftPeriod: 'Entire tournament',
+      rightPeriod: 'Entire tournament',
+      leftMatchId: 'eng-australia',
+      rightMatchId: 'eng-spain',
+    },
     pages: buildEnglandPages(),
   };
 }
@@ -54,7 +63,7 @@ function australiaReport(): ReportRecord {
     team: 'Australia',
     period: 'Entire tournament',
     audience: 'Executive',
-    demoSources: ['Women’s World Cup 2023 match data', 'Team performance data'],
+    sourceLabels: ['Women’s World Cup 2023 match data', 'Team performance data'],
     context: [
       { id: 'a1', label: 'Women’s World Cup 2023 match data', kind: 'data' },
       { id: 'a2', label: 'Australia team performance', kind: 'data' },
@@ -86,7 +95,7 @@ function spainReport(): ReportRecord {
     team: 'Spain',
     period: 'Entire tournament',
     audience: 'Analyst',
-    demoSources: ['Women’s World Cup 2023 match data', 'Team performance data'],
+    sourceLabels: ['Women’s World Cup 2023 match data', 'Team performance data'],
     context: [
       { id: 's1', label: 'Spain team performance', kind: 'data' },
       { id: 's2', label: 'Match events', kind: 'data' },
@@ -107,12 +116,20 @@ function playerCompareReport(): ReportRecord {
     status: 'Draft',
     owner: 'You',
     sharing: 'Private',
+    team: 'England',
     period: 'Entire tournament',
     audience: 'Analyst',
-    demoSources: ['Player performance data'],
+    sourceLabels: ['Player performance data'],
     context: [{ id: 'pc1', label: 'Player performance data', kind: 'data' }],
     chat: [],
     schedule: null,
+    compare: {
+      enabled: true,
+      leftTeam: 'England',
+      rightTeam: 'Spain',
+      leftPeriod: 'Entire tournament',
+      rightPeriod: 'Entire tournament',
+    },
     pages: buildPlayerComparisonPages(),
   };
 }
@@ -129,7 +146,7 @@ function knockoutReport(): ReportRecord {
     sharing: 'Shared with 1',
     period: 'Knockout stage',
     audience: 'General audience',
-    demoSources: ['Women’s World Cup 2023 match data'],
+    sourceLabels: ['Women’s World Cup 2023 match data'],
     context: [{ id: 'k1', label: 'Women’s World Cup 2023 match data', kind: 'data' }],
     chat: [],
     schedule: {
@@ -149,7 +166,7 @@ function knockoutReport(): ReportRecord {
             id: 'ko-ai',
             kind: 'ai-summary',
             title: 'Knockout stage summary',
-            body: 'Simulated: knockout matches featured lower chance quality and tighter defensive spacing across several teams.',
+            body: 'Knockout matches featured lower chance quality and tighter defensive spacing across several teams.',
           },
         ],
       },
@@ -171,7 +188,7 @@ export function createInitialSnapshot(): DemoSnapshot {
       {
         id: 'n1',
         title: 'England opponent analysis was refreshed.',
-        detail: '12 objects refreshed with simulated demo data.',
+        detail: '12 objects refreshed from Women’s World Cup 2023 match data.',
         time: '12 min ago',
         tone: 'success',
         read: false,
@@ -188,8 +205,8 @@ export function createInitialSnapshot(): DemoSnapshot {
       },
       {
         id: 'n3',
-        title: 'New demo data is available.',
-        detail: 'Women’s World Cup 2023 match data updated (simulated).',
+        title: 'New source data is available.',
+        detail: 'Women’s World Cup 2023 match data updated.',
         time: '1 hr ago',
         tone: 'info',
         read: true,
@@ -215,7 +232,7 @@ export function createInitialSnapshot(): DemoSnapshot {
       {
         id: 'n6',
         title: 'One report object could not be refreshed.',
-        detail: 'Spatial visualization remains a placeholder.',
+        detail: 'One chart object needs review.',
         time: '2 days ago',
         tone: 'error',
         read: false,
@@ -225,25 +242,92 @@ export function createInitialSnapshot(): DemoSnapshot {
     activities: [
       { id: 'act1', text: 'England opponent analysis was refreshed.', time: '12 min ago' },
       { id: 'act2', text: 'A. Patel shared Spain performance report.', time: 'Yesterday' },
-      { id: 'act3', text: 'Scheduled Australia tournament overview completed.', time: 'Yesterday' },
-      { id: 'act4', text: 'New source data became available (demo).', time: '1 hr ago' },
+      { id: 'act3', text: 'Automation generated Spain vs Sweden match report.', time: 'Yesterday' },
+      { id: 'act4', text: 'New source data became available.', time: '1 hr ago' },
     ],
-    scheduled: [
-      {
-        id: 'sa1',
-        text: 'Australia tournament overview refreshes tomorrow at 8:00 AM',
-        when: 'Tomorrow · 8:00 AM',
-      },
-      {
-        id: 'sa2',
-        text: 'Knockout stage summary refreshes when new data is available',
-        when: 'On new data',
-      },
-      {
-        id: 'sa3',
-        text: 'Weekly performance email sends Monday at 9:00 AM',
-        when: 'Monday · 9:00 AM',
-      },
-    ],
+    automations: sampleAutomations(),
   };
+}
+
+function sampleAutomations(): Automation[] {
+  return [
+    {
+      id: 'auto-post-match',
+      name: 'Post-match analysis (30 min)',
+      enabled: true,
+      triggerKind: 'team',
+      team: 'England',
+      triggerEvent: 'full-time',
+      delayMinutes: 30,
+      templateId: 'match-analysis',
+      templateName: 'Match analysis',
+      notify: 'both',
+      requireReview: true,
+      lastRun: undefined,
+      lastMatch: undefined,
+      lastReportId: undefined,
+      runsGenerated: 0,
+    },
+    {
+      id: 'auto-spain',
+      name: 'Spain match reports',
+      enabled: true,
+      triggerKind: 'team',
+      team: 'Spain',
+      triggerEvent: 'full-time',
+      delayMinutes: 30,
+      templateId: 'match-analysis',
+      templateName: 'Match analysis',
+      notify: 'both',
+      requireReview: false,
+      lastRun: 'Yesterday',
+      lastMatch: 'Spain 2–1 Sweden',
+      lastReportId: 'spain-performance',
+      runsGenerated: 6,
+    },
+    {
+      id: 'auto-every',
+      name: 'Matchday briefing',
+      enabled: true,
+      triggerKind: 'any-match',
+      templateId: 'executive-summary',
+      templateName: 'Executive summary',
+      notify: 'in-app',
+      requireReview: false,
+      lastRun: '2 hours ago',
+      lastMatch: 'England 1–0 Australia',
+      lastReportId: 'england-opponent',
+      runsGenerated: 28,
+    },
+    {
+      id: 'auto-england',
+      name: 'England opponent watch',
+      enabled: true,
+      triggerKind: 'team',
+      team: 'England',
+      templateId: 'opponent-analysis',
+      templateName: 'Opponent analysis',
+      notify: 'both',
+      requireReview: true,
+      lastRun: '12 min ago',
+      lastMatch: 'England 1–0 Australia',
+      lastReportId: 'england-opponent',
+      runsGenerated: 7,
+    },
+    {
+      id: 'auto-knockout',
+      name: 'Knockout deep-dives',
+      enabled: false,
+      triggerKind: 'requirements',
+      requirements: 'Knockout stage matches only',
+      templateId: 'match-analysis',
+      templateName: 'Match analysis',
+      notify: 'email',
+      requireReview: true,
+      lastRun: '4 days ago',
+      lastMatch: 'Spain 1–0 Netherlands',
+      lastReportId: 'knockout-summary',
+      runsGenerated: 4,
+    },
+  ];
 }

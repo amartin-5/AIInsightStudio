@@ -1,25 +1,89 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
+/**
+ * HelloPC Button/Chip/Badge labels default to nowrap + ellipsis.
+ * Prefer wrapping so product copy stays fully readable.
+ * Skips icon-only controls (IconButton / SVG actions) so glyphs stay
+ * square and fully visible — those use AccessibleIcon, not aria-label.
+ * Also skips Radio / Checkbox / Switch roots: their indicator is an empty
+ * bordered span, and `height: auto` collapses unchecked rings to a line.
+ */
+const showFullLabelText = css`
+  button:not([aria-label]):not(:has(svg)):not([role='radio']):not([role='checkbox']):not([role='switch']),
+  [role='button']:not([aria-label]):not(:has(svg)) {
+    height: auto !important;
+    white-space: normal !important;
+    overflow: visible !important;
+  }
+
+  button:not([aria-label]):not(:has(svg)):not([role='radio']):not([role='checkbox']):not([role='switch']) span,
+  [role='button']:not([aria-label]):not(:has(svg)) span {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    height: auto !important;
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+
+  /* Restore HelloPC selection-control geometry if any ancestor rule fought it. */
+  button[role='radio'],
+  button[role='checkbox'] {
+    width: var(--space-500) !important;
+    height: var(--space-500) !important;
+    min-width: var(--space-500);
+    min-height: var(--space-500);
+    flex-shrink: 0;
+    overflow: visible !important;
+  }
+
+  button[role='radio'] > span,
+  button[role='checkbox'] > span {
+    width: var(--space-300) !important;
+    height: var(--space-300) !important;
+    min-width: var(--space-300);
+    min-height: var(--space-300);
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    overflow: visible !important;
+    box-sizing: border-box;
+  }
+
+  button[role='checkbox'] > span {
+    width: var(--space-350) !important;
+    height: var(--space-350) !important;
+    min-width: var(--space-350);
+    min-height: var(--space-350);
+    border-radius: var(--radius-50);
+  }
+`;
+
+/** TokenHub report/home page gutters: 48 left / 48 right / 24 top / 48 bottom. */
 export const ScrollArea = styled.div`
+  box-sizing: border-box;
   flex: 1 1 auto;
   min-height: 0;
+  width: 0;
+  min-width: 100%;
+  max-width: 100%;
   overflow: auto;
-  padding: var(--space-600) var(--space-700) var(--space-800);
+  padding: var(--space-500) var(--space-800) var(--space-800);
+  ${showFullLabelText}
 `;
 
 export const PageHeader = styled.div`
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-400);
-  margin-bottom: var(--space-600);
+  gap: var(--space-500);
+  margin-bottom: var(--space-500);
 `;
 
 export const TitleBlock = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--space-150);
+  gap: var(--space-100);
   min-width: 0;
   flex: 1 1 280px;
 `;
@@ -31,7 +95,7 @@ export const PageTitle = styled.h1`
   font-size: var(--type-size-page);
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.4px;
-  line-height: 1.25;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 `;
 
@@ -41,7 +105,48 @@ export const PageSubtitle = styled.p`
   color: var(--color-text-icon-secondary);
   font-family: var(--font-family);
   font-size: var(--type-size-body);
-  line-height: 1.5;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.35;
+  overflow-wrap: break-word;
+`;
+
+/**
+ * TokenHub report header card — indigo → violet gradient banner.
+ * Stops match TokenHub ReportPage; not available as tokens.
+ */
+export const HeroBanner = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-500);
+  width: 100%;
+  min-width: 0;
+  margin-bottom: var(--space-500);
+  padding: var(--space-500);
+  border-radius: var(--radius-300);
+  background-image: linear-gradient(8deg, rgb(21, 47, 197) 14%, rgb(160, 120, 255) 87%);
+  box-shadow: var(--elevation-2);
+`;
+
+export const HeroTitle = styled.h1`
+  margin: 0;
+  color: var(--color-text-icon-on-primary);
+  font-family: var(--font-family);
+  font-size: var(--type-size-page);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.35;
+  overflow-wrap: break-word;
+`;
+
+export const HeroSubtitle = styled.p`
+  margin: 0;
+  max-width: 48ch;
+  color: var(--color-text-icon-on-secondary);
+  font-family: var(--font-family);
+  font-size: var(--type-size-body);
+  line-height: 1.35;
   overflow-wrap: break-word;
 `;
 
@@ -56,8 +161,8 @@ export const ActionRow = styled.div`
 export const Section = styled.section`
   display: flex;
   flex-direction: column;
-  gap: var(--space-400);
-  margin-bottom: var(--space-700);
+  gap: var(--space-300);
+  margin-bottom: var(--space-500);
 `;
 
 export const SectionHeader = styled.div`
@@ -75,14 +180,14 @@ export const SectionTitle = styled.h2`
   font-family: var(--font-family);
   font-size: var(--type-size-title);
   font-weight: var(--font-weight-bold);
-  line-height: 1.3;
+  line-height: 1.35;
   overflow-wrap: break-word;
 `;
 
 export const CardGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-  gap: var(--space-400);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-500);
   align-items: stretch;
 `;
 
@@ -97,7 +202,7 @@ export const SurfaceCard = styled.article`
   border: var(--stroke-100) solid var(--color-stroke-border);
   border-radius: var(--radius-300);
   background: var(--color-surfaces-container);
-  box-shadow: var(--elevation-0);
+  box-shadow: var(--elevation-2);
   overflow: visible;
 `;
 
@@ -185,10 +290,11 @@ export const PreviewThumb = styled.div`
   align-items: center;
   justify-content: center;
   flex: none;
-  min-height: 104px;
+  min-height: 120px;
   border-radius: var(--radius-200);
-  background: var(--color-surfaces-on-container);
-  color: var(--color-text-icon-secondary);
+  background:
+    linear-gradient(146deg, rgb(4, 27, 149) 2.5%, rgb(83, 103, 246) 55%, rgb(89, 177, 255) 100%);
+  color: var(--color-text-icon-inverse);
   font-family: var(--font-family);
   font-size: var(--type-size-caption);
   line-height: 1.4;
@@ -203,7 +309,7 @@ export const PlaceholderViz = styled.div`
   justify-content: center;
   min-height: 180px;
   border: var(--stroke-100) dashed var(--color-stroke-border-high);
-  border-radius: var(--radius-200);
+  border-radius: var(--radius-300);
   background: var(--color-surfaces-on-container-high);
   color: var(--color-text-icon-secondary);
   font-family: var(--font-family);
@@ -216,7 +322,7 @@ export const PlaceholderViz = styled.div`
 
 export const KpiGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 148px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
   gap: var(--space-300);
 `;
 
@@ -226,13 +332,15 @@ export const KpiTile = styled.div`
   flex-direction: column;
   gap: var(--space-100);
   min-width: 0;
-  padding: var(--space-300);
-  border: var(--stroke-100) solid var(--color-stroke-border-low);
-  border-radius: var(--radius-200);
-  background: var(--color-surfaces-on-container-high);
+  padding: var(--space-400);
+  border: var(--stroke-100) solid var(--color-stroke-border);
+  border-radius: var(--radius-300);
+  background: var(--color-surfaces-container);
+  box-shadow: var(--elevation-2);
 `;
 
 export const SplitWorkspace = styled.div`
+  position: relative;
   display: flex;
   flex: 1 1 auto;
   min-height: 0;
@@ -246,21 +354,61 @@ export const AiPanel = styled.aside<{ $width: number; $collapsed: boolean }>`
   display: flex;
   flex: none;
   flex-direction: column;
-  width: ${(p) => (p.$collapsed ? '48px' : `min(${p.$width}px, 40%)`)};
-  min-width: ${(p) => (p.$collapsed ? '48px' : '280px')};
-  max-width: 420px;
+  width: ${(p) => (p.$collapsed ? '44px' : `min(${p.$width}px, 28%)`)};
+  min-width: ${(p) => (p.$collapsed ? '44px' : '240px')};
+  max-width: 320px;
   border-right: var(--stroke-100) solid var(--color-stroke-border);
-  background: var(--color-surfaces-container);
+  background: var(--color-surfaces-container-blur-high);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   min-height: 0;
   overflow: hidden;
 `;
 
+/** Floating chat card over the report canvas (ChatGPT-style dock). */
+export const FloatingChat = styled.aside`
+  position: absolute;
+  left: var(--space-400);
+  bottom: var(--space-400);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  width: min(360px, calc(100% - var(--space-800)));
+  height: min(520px, calc(100% - var(--space-800)));
+  border: var(--stroke-100) solid var(--color-stroke-border);
+  border-radius: var(--radius-300);
+  background: var(--color-surfaces-container-blur-high);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: var(--elevation-4);
+  overflow: hidden;
+`;
+
+export const FloatingChatFab = styled.div`
+  position: absolute;
+  left: var(--space-400);
+  bottom: var(--space-400);
+  z-index: 4;
+`;
+
+export const AiPanelHeader = styled.div<{ $collapsed?: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: ${(p) => (p.$collapsed ? 'center' : 'space-between')};
+  gap: var(--space-200);
+  min-height: 48px;
+  padding: var(--space-200) var(--space-300);
+  border-bottom: var(--stroke-100) solid var(--color-stroke-border);
+  min-width: 0;
+`;
+
 export const AiPanelSection = styled.div`
   display: grid;
-  gap: var(--space-300);
-  padding: var(--space-400);
+  gap: var(--space-200);
+  padding: var(--space-300);
   min-width: 0;
   overflow-x: hidden;
+  ${showFullLabelText}
 `;
 
 export const AiChatScroll = styled.div`
@@ -269,10 +417,48 @@ export const AiChatScroll = styled.div`
   min-width: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: var(--space-400);
+  padding: var(--space-300);
   display: flex;
   flex-direction: column;
-  gap: var(--space-300);
+  gap: var(--space-250);
+
+  /* Keep chat action IconButtons at designed size (avoid label-wrap rules). */
+  ${ActionRow} {
+    align-items: center;
+  }
+
+  ${ActionRow} button {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+`;
+
+export const AiEmptyState = styled.div`
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--space-250);
+  min-height: 0;
+  min-width: 0;
+  padding: var(--space-200) 0;
+  color: var(--color-text-icon-secondary);
+`;
+
+export const AiComposer = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-150);
+  align-items: end;
+  padding: var(--space-250) var(--space-300) var(--space-300);
+  border-top: var(--stroke-100) solid var(--color-stroke-border);
+  min-width: 0;
+`;
+
+export const ChatMessageBlock = styled.div`
+  display: grid;
+  gap: var(--space-100);
+  min-width: 0;
 `;
 
 export const ReportPane = styled.section`
@@ -282,34 +468,38 @@ export const ReportPane = styled.section`
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: var(--color-surfaces-on-container-high);
+  background: transparent;
 `;
 
 export const Toolbar = styled.div`
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-300) var(--space-400);
-  padding: var(--space-400) var(--space-500);
+  gap: var(--space-200) var(--space-300);
+  padding: var(--space-250) var(--space-400);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
-  background: var(--color-surfaces-container);
+  background: var(--color-surfaces-container-blur-high);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   min-width: 0;
+  ${showFullLabelText}
 `;
 
 export const ToolbarTitle = styled.div`
   display: grid;
-  gap: var(--space-150);
+  gap: var(--space-050);
   min-width: 0;
-  flex: 1 1 240px;
+  flex: 1 1 200px;
 `;
 
 export const PageTabs = styled.div`
   display: flex;
   gap: var(--space-100);
   align-items: center;
-  padding: var(--space-250) var(--space-500);
+  padding: var(--space-200) var(--space-500);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
+  background: var(--color-surfaces-container-blur-high);
   overflow-x: auto;
   min-width: 0;
 
@@ -320,14 +510,38 @@ export const PageTabs = styled.div`
   }
 `;
 
-export const ReportCanvas = styled.div`
+/** Dedicated edit chrome under page tabs — keeps tabs readable. */
+export const EditBar = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-300);
+  padding: var(--space-300) var(--space-500);
+  border-bottom: var(--stroke-100) solid var(--color-stroke-border);
+  background: var(--color-primary-primary-overlay);
+  min-width: 0;
+`;
+
+export const EditBarGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-150);
+  min-width: 0;
+`;
+
+export const ReportCanvas = styled.div<{ $editing?: boolean }>`
   flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
-  overflow: auto;
-  padding: var(--space-500) var(--space-600);
-  display: grid;
-  gap: var(--space-400);
+  /* Only the report page scrolls — widgets/charts never scroll themselves. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: ${(p) =>
+    p.$editing ? 'var(--space-600) var(--space-800)' : 'var(--space-400)'};
+  display: block;
+  ${showFullLabelText}
 `;
 
 export const SideDrawer = styled.aside`
@@ -343,6 +557,42 @@ export const SideDrawer = styled.aside`
   background: var(--color-surfaces-container);
   box-shadow: var(--elevation-3);
   min-width: 0;
+`;
+
+/**
+ * Wider notifications host — HelloPC NotificationPanel caps at 432px and
+ * Notification cards at 480px; the footer packs timestamp + actions on one
+ * row, which overlaps when the drawer is narrow.
+ */
+export const NotificationsDrawer = styled(SideDrawer)`
+  width: min(560px, 100%);
+
+  & > section {
+    max-width: none;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border: 0;
+  }
+
+  & article {
+    max-width: none;
+  }
+
+  /* Give each notification more vertical room and stack meta above actions. */
+  & article > div {
+    gap: var(--space-400);
+    padding: var(--space-500);
+  }
+
+  & article > div > div:last-child {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-200);
+    padding-left: var(--space-700);
+  }
+
+  ${showFullLabelText}
 `;
 
 export const DrawerHeader = styled.div`
@@ -363,6 +613,7 @@ export const DrawerBody = styled.div`
   display: flex;
   flex-direction: column;
   gap: var(--space-400);
+  ${showFullLabelText}
 `;
 
 export const ChatBubble = styled.div<{ $role: 'user' | 'assistant' | 'system' }>`
@@ -370,7 +621,7 @@ export const ChatBubble = styled.div<{ $role: 'user' | 'assistant' | 'system' }>
   box-sizing: border-box;
   max-width: 100%;
   min-width: 0;
-  padding: var(--space-250) var(--space-300);
+  padding: var(--space-200) var(--space-250);
   border-radius: var(--radius-200);
   background: ${(p) =>
     p.$role === 'user'
@@ -378,8 +629,8 @@ export const ChatBubble = styled.div<{ $role: 'user' | 'assistant' | 'system' }>
       : 'var(--color-surfaces-on-container)'};
   color: var(--color-text-icon-primary);
   font-family: var(--font-family);
-  font-size: var(--type-size-body);
-  line-height: 1.5;
+  font-size: var(--type-size-caption);
+  line-height: 1.45;
   white-space: pre-wrap;
   overflow-wrap: break-word;
 `;
@@ -387,7 +638,7 @@ export const ChatBubble = styled.div<{ $role: 'user' | 'assistant' | 'system' }>
 export const PromptChipRow = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--space-150);
+  gap: var(--space-100);
   min-width: 0;
 `;
 
@@ -397,8 +648,8 @@ export const WrapButtonSlot = styled.div`
   width: 100%;
   max-width: 100%;
 
-  & > button,
-  & button {
+  & > button:not([role='radio']):not([role='checkbox']):not([role='switch']),
+  & button:not([role='radio']):not([role='checkbox']):not([role='switch']) {
     width: 100%;
     max-width: 100%;
     height: auto !important;
@@ -412,8 +663,8 @@ export const WrapButtonSlot = styled.div`
     overflow: visible !important;
   }
 
-  & button *,
-  & button span {
+  & button:not([role='radio']):not([role='checkbox']):not([role='switch']) *,
+  & button:not([role='radio']):not([role='checkbox']):not([role='switch']) span {
     white-space: normal !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -437,32 +688,11 @@ export const StatusBanner = styled.div`
   overflow-wrap: break-word;
 `;
 
-export const ToastBar = styled.div`
-  position: absolute;
-  left: 50%;
-  bottom: var(--space-500);
-  z-index: 8;
-  transform: translateX(-50%);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-200);
-  max-width: min(560px, calc(100% - var(--space-800)));
-  padding: var(--space-250) var(--space-400);
-  border-radius: var(--radius-1000);
-  background: var(--color-secondary-secondary);
-  color: var(--color-text-icon-inverse);
-  box-shadow: var(--elevation-3);
-  font-family: var(--font-family);
-  font-size: var(--type-size-body);
-  line-height: 1.4;
-  overflow-wrap: break-word;
-`;
-
-export const DemoBadge = styled.span`
+export const SoftBadge = styled.span`
   display: inline-flex;
   align-items: center;
   flex: none;
+  max-width: 100%;
   padding: var(--space-050) var(--space-150);
   border-radius: var(--radius-1000);
   background: var(--color-warning-warn-overlay);
@@ -471,18 +701,24 @@ export const DemoBadge = styled.span`
   font-size: var(--type-size-caption);
   font-weight: var(--font-weight-medium);
   line-height: 1.3;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
 `;
 
-export const ObjectCard = styled.article`
+export const ObjectCard = styled.article<{ $editing?: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: var(--space-300);
+  gap: ${(p) => (p.$editing ? 'var(--space-400)' : 'var(--space-200)')};
   min-width: 0;
-  padding: var(--space-500);
-  border: var(--stroke-100) solid var(--color-stroke-border);
+  height: auto;
+  padding: ${(p) => (p.$editing ? 'var(--space-500)' : 'var(--space-300)')};
+  border: var(--stroke-100) solid
+    ${(p) =>
+      p.$editing ? 'var(--color-primary-primary)' : 'var(--color-stroke-border)'};
   border-radius: var(--radius-300);
   background: var(--color-surfaces-container);
+  box-shadow: var(--elevation-2);
+  /* Never clip or scroll widgets — the report page scrolls instead. */
   overflow: visible;
 `;
 
@@ -497,50 +733,65 @@ export const ObjectHeader = styled.div`
 
 export const ObjectTitleBlock = styled.div`
   display: grid;
-  gap: var(--space-150);
+  gap: var(--space-100);
   min-width: 0;
-  flex: 1 1 200px;
+  flex: 1 1 160px;
 `;
 
 export const InlineMenu = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: var(--space-050);
+  align-items: center;
+  gap: var(--space-100);
   flex: none;
 `;
 
 export const TableWrap = styled.div`
   width: 100%;
   max-width: 100%;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: visible;
   border: var(--stroke-100) solid var(--color-stroke-border);
   border-radius: var(--radius-200);
+  -webkit-overflow-scrolling: touch;
 `;
 
 export const SimpleTable = styled.table`
   width: 100%;
-  min-width: 520px;
   border-collapse: collapse;
+  table-layout: auto;
   font-family: var(--font-family);
-  font-size: var(--type-size-caption);
+  font-size: var(--type-size-body);
 
   th,
   td {
-    padding: var(--space-200) var(--space-250);
+    padding: var(--space-250) var(--space-300);
     border-bottom: var(--stroke-100) solid var(--color-stroke-border-low);
     text-align: left;
     color: var(--color-text-icon-primary);
-    vertical-align: top;
-    line-height: 1.45;
-    overflow-wrap: break-word;
+    vertical-align: middle;
+    line-height: 1.5;
+    white-space: nowrap;
   }
 
   th {
     background: var(--color-surfaces-on-container);
     font-weight: var(--font-weight-medium);
     color: var(--color-text-icon-secondary);
-    white-space: nowrap;
+  }
+
+  /* Longer prose columns (notes, observations) wrap and claim leftover width. */
+  th:last-child,
+  td:last-child {
+    white-space: normal;
+    width: 40%;
+    min-width: 10rem;
+    overflow-wrap: break-word;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
   }
 `;
 

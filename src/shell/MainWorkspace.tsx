@@ -1,13 +1,12 @@
 import { OverlayHost } from '../app/overlays/OverlayHost';
 import { useAppState } from '../app/AppState';
 import { WorkspaceRoot } from '../app/ui.styles';
+import { AutomationsView } from '../app/views/AutomationsView';
+import { ExploreView } from '../app/views/ExploreView';
 import { HomeView } from '../app/views/HomeView';
-import {
-  NotificationsView,
-  ReportsLibraryView,
-  ScheduledView,
-  SharedView,
-} from '../app/views/SimpleListViews';
+import { LibraryView } from '../app/views/LibraryView';
+import { ReportsLibraryView } from '../app/views/ReportsLibraryView';
+import { SettingsView } from '../app/views/SettingsView';
 import { SetupView } from '../app/views/SetupView';
 import { TemplatesView } from '../app/views/TemplatesView';
 import { WorkspaceView } from '../app/views/WorkspaceView';
@@ -23,13 +22,14 @@ export function MainWorkspace() {
     <WorkspaceSurface aria-label="Workspace">
       <WorkspaceRoot>
         {view === 'home' && <HomeView />}
+        {view === 'explore' && <ExploreView />}
         {view === 'reports' && <ReportsLibraryView />}
         {view === 'templates' && <TemplatesView />}
+        {view === 'library' && <LibraryView />}
         {(view === 'setup' || view === 'generating') && <SetupView />}
         {view === 'workspace' && <WorkspaceView />}
-        {view === 'shared' && <SharedView />}
-        {view === 'scheduled' && <ScheduledView />}
-        {view === 'notifications' && <NotificationsView />}
+        {view === 'automations' && <AutomationsView />}
+        {view === 'settings' && <SettingsView />}
         <OverlayHost />
       </WorkspaceRoot>
     </WorkspaceSurface>

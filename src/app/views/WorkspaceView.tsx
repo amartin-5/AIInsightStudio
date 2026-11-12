@@ -2,40 +2,55 @@ import { useState } from 'react';
 import {
   Badge,
   Button,
-  Dropdown,
   IconButton,
-  Switch,
+  MenuContainer,
+  MenuItem,
   TextInput,
 } from '@cake-admin/cakeand';
 import {
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Columns2,
   Copy,
   Download,
+  Maximize2,
   MessageSquare,
   MoreHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
+  Pencil,
+  Pin,
   Plus,
   RefreshCw,
+  Send,
+  Settings,
   Share2,
   Sparkles,
+  SquareStack,
+  Trash2,
 } from 'lucide-react';
+import { DropdownMenu } from 'radix-ui';
+import styled from 'styled-components';
 
-import { ReportObjectView } from '../../product/ReportObjectView';
+import { ReportPageCanvas } from '../../product/ReportPageCanvas';
+import { TeamCrest } from '../../product/teams/TeamCrest';
 import { useAppState } from '../AppState';
+import { PresentChrome } from '../components/PresentChrome';
 import {
   ActionRow,
   AiChatScroll,
+  AiComposer,
+  AiEmptyState,
   AiPanel,
-  AiPanelSection,
+  AiPanelHeader,
   BodyText,
   ChatBubble,
-  DemoBadge,
-  ListStack,
+  ChatMessageBlock,
+  EditBar,
+  EditBarGroup,
+  FloatingChat,
+  FloatingChatFab,
   MetaRow,
-  MetaStack,
   Muted,
   PageTabs,
   PromptChipRow,
@@ -49,22 +64,23 @@ import {
   ToolbarTitle,
   WrapButtonSlot,
 } from '../ui.styles';
+import { CustomReportWorkspace } from './CustomReportWorkspace';
 
 export function WorkspaceView() {
   const {
-    snapshot,
     activeReport,
     activePageId,
     aiCollapsed,
     aiWidth,
+    chatPlacement,
     editMode,
     presentMode,
     statusMessage,
     suggestedPrompts,
     config,
-    setActiveReport,
     setActivePage,
     setAiCollapsed,
+    setChatPlacement,
     setEditMode,
     setPresentMode,
     setPanel,
@@ -75,13 +91,16 @@ export function WorkspaceView() {
     removePage,
     duplicatePage,
     movePage,
-    addContext,
-    removeContext,
+    setCompareContext,
+    quickRefresh,
   } = useAppState();
 
   const [draft, setDraft] = useState('');
-  const [showContext, setShowContext] = useState(false);
   const page = activeReport?.pages.find((p) => p.id === activePageId) ?? activeReport?.pages[0];
+  const floating = chatPlacement === 'floating';
+  const showEmbedded = !floating;
+  const showFloatingCard = floating && !aiCollapsed;
+  const showFloatingFab = floating && aiCollapsed;
 
   if (!activeReport || !page) {
     return (
@@ -92,6 +111,116 @@ export function WorkspaceView() {
     );
   }
 
+  if (activeReport.templateId === 'blank' || page.layout === 'custom-grid') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        {statusMessage && !presentMode && (
+          <StatusBanner role="status" aria-live="polite">
+            <Sparkles size={16} aria-hidden />
+            {statusMessage}
+          </StatusBanner>
+        )}
+        <CustomReportWorkspace />
+      </div>
+    );
+  }
+
+  if (presentMode) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PresentChrome />
+        <ReportCanvas style={{ flex: 1 }}>
+          <ReportPageCanvas page={page} />
+        </ReportCanvas>
+      </div>
+    );
+  }
+
+  const submitDraft = () => {
+    if (!draft.trim()) return;
+    sendPrompt(draft.trim());
+    setDraft('');
+  };
+
+  const chatBody = (
+    <>
+      <AiChatScroll>
+        {activeReport.chat.length === 0 && (
+          <AiEmptyState>
+            <Muted>Ask about this report</Muted>
+            <PromptChipRow>
+              {suggestedPrompts.slice(0, 3).map((prompt) => (
+                <WrapButtonSlot key={prompt}>
+                  <Button
+                    size="sm"
+                    intent="secondary"
+                    variant="outline"
+                    onClick={() => sendPrompt(prompt)}
+                  >
+                    {prompt}
+                  </Button>
+                </WrapButtonSlot>
+              ))}
+            </PromptChipRow>
+          </AiEmptyState>
+        )}
+
+        {activeReport.chat.map((message) => (
+          <ChatMessageBlock key={message.id}>
+            <ChatBubble $role={message.role}>{message.content}</ChatBubble>
+            {message.role === 'assistant' && !message.pending && (
+              <ActionRow>
+                <IconButton
+                  label="Pin to report"
+                  icon={<Pin />}
+                  size="xs"
+                  intent="secondary"
+                  variant="ghost"
+                  onClick={() => {
+                    setPinPayload({
+                      title: 'Pinned AI insight',
+                      body: message.content,
+                    });
+                    setPanel('pin');
+                  }}
+                />
+                <IconButton
+                  label="Copy answer"
+                  icon={<Copy size={16} strokeWidth={2} />}
+                  size="sm"
+                  intent="secondary"
+                  variant="ghost"
+                  onClick={() => navigator.clipboard?.writeText(message.content)}
+                />
+              </ActionRow>
+            )}
+          </ChatMessageBlock>
+        ))}
+      </AiChatScroll>
+
+      <AiComposer>
+        <TextInput
+          aria-label="Ask Insight Studio"
+          placeholder="Ask anything…"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') submitDraft();
+          }}
+        />
+        <IconButton
+          label="Send"
+          icon={<Send />}
+          size="sm"
+          intent="primary"
+          variant="fill"
+          onClick={submitDraft}
+          disabled={!draft.trim()}
+        />
+      </AiComposer>
+    </>
+  );
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {statusMessage && (
@@ -101,263 +230,129 @@ export function WorkspaceView() {
         </StatusBanner>
       )}
       <SplitWorkspace>
-        <AiPanel $width={aiWidth} $collapsed={aiCollapsed} aria-label="AI panel">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 'var(--space-200)',
-              padding: 'var(--space-300) var(--space-400)',
-              borderBottom: 'var(--stroke-100) solid var(--color-stroke-border)',
-              minWidth: 0,
-            }}
-          >
-            {!aiCollapsed && <Strong>AI</Strong>}
-            <IconButton
-              label={aiCollapsed ? 'Expand AI panel' : 'Collapse AI panel'}
-              icon={aiCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
-              size="xs"
-              intent="secondary"
-              variant="ghost"
-              onClick={() => setAiCollapsed(!aiCollapsed)}
-            />
-          </div>
-
-          {!aiCollapsed && (
-            <>
-              <AiPanelSection style={{ borderBottom: 'var(--stroke-100) solid var(--color-stroke-border)' }}>
-                <Dropdown
-                  label="Active report"
-                  value={activeReport.id}
-                  onValueChange={setActiveReport}
-                  options={snapshot.reports.slice(0, 4).map((r) => ({
-                    label: r.name,
-                    value: r.id,
-                  }))}
-                />
-                <ActionRow>
-                  <Button
-                    size="sm"
-                    intent="secondary"
-                    variant="tonal"
-                    endIcon={<ChevronDown size={16} />}
-                    onClick={() => setShowContext((v) => !v)}
-                  >
-                    Context · {activeReport.context.length}
-                  </Button>
-                  <Button
-                    size="sm"
-                    intent="secondary"
-                    variant="ghost"
-                    onClick={() =>
-                      addContext({
-                        id: `ctx-${Date.now()}`,
-                        label: 'Uploaded file (demo)',
-                        kind: 'file',
-                      })
-                    }
-                  >
-                    + Add context
-                  </Button>
-                  <Button
-                    size="sm"
+        {showEmbedded && (
+          <AiPanel $width={aiWidth} $collapsed={aiCollapsed} aria-label="AI panel">
+            <AiPanelHeader $collapsed={aiCollapsed}>
+              {!aiCollapsed && <Strong>Ask</Strong>}
+              <HeaderActions>
+                {!aiCollapsed && (
+                  <IconButton
+                    label="Float chat over report"
+                    icon={<SquareStack />}
+                    size="xs"
                     intent="secondary"
                     variant="ghost"
                     onClick={() => {
-                      const last = activeReport.context[activeReport.context.length - 1];
-                      if (last) removeContext(last.id);
+                      setChatPlacement('floating');
+                      setAiCollapsed(false);
                     }}
-                  >
-                    − Remove context
-                  </Button>
-                </ActionRow>
-                {showContext && (
-                  <ListStack>
-                    {activeReport.context.map((item) => (
-                      <SurfaceCard key={item.id} as="div">
-                        <ActionRow style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <Muted style={{ flex: '1 1 auto' }}>{item.label}</Muted>
-                          <Button size="xs" intent="secondary" variant="ghost" onClick={() => removeContext(item.id)}>
-                            Remove
-                          </Button>
-                        </ActionRow>
-                      </SurfaceCard>
-                    ))}
-                  </ListStack>
+                  />
                 )}
-              </AiPanelSection>
-
-              <AiChatScroll>
-                {activeReport.chat.length === 0 && (
-                  <PromptChipRow>
-                    <Muted>Suggested prompts</Muted>
-                    {suggestedPrompts.map((prompt) => (
-                      <WrapButtonSlot key={prompt}>
-                        <Button
-                          size="sm"
-                          intent="secondary"
-                          variant="outline"
-                          onClick={() => sendPrompt(prompt)}
-                        >
-                          {prompt}
-                        </Button>
-                      </WrapButtonSlot>
-                    ))}
-                  </PromptChipRow>
-                )}
-
-                {activeReport.chat.map((message) => (
-                  <div key={message.id} style={{ display: 'grid', gap: 'var(--space-150)', minWidth: 0 }}>
-                    <ChatBubble $role={message.role}>{message.content}</ChatBubble>
-                    {message.role === 'assistant' && !message.pending && (
-                      <>
-                        {message.sources && (
-                          <Muted>Sources: {message.sources.join(' · ')}</Muted>
-                        )}
-                        <ActionRow>
-                          <Button
-                            size="xs"
-                            onClick={() => {
-                              setPinPayload({
-                                title: 'Pinned AI insight',
-                                body: message.content,
-                              });
-                              setPanel('pin');
-                            }}
-                          >
-                            Pin to report
-                          </Button>
-                          <Button
-                            size="xs"
-                            intent="secondary"
-                            variant="ghost"
-                            onClick={() => sendPrompt(`Follow up: ${message.content.slice(0, 80)}`)}
-                          >
-                            Ask a follow-up
-                          </Button>
-                          <Button
-                            size="xs"
-                            intent="secondary"
-                            variant="ghost"
-                            onClick={() => navigator.clipboard?.writeText(message.content)}
-                          >
-                            Copy
-                          </Button>
-                          <Button
-                            size="xs"
-                            intent="secondary"
-                            variant="ghost"
-                            onClick={() => sendPrompt(activeReport.chat.find((m) => m.role === 'user')?.content ?? 'Regenerate')}
-                          >
-                            Regenerate
-                          </Button>
-                        </ActionRow>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </AiChatScroll>
-
-              <AiPanelSection style={{ borderTop: 'var(--stroke-100) solid var(--color-stroke-border)' }}>
-                <Muted>{activeReport.name}</Muted>
-                <TextInput
-                  aria-label="Ask Insight Studio"
-                  placeholder="Ask about this report…"
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && draft.trim()) {
-                      sendPrompt(draft.trim());
-                      setDraft('');
-                    }
-                  }}
+                <IconButton
+                  label={aiCollapsed ? 'Expand AI panel' : 'Collapse AI panel'}
+                  icon={aiCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+                  size="xs"
+                  intent="secondary"
+                  variant="ghost"
+                  onClick={() => setAiCollapsed(!aiCollapsed)}
                 />
-                <Button
-                  onClick={() => {
-                    if (!draft.trim()) return;
-                    sendPrompt(draft.trim());
-                    setDraft('');
-                  }}
-                >
-                  Send
-                </Button>
-              </AiPanelSection>
-            </>
-          )}
-        </AiPanel>
+              </HeaderActions>
+            </AiPanelHeader>
+            {!aiCollapsed && chatBody}
+          </AiPanel>
+        )}
 
         <ReportPane aria-label="Standing report">
           <Toolbar>
             <ToolbarTitle>
-              <Strong>{activeReport.name}</Strong>
-              <MetaStack>
-                <MetaRow>
-                  <Muted as="span" style={{ display: 'inline' }}>
-                    {config.competitionLabel}
-                  </Muted>
-                  <DemoBadge>{config.dataBadge}</DemoBadge>
-                  <Badge color="secondary" tone="subtle" dot={false}>
-                    {activeReport.sharing}
-                  </Badge>
-                </MetaRow>
-                <Muted>
-                  Updated {activeReport.lastUpdated} · {activeReport.context.length} sources ·{' '}
-                  {activeReport.owner}
+              <TitleWithCrest>
+                {activeReport.team ? <TeamCrest team={activeReport.team} size="lg" /> : null}
+                <Strong>{activeReport.name}</Strong>
+              </TitleWithCrest>
+              <MetaRow>
+                <Muted as="span" style={{ display: 'inline' }}>
+                  {config.competitionLabel}
                 </Muted>
-              </MetaStack>
+                <Badge color="secondary" tone="subtle" dot={false}>
+                  {activeReport.sharing}
+                </Badge>
+                <Muted as="span" style={{ display: 'inline' }}>
+                  Updated {activeReport.lastUpdated}
+                </Muted>
+              </MetaRow>
             </ToolbarTitle>
             <ActionRow>
-              <Button
-                size="sm"
-                intent="secondary"
-                variant="outline"
-                startIcon={<RefreshCw size={16} />}
-                onClick={() => setPanel('refresh')}
-              >
-                Refresh
-              </Button>
-              <Button
-                size="sm"
-                intent="secondary"
-                variant="outline"
-                startIcon={<Share2 size={16} />}
-                onClick={() => setPanel('share')}
-              >
-                Share
-              </Button>
-              <Button
-                size="sm"
-                intent="secondary"
-                variant="outline"
-                startIcon={<Download size={16} />}
-                onClick={() => setPanel('export')}
-              >
-                Export
-              </Button>
-              <Button
-                size="sm"
-                intent="secondary"
-                variant="ghost"
-                startIcon={<MoreHorizontal size={16} />}
-                onClick={() => setPanel('schedule')}
-              >
-                More
-              </Button>
-              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-100)' }}>
-                <span style={{ fontSize: 'var(--type-size-caption)' }}>Edit</span>
-                <Switch checked={editMode} onCheckedChange={setEditMode} aria-label="Edit mode" />
-              </label>
-              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-100)' }}>
-                <span style={{ fontSize: 'var(--type-size-caption)' }}>Present</span>
-                <Switch checked={presentMode} onCheckedChange={setPresentMode} aria-label="Present mode" />
-              </label>
+              {floating && (
+                <IconButton
+                  label="Dock chat to side"
+                  icon={<PanelLeftOpen size={16} />}
+                  size="xs"
+                  intent="secondary"
+                  variant="ghost"
+                  onClick={() => {
+                    setChatPlacement('embedded');
+                    setAiCollapsed(false);
+                  }}
+                />
+              )}
               <IconButton
-                label="Comments"
-                icon={<MessageSquare />}
+                label="Refresh"
+                icon={<RefreshCw size={16} />}
                 size="xs"
                 intent="secondary"
                 variant="ghost"
+                onClick={quickRefresh}
+              />
+              <IconButton
+                label="Share"
+                icon={<Share2 size={16} />}
+                size="xs"
+                intent="secondary"
+                variant="ghost"
+                onClick={() => setPanel('share')}
+              />
+              <IconButton
+                label="Export"
+                icon={<Download size={16} />}
+                size="xs"
+                intent="secondary"
+                variant="ghost"
+                onClick={() => setPanel('export')}
+              />
+              <IconButton
+                label={activeReport.compare?.enabled ? 'Comparing' : 'Compare'}
+                icon={<Columns2 size={16} />}
+                size="xs"
+                intent="secondary"
+                variant={activeReport.compare?.enabled ? 'tonal' : 'ghost'}
+                onClick={() => {
+                  setCompareContext({ enabled: activeReport.compare?.enabled ?? false });
+                  setPanel('compare');
+                }}
+              />
+              <IconButton
+                label="Present"
+                icon={<Maximize2 size={16} />}
+                size="xs"
+                intent="secondary"
+                variant="ghost"
+                onClick={() => setPresentMode(true)}
+              />
+              <IconButton
+                label="Report settings"
+                icon={<Settings size={16} />}
+                size="xs"
+                intent="secondary"
+                variant="ghost"
+                onClick={() => setPanel('settings')}
+              />
+              <IconButton
+                label={editMode ? 'Exit edit mode' : 'Edit'}
+                icon={<Pencil size={16} />}
+                size="xs"
+                intent="secondary"
+                variant={editMode ? 'tonal' : 'ghost'}
+                onClick={() => setEditMode(!editMode)}
               />
             </ActionRow>
           </Toolbar>
@@ -375,77 +370,185 @@ export function WorkspaceView() {
               </Button>
             ))}
             {editMode && (
-              <>
-                <Button size="sm" intent="secondary" variant="ghost" startIcon={<Plus size={16} />} onClick={addPage}>
-                  Add page
-                </Button>
-                <IconButton
-                  label="Rename page"
-                  icon={<MoreHorizontal />}
-                  size="xs"
-                  intent="secondary"
-                  variant="ghost"
-                  onClick={() => {
-                    const name = window.prompt('Rename page', page.name);
-                    if (name) renamePage(page.id, name);
-                  }}
-                />
-                <IconButton
-                  label="Duplicate page"
-                  icon={<Copy />}
-                  size="xs"
-                  intent="secondary"
-                  variant="ghost"
-                  onClick={() => duplicatePage(page.id)}
-                />
-                <IconButton
-                  label="Move page left"
-                  icon={<ChevronLeft />}
-                  size="xs"
-                  intent="secondary"
-                  variant="ghost"
-                  onClick={() => movePage(page.id, 'up')}
-                />
-                <IconButton
-                  label="Move page right"
-                  icon={<ChevronRight />}
-                  size="xs"
-                  intent="secondary"
-                  variant="ghost"
-                  onClick={() => movePage(page.id, 'down')}
-                />
-                <Button
-                  size="sm"
-                  intent="secondary"
-                  variant="ghost"
-                  onClick={() => {
-                    if (window.confirm(`Remove page “${page.name}”?`)) removePage(page.id);
-                  }}
-                >
-                  Remove page
-                </Button>
-                <Button size="sm" onClick={() => setPanel('add-object')}>
-                  Add object
-                </Button>
-              </>
+              <Button
+                size="sm"
+                intent="secondary"
+                variant="ghost"
+                startIcon={<Plus size={16} />}
+                onClick={addPage}
+              >
+                Add page
+              </Button>
             )}
           </PageTabs>
 
-          <ReportCanvas>
+          {editMode && (
+            <EditBar>
+              <EditBarGroup>
+                <Muted>Editing page</Muted>
+                <Strong style={{ fontSize: 'var(--type-size-body)' }}>{page.name}</Strong>
+                <DropdownMenu.Root>
+                  <DropdownMenu.Trigger asChild>
+                    <IconButton
+                      label="Page options"
+                      icon={<MoreHorizontal size={16} />}
+                      size="xs"
+                      intent="secondary"
+                      variant="ghost"
+                    />
+                  </DropdownMenu.Trigger>
+                  <DropdownMenu.Portal>
+                    <DropdownMenu.Content asChild sideOffset={8} align="start">
+                      <MenuContainer width={220} style={{ zIndex: 30 }}>
+                        <DropdownMenu.Item asChild>
+                          <MenuItem
+                            showLeftSlot
+                            showRightSlot={false}
+                            leftSlot={<Pencil size={16} />}
+                            onClick={() => {
+                              const name = window.prompt('Rename page', page.name);
+                              if (name) renamePage(page.id, name);
+                            }}
+                          >
+                            Rename
+                          </MenuItem>
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item asChild>
+                          <MenuItem
+                            showLeftSlot
+                            showRightSlot={false}
+                            leftSlot={<Copy size={16} />}
+                            onClick={() => duplicatePage(page.id)}
+                          >
+                            Duplicate
+                          </MenuItem>
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item asChild>
+                          <MenuItem
+                            showLeftSlot
+                            showRightSlot={false}
+                            leftSlot={<ChevronLeft size={16} />}
+                            onClick={() => movePage(page.id, 'up')}
+                          >
+                            Move left
+                          </MenuItem>
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item asChild>
+                          <MenuItem
+                            showLeftSlot
+                            showRightSlot={false}
+                            leftSlot={<ChevronRight size={16} />}
+                            onClick={() => movePage(page.id, 'down')}
+                          >
+                            Move right
+                          </MenuItem>
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item asChild>
+                          <MenuItem
+                            showLeftSlot
+                            showRightSlot={false}
+                            leftSlot={<Trash2 size={16} />}
+                            onClick={() => {
+                              if (window.confirm(`Remove page “${page.name}”?`)) {
+                                removePage(page.id);
+                              }
+                            }}
+                          >
+                            Delete page
+                          </MenuItem>
+                        </DropdownMenu.Item>
+                      </MenuContainer>
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Portal>
+                </DropdownMenu.Root>
+              </EditBarGroup>
+              <Button
+                size="sm"
+                startIcon={<Plus size={16} />}
+                onClick={() => setPanel('widget-library')}
+              >
+                Add object
+              </Button>
+            </EditBar>
+          )}
+
+          <ReportCanvas $editing={editMode}>
             {page.objects.length === 0 ? (
               <SurfaceCard>
                 <Strong>This page is empty</Strong>
                 <BodyText>Add an object or ask AI to create content for “{page.name}”.</BodyText>
-                <Button onClick={() => setPanel('add-object')}>Add object</Button>
+                {editMode ? (
+                  <Button onClick={() => setPanel('widget-library')}>Add object</Button>
+                ) : (
+                  <Button intent="secondary" variant="outline" onClick={() => setEditMode(true)}>
+                    Enter edit mode
+                  </Button>
+                )}
               </SurfaceCard>
             ) : (
-              page.objects.map((object) => (
-                <ReportObjectView key={object.id} pageId={page.id} object={object} />
-              ))
+              <ReportPageCanvas page={page} />
             )}
           </ReportCanvas>
         </ReportPane>
+
+        {showFloatingCard && (
+          <FloatingChat aria-label="Floating AI chat">
+            <AiPanelHeader>
+              <Strong>Ask</Strong>
+              <HeaderActions>
+                <IconButton
+                  label="Dock chat to side"
+                  icon={<PanelLeftOpen />}
+                  size="xs"
+                  intent="secondary"
+                  variant="ghost"
+                  onClick={() => {
+                    setChatPlacement('embedded');
+                    setAiCollapsed(false);
+                  }}
+                />
+                <IconButton
+                  label="Minimize chat"
+                  icon={<PanelLeftClose />}
+                  size="xs"
+                  intent="secondary"
+                  variant="ghost"
+                  onClick={() => setAiCollapsed(true)}
+                />
+              </HeaderActions>
+            </AiPanelHeader>
+            {chatBody}
+          </FloatingChat>
+        )}
+
+        {showFloatingFab && (
+          <FloatingChatFab>
+            <IconButton
+              label="Open AI chat"
+              icon={<MessageSquare />}
+              size="md"
+              intent="primary"
+              variant="fill"
+              onClick={() => setAiCollapsed(false)}
+            />
+          </FloatingChatFab>
+        )}
       </SplitWorkspace>
     </div>
   );
 }
+
+const TitleWithCrest = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-200);
+  min-width: 0;
+`;
+
+const HeaderActions = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-050);
+  margin-inline-start: auto;
+`;

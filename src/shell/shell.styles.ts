@@ -1,16 +1,16 @@
 import styled from 'styled-components';
 
-/** Full-viewport desktop behind the Windows app mock. */
+/** Full-viewport desktop behind the Windows app mock — TokenHub Stage geometry. */
 export const Stage = styled.div`
   position: relative;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  height: 100%;
+  min-height: 100%;
   width: 100%;
-  padding: var(--space-500);
-  overflow: auto;
+  overflow: hidden;
 `;
 
 export const StageBackdrop = styled.div`
@@ -18,7 +18,7 @@ export const StageBackdrop = styled.div`
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  background: #03013d;
+  background: rgb(3, 1, 61);
 `;
 
 export const StageWallpaper = styled.img`
@@ -29,31 +29,25 @@ export const StageWallpaper = styled.img`
   object-fit: cover;
 `;
 
-/** Figma DesktopStage gradient overlays (frame 453:9193). */
+/** Figma / TokenHub DesktopStage gradient overlays. */
 export const StageScrim = styled.div`
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(
-      180deg,
-      rgba(147, 97, 221, 0.3) 0%,
-      rgba(89, 59, 157, 0.375) 21.938%,
-      rgba(51, 33, 114, 0.45) 43.877%,
-      rgba(24, 15, 84, 0.525) 65.816%,
-      rgba(3, 1, 61, 0.6) 87.754%
-    ),
+    linear-gradient(180deg, rgba(147, 97, 221, 0.3) 0%, rgba(3, 1, 61, 0.6) 87.754%),
     linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%);
 `;
 
-/** Translucent Windows app frame — TokenHub container geometry. */
+/** Translucent Windows app frame — TokenHub WindowFrame (90% × 90%). */
 export const WindowFrame = styled.div`
   position: relative;
   z-index: 1;
   box-sizing: border-box;
   display: flex;
   align-items: stretch;
-  width: min(1440px, 100%);
-  height: min(778px, calc(100vh - var(--space-800)));
+  width: 90%;
+  height: 90%;
+  min-width: 720px;
   min-height: 560px;
   overflow: hidden;
   border: 8px solid var(--color-stroke-border-container-os);
@@ -87,6 +81,48 @@ export const SidebarHost = styled.div`
   }
 `;
 
+/**
+ * TokenHub selected nav is fill-only — no leading indicator bar and no
+ * focus/selected outline that reads as a border around the pill.
+ */
+export const TokenHubNav = styled.div`
+  display: flex;
+  height: 100%;
+  min-height: 0;
+
+  & > * {
+    height: 100%;
+  }
+
+  [role='tab'][data-state='active']::before,
+  [role='tab'][aria-selected='true']::before {
+    content: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    background: transparent !important;
+  }
+
+  [role='tab'][data-state='active'],
+  [role='tab'][aria-selected='true'],
+  [role='tab']:focus,
+  [role='tab']:focus-visible {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Hide orphan divider under collapse toggle (TokenHub pattern). */
+  & [aria-label='Main navigation'] > div:last-child > div:not(:has(button)) {
+    display: none;
+  }
+
+  & [aria-label='Main navigation'] > div:last-child > div:has(button) {
+    padding-bottom: 0;
+  }
+`;
+
 export const MainColumn = styled.div`
   display: flex;
   flex: 1 1 0%;
@@ -103,7 +139,7 @@ export const HeaderBar = styled.header`
   flex: none;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-500);
+  gap: var(--space-300);
   box-sizing: border-box;
   width: 100%;
   padding: var(--space-300) var(--space-300) var(--space-100) var(--space-500);
@@ -133,7 +169,20 @@ export const UtilityCluster = styled.div`
 export const WindowControlCluster = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--space-050);
+  gap: var(--space-025);
+
+  /* IconButton xs is 24×24 — WCAG 2.5.8 Target Size (Minimum) AA floor. */
+  & button {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+  }
+`;
+
+export const ProfileMenuHost = styled.div`
+  position: relative;
+  display: inline-flex;
 `;
 
 /** Pill search field matching TokenHub header chrome. */
@@ -199,7 +248,7 @@ export const NotificationWrap = styled.span`
 
 export const NotificationDot = styled.span`
   position: absolute;
-  top: 2px;
+  top: 4px;
   right: 2px;
   width: 6px;
   height: 6px;
@@ -213,16 +262,21 @@ export const AvatarButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 0;
   border-radius: var(--radius-1000);
   background: var(--color-primary-primary-overlay);
   color: var(--color-primary-primary);
-  cursor: default;
+  cursor: pointer;
 
   &:focus-visible {
+    outline: var(--stroke-200) solid var(--color-primary-primary);
+    outline-offset: var(--space-025);
+  }
+
+  &[data-state='open'] {
     outline: var(--stroke-200) solid var(--color-primary-primary);
     outline-offset: var(--space-025);
   }
@@ -234,6 +288,10 @@ export const AvatarButton = styled.button`
   }
 `;
 
+/**
+ * Content surface — TokenHub lets the frosted frame show through;
+ * avoid a heavy solid gray slab behind cards.
+ */
 export const WorkspaceSurface = styled.main`
   display: flex;
   flex: 1 1 auto;
@@ -241,7 +299,7 @@ export const WorkspaceSurface = styled.main`
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: var(--color-surfaces-on-container-high);
+  background: transparent;
 `;
 
 /** Generic stand-in app mark for the SidebarNav 32px logo slot. */

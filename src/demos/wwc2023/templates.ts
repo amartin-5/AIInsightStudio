@@ -123,7 +123,7 @@ export const templates: ReportTemplate[] = [
     audience: 'Analyst',
     pages: 3,
     sections: ['Issues', 'Coverage', 'Recommendations'],
-    requiredData: ['Any connected demo sources'],
+    requiredData: ['Any connected sources'],
     objects: ['Issue table', 'Coverage metrics', 'AI summary'],
     suggestedPrompts: ['List the highest-risk data gaps.'],
     refreshBehavior: 'Re-scan sources on demand.',
@@ -131,17 +131,21 @@ export const templates: ReportTemplate[] = [
   },
   {
     id: 'blank',
-    name: 'Blank report',
-    purpose: 'Begin with an empty report and build it using AI, report objects, and pinned content.',
+    name: 'Custom AI guided build',
+    purpose:
+      'Start from an empty canvas — generate charts in chat or drag widgets from the library, then rearrange and rename.',
     category: 'Blank',
     audience: 'Any',
     pages: 1,
-    sections: ['Untitled page'],
+    sections: ['Custom grid'],
     requiredData: ['Optional'],
     objects: [],
-    suggestedPrompts: ['What should we add first?'],
+    suggestedPrompts: [
+      'Generate a chart',
+      'Show me a bar chart of World Cup wins by country.',
+    ],
     refreshBehavior: 'Refresh only objects that have data bindings.',
-    recommended: false,
+    recommended: true,
   },
 ];
 

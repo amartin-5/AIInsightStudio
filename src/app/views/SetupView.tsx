@@ -1,11 +1,12 @@
 import { Button, Checkbox, Dropdown, ProgressBar, TextInput } from '@cake-admin/cakeand';
 import { ArrowLeft } from 'lucide-react';
+import styled from 'styled-components';
 
+import { TeamCrest } from '../../product/teams/TeamCrest';
 import { useAppState } from '../AppState';
 import {
   ActionRow,
   BodyText,
-  DemoBadge,
   ListStack,
   Muted,
   PageHeader,
@@ -22,7 +23,7 @@ import {
 
 const generationLabels = [
   'Preparing template',
-  'Connecting demo data',
+  'Connecting data sources',
   'Generating report objects',
   'Creating initial AI summary',
   'Report ready',
@@ -65,7 +66,6 @@ export function SetupView() {
               </Muted>
             ))}
           </ListStack>
-          <DemoBadge>{config.dataBadge}</DemoBadge>
         </SurfaceCard>
       </ScrollArea>
     );
@@ -99,9 +99,8 @@ export function SetupView() {
             </Button>
           </ActionRow>
           <PageTitle>Configure report</PageTitle>
-          <PageSubtitle>Opponent analysis setup · simulated demo data only</PageSubtitle>
+          <PageSubtitle>Opponent analysis setup · Women’s World Cup 2023</PageSubtitle>
         </TitleBlock>
-        <DemoBadge>{config.dataBadge}</DemoBadge>
       </PageHeader>
 
       <Section>
@@ -115,14 +114,14 @@ export function SetupView() {
 
       <Section>
         <SectionTitle>2. Select data</SectionTitle>
-        <Muted>Clearly labeled demo sources — not a live service.</Muted>
+        <Muted>Select the sources to include in this report.</Muted>
         <ListStack>
           {config.dataSources.map((source) => {
             const checked = setup.sources.includes(source.id);
             return (
               <SurfaceCard key={source.id} as="div">
                 <Checkbox
-                  label={`${source.label} (Demo data)`}
+                  label={source.label}
                   checked={checked}
                   onCheckedChange={(next) => {
                     const on = next === true;
@@ -142,12 +141,15 @@ export function SetupView() {
       <Section>
         <SectionTitle>3. Configure the analysis</SectionTitle>
         <SetupGrid>
-          <Dropdown
-            label="Team to analyze"
-            value={setup.team}
-            onValueChange={(value) => updateSetup({ team: value })}
-            options={config.teams.map((team) => ({ label: team, value: team }))}
-          />
+          <TeamField>
+            <TeamCrest team={setup.team} size="lg" labelled />
+            <Dropdown
+              label="Team to analyze"
+              value={setup.team}
+              onValueChange={(value) => updateSetup({ team: value })}
+              options={config.teams.map((team) => ({ label: team, value: team }))}
+            />
+          </TeamField>
           <Dropdown
             label="Comparison or reporting period"
             value={setup.period}
@@ -175,3 +177,16 @@ export function SetupView() {
     </ScrollArea>
   );
 }
+
+const TeamField = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-300);
+  min-width: 0;
+
+  & > :last-child {
+    flex: 1 1 200px;
+    min-width: 0;
+  }
+`;

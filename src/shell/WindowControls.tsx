@@ -5,7 +5,7 @@ import { WindowControlCluster } from './shell.styles';
 
 /**
  * Decorative Windows chrome. Non-functional for this demo shell.
- * Sized to HelloPC IconButton xs (24px) to match the header utility row.
+ * Sized to HelloPC IconButton xs (24px) — WCAG 2.5.8 Target Size Minimum.
  */
 export function WindowControls() {
   return (

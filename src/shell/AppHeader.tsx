@@ -1,5 +1,6 @@
-import { Counter, IconButton } from '@cake-admin/cakeand';
-import { Bell, MoreHorizontal, Search } from 'lucide-react';
+import { Counter, IconButton, MenuContainer, MenuItem } from '@cake-admin/cakeand';
+import { Bell, LogOut, Search, Settings } from 'lucide-react';
+import { DropdownMenu } from 'radix-ui';
 
 import { useAppState } from '../app/AppState';
 import avatarGlyph from '../assets/shell/icon-avatar.svg';
@@ -10,6 +11,7 @@ import {
   HeaderUtilities,
   NotificationDot,
   NotificationWrap,
+  ProfileMenuHost,
   SearchField,
   SearchIconSlot,
   SearchInput,
@@ -18,10 +20,10 @@ import {
 import { WindowControls } from './WindowControls';
 
 /**
- * Shell header utilities. Preserves TokenHub chrome; wires notifications + reset.
+ * Shell header utilities — search, notifications, account menu, window chrome.
  */
 export function AppHeader() {
-  const { unreadCount, setPanel, openTemplates } = useAppState();
+  const { unreadCount, setPanel, setNav, openTemplates, signOut } = useAppState();
 
   return (
     <HeaderBar>
@@ -47,7 +49,7 @@ export function AppHeader() {
             <IconButton
               label="Notifications"
               icon={<Bell />}
-              size="xs"
+              size="sm"
               intent="secondary"
               variant="ghost"
               onClick={() => setPanel('notifications')}
@@ -70,22 +72,41 @@ export function AppHeader() {
             )}
           </NotificationWrap>
 
-          <AvatarButton
-            type="button"
-            aria-label="Account"
-            onClick={(event) => event.preventDefault()}
-          >
-            <img src={avatarGlyph} alt="" width={16} height={16} />
-          </AvatarButton>
-
-          <IconButton
-            label="More application actions"
-            icon={<MoreHorizontal />}
-            size="xs"
-            intent="secondary"
-            variant="ghost"
-            onClick={() => setPanel('reset')}
-          />
+          <ProfileMenuHost>
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <AvatarButton type="button" aria-label="Account menu">
+                  <img src={avatarGlyph} alt="" width={16} height={16} />
+                </AvatarButton>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content asChild sideOffset={8} align="end">
+                  <MenuContainer width={220} style={{ zIndex: 20 }}>
+                    <DropdownMenu.Item asChild>
+                      <MenuItem
+                        showLeftSlot
+                        showRightSlot={false}
+                        leftSlot={<Settings />}
+                        onClick={() => setNav('settings')}
+                      >
+                        Settings
+                      </MenuItem>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item asChild>
+                      <MenuItem
+                        showLeftSlot
+                        showRightSlot={false}
+                        leftSlot={<LogOut />}
+                        onClick={signOut}
+                      >
+                        Log out
+                      </MenuItem>
+                    </DropdownMenu.Item>
+                  </MenuContainer>
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
+          </ProfileMenuHost>
         </UtilityCluster>
 
         <WindowControls />

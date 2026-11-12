@@ -1,14 +1,14 @@
-# Demos
+# Scenario packs
 
-Insight Studio keeps layers separate so a new demo can mostly swap config and data:
+Insight Studio keeps layers separate so a new scenario can mostly swap config and data:
 
-1. **Application shell** (`src/shell`) — Windows chrome, navigation, workspace frame
-2. **Reusable product components** (`src/product`) — domain-agnostic report objects
-3. **App orchestration** (`src/app`) — views, overlays, session state
-4. **Demo configuration / dataset** (`src/demos/<demo>/`) — labels, templates, simulated data
+1. Application shell (`src/shell`)
+2. Reusable product components (`src/product`)
+3. App state and views (`src/app`)
+4. Scenario configuration / dataset (`src/demos/<id>/`) — labels, templates, data
 
-## Active demo
+## Active scenario
 
-`wwc2023` — Women’s World Cup 2023 simulated analytics for the Insight Studio prototype.
+`wwc2023` — Women’s World Cup 2023 analytics for Insight Studio.
 
-Copy `_template/` to start another demo scenario.
+Copy `_template/` to start another scenario.

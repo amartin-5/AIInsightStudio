@@ -1,21 +1,19 @@
-import { Badge, Button, IconButton } from '@cake-admin/cakeand';
+import { Badge, Button, IconButton, MenuContainer, MenuItem } from '@cake-admin/cakeand';
 import {
   ArrowDown,
   ArrowUp,
-  Copy,
+  Database,
   MoreHorizontal,
-  RefreshCw,
   Sparkles,
   Trash2,
 } from 'lucide-react';
+import { DropdownMenu } from 'radix-ui';
 
-import { englandKpis, englandPlayers } from '../demos/wwc2023/dataset';
+import { englandKpis, englandPlayers, finalMatchKpis } from '../demos/wwc2023/dataset';
 import { useAppState } from '../app/AppState';
 import {
   BodyText,
   InlineMenu,
-  KpiGrid,
-  KpiTile,
   MetaRow,
   Muted,
   ObjectCard,
@@ -27,6 +25,13 @@ import {
   SurfaceCard,
   TableWrap,
 } from '../app/ui.styles';
+import { renderChartById } from './charts';
+import { ComparisonBars } from './charts/ComparisonBars';
+import { EventTimeline } from './widgets/EventTimeline';
+import { HeadToHead } from './widgets/HeadToHead';
+import { KpiStatRow } from './widgets/KpiStatRow';
+import { MatchScoreboard } from './widgets/MatchScoreboard';
+import { VideoWidget } from './widgets/VideoWidget';
 import type { ReportObject } from './types';
 
 type Props = {
@@ -37,123 +42,197 @@ type Props = {
 export function ReportObjectView({ pageId, object }: Props) {
   const {
     editMode,
+    presentMode,
+    activeReport,
     askAiAboutObject,
     updateObject,
     removeObject,
-    duplicateObject,
     moveObject,
-    setToast,
+    openLineage,
+    setCompareContext,
+    setPanel,
   } = useAppState();
 
+  const chromeLess =
+    !editMode &&
+    (object.kind === 'scoreboard' || object.kind === 'video' || object.kind === 'kpi-row');
+  const compare = activeReport?.compare;
+  const canShowSources =
+    Boolean(object.sourceRefs?.length) ||
+    object.kind === 'metric' ||
+    object.kind === 'kpi-row' ||
+    object.kind === 'chart' ||
+    object.kind === 'table' ||
+    object.kind === 'event-list';
+
+  const openObjectLineage = (metricKey?: string) => {
+    openLineage({
+      objectId: object.id,
+      metricKey,
+      title: object.title,
+    });
+  };
+
   return (
-    <ObjectCard>
-      <ObjectHeader>
-        <ObjectTitleBlock>
-          <Strong>{object.title}</Strong>
-          <MetaRow>
-            {object.kind === 'ai-summary' && (
-              <Badge color="blue" tone="subtle" dot={false}>
-                AI-generated summary
-              </Badge>
+    <ObjectCard $editing={editMode}>
+      {!chromeLess && (
+        <ObjectHeader>
+          <ObjectTitleBlock>
+            <Strong style={{ fontSize: 'var(--type-size-subject)' }}>{object.title}</Strong>
+            {editMode && (
+              <MetaRow>
+                {object.kind === 'ai-summary' && (
+                  <Badge color="blue" tone="subtle" dot={false}>
+                    AI
+                  </Badge>
+                )}
+                {object.preserveOnRefresh && (
+                  <Badge color="amber" tone="subtle" dot={false}>
+                    Preserved
+                  </Badge>
+                )}
+                {object.pinnedFromAi && (
+                  <Badge color="green" tone="subtle" dot={false}>
+                    Pinned
+                  </Badge>
+                )}
+              </MetaRow>
             )}
-            {object.preserveOnRefresh && (
-              <Badge color="amber" tone="subtle" dot={false}>
-                Preserve on refresh
-              </Badge>
-            )}
-            {object.pinnedFromAi && (
-              <Badge color="green" tone="subtle" dot={false}>
-                Pinned from AI
-              </Badge>
-            )}
-          </MetaRow>
-        </ObjectTitleBlock>
-        {editMode && (
+          </ObjectTitleBlock>
           <InlineMenu>
-            <IconButton
-              label={`Ask AI about ${object.title}`}
-              icon={<Sparkles />}
-              size="xs"
-              intent="secondary"
-              variant="ghost"
-              onClick={() => askAiAboutObject(object.title)}
-            />
-            <IconButton
-              label={`Refresh ${object.title}`}
-              icon={<RefreshCw />}
-              size="xs"
-              intent="secondary"
-              variant="ghost"
-              onClick={() => {
-                updateObject(pageId, object.id, {
-                  body: object.body
-                    ? `${object.body}\n\nObject refreshed (simulated).`
-                    : 'Object refreshed (simulated).',
-                });
-                setToast({ message: `${object.title} refreshed` });
-              }}
-            />
-            <IconButton
-              label={`Duplicate ${object.title}`}
-              icon={<Copy />}
-              size="xs"
-              intent="secondary"
-              variant="ghost"
-              onClick={() => duplicateObject(pageId, object.id)}
-            />
-            <IconButton
-              label={`Move ${object.title} up`}
-              icon={<ArrowUp />}
-              size="xs"
-              intent="secondary"
-              variant="ghost"
-              onClick={() => moveObject(pageId, object.id, 'up')}
-            />
-            <IconButton
-              label={`Move ${object.title} down`}
-              icon={<ArrowDown />}
-              size="xs"
-              intent="secondary"
-              variant="ghost"
-              onClick={() => moveObject(pageId, object.id, 'down')}
-            />
-            <IconButton
-              label={`Remove ${object.title}`}
-              icon={<Trash2 />}
-              size="xs"
-              intent="secondary"
-              variant="ghost"
-              onClick={() => removeObject(pageId, object.id)}
-            />
-            <IconButton
-              label={`More actions for ${object.title}`}
-              icon={<MoreHorizontal />}
-              size="xs"
-              intent="secondary"
-              variant="ghost"
-              onClick={() =>
-                setToast({
-                  message: 'Replace / change data / resize available in later pass',
-                })
-              }
-            />
+            {canShowSources && !presentMode && (
+              <IconButton
+                label={`View sources for ${object.title}`}
+                icon={<Database size={16} />}
+                size="xs"
+                intent="secondary"
+                variant="ghost"
+                onClick={() => openObjectLineage()}
+              />
+            )}
+            {editMode && (
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <IconButton
+                    label={`Object actions for ${object.title}`}
+                    icon={<MoreHorizontal size={16} />}
+                    size="xs"
+                    intent="secondary"
+                    variant="ghost"
+                  />
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content asChild sideOffset={8} align="end">
+                    <MenuContainer width={220} style={{ zIndex: 30 }}>
+                      <DropdownMenu.Item asChild>
+                        <MenuItem
+                          showLeftSlot
+                          showRightSlot={false}
+                          leftSlot={<Sparkles size={16} />}
+                          onClick={() => askAiAboutObject(object.title)}
+                        >
+                          Ask AI
+                        </MenuItem>
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item asChild>
+                        <MenuItem
+                          showLeftSlot
+                          showRightSlot={false}
+                          leftSlot={<ArrowUp size={16} />}
+                          onClick={() => moveObject(pageId, object.id, 'up')}
+                        >
+                          Move up
+                        </MenuItem>
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item asChild>
+                        <MenuItem
+                          showLeftSlot
+                          showRightSlot={false}
+                          leftSlot={<ArrowDown size={16} />}
+                          onClick={() => moveObject(pageId, object.id, 'down')}
+                        >
+                          Move down
+                        </MenuItem>
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item asChild>
+                        <MenuItem
+                          showLeftSlot
+                          showRightSlot={false}
+                          leftSlot={<Trash2 size={16} />}
+                          onClick={() => removeObject(pageId, object.id)}
+                        >
+                          Remove
+                        </MenuItem>
+                      </DropdownMenu.Item>
+                    </MenuContainer>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+            )}
           </InlineMenu>
-        )}
-      </ObjectHeader>
+        </ObjectHeader>
+      )}
 
       {object.kind === 'metric' && (
-        <div>
+        <button
+          type="button"
+          onClick={() => openObjectLineage(object.metricKey)}
+          style={{
+            display: 'grid',
+            gap: 'var(--space-100)',
+            border: 'none',
+            background: 'transparent',
+            padding: 0,
+            textAlign: 'start',
+            cursor: 'pointer',
+            color: 'inherit',
+            font: 'inherit',
+          }}
+        >
           <Strong style={{ fontSize: 'var(--type-size-greeting)' }}>{object.metricValue}</Strong>
           {object.metricHint && <Muted style={{ display: 'block' }}>{object.metricHint}</Muted>}
-        </div>
+        </button>
       )}
 
       {(object.kind === 'ai-summary' ||
         object.kind === 'text' ||
         object.kind === 'analyst-note' ||
-        object.kind === 'comparison' ||
         object.kind === 'source-list') &&
-        object.body && <BodyText>{object.body}</BodyText>}
+        object.body &&
+        !(object.kind === 'analyst-note' && editMode) && <BodyText>{object.body}</BodyText>}
+
+      {object.kind === 'comparison' && (
+        <div style={{ display: 'grid', gap: 'var(--space-400)' }}>
+          {object.body && <BodyText>{object.body}</BodyText>}
+          {object.chartId ? (
+            <ChartSlot object={object} />
+          ) : compare?.enabled ? (
+            <HeadToHead
+              leftLabel={compare.leftTeam}
+              rightLabel={compare.rightTeam}
+              leftWins={3}
+              draws={1}
+              rightWins={2}
+              leftColor="var(--color-primary-primary)"
+              rightColor="var(--color-secondary-secondary)"
+              ariaLabel={`${compare.leftTeam} vs ${compare.rightTeam}`}
+            />
+          ) : (
+            <ComparisonBars
+              leftLabel="Group"
+              rightLabel="Knockout"
+              leftColor="var(--color-primary-primary)"
+              rightColor="var(--color-secondary-secondary)"
+              rows={[
+                { label: 'Goals / match', left: 2.7, right: 1.3 },
+                { label: 'xG / match', left: 2.0, right: 1.4 },
+                { label: 'Shots / match', left: 15, right: 12 },
+              ]}
+              ariaLabel={object.title}
+            />
+          )}
+        </div>
+      )}
 
       {object.kind === 'analyst-note' && editMode && (
         <textarea
@@ -162,23 +241,23 @@ export function ReportObjectView({ pageId, object }: Props) {
           onChange={(e) => updateObject(pageId, object.id, { body: e.target.value })}
           style={{
             width: '100%',
-            minHeight: 96,
+            minHeight: 120,
             boxSizing: 'border-box',
             border: 'var(--stroke-100) solid var(--color-stroke-border)',
             borderRadius: 'var(--radius-200)',
-            padding: 'var(--space-200)',
+            padding: 'var(--space-300)',
             fontFamily: 'var(--font-family)',
             fontSize: 'var(--type-size-body)',
+            lineHeight: 1.5,
             color: 'var(--color-text-icon-primary)',
             background: 'var(--color-surfaces-on-container-high)',
+            resize: 'vertical',
           }}
         />
       )}
 
       {(object.kind === 'chart' || object.kind === 'spatial' || object.kind === 'timeline') && (
-        <PlaceholderViz role="img" aria-label={object.placeholderLabel ?? object.title}>
-          {object.placeholderLabel ?? 'Visualization placeholder'}
-        </PlaceholderViz>
+        <ChartSlot object={object} />
       )}
 
       {object.kind === 'table' && object.columns && object.rows && (
@@ -205,25 +284,93 @@ export function ReportObjectView({ pageId, object }: Props) {
       )}
 
       {object.kind === 'kpi-row' && (
-        <KpiGrid>
-          {englandKpis.map((kpi) => (
-            <KpiTile key={kpi.id}>
-              <Muted>{kpi.title}</Muted>
-              <Strong style={{ fontSize: 'var(--type-size-subtitle)' }}>{kpi.value}</Strong>
-              <Muted>{kpi.hint}</Muted>
-            </KpiTile>
-          ))}
-        </KpiGrid>
+        <KpiStatRow
+          ariaLabel={object.title}
+          items={(object.metricHint === 'final-match' ? finalMatchKpis : englandKpis).map((kpi) => ({
+            id: kpi.id,
+            label: kpi.title,
+            value: kpi.value,
+            hint: kpi.hint,
+          }))}
+          onSelectItem={(item) => openObjectLineage(item.id)}
+        />
       )}
 
-      {object.kind === 'player-list' && <ListPlayers />}
+      {object.kind === 'player-list' && (
+        <ListPlayers
+          onCompare={() => {
+            setCompareContext({ enabled: activeReport?.compare?.enabled ?? false });
+            setPanel('compare');
+          }}
+        />
+      )}
+
+      {object.kind === 'video' && (
+        <VideoWidget
+          title={object.title}
+          subtitle={object.body}
+          duration={object.live ? 'LIVE' : object.metricHint}
+          live={object.live}
+          ariaLabel={`Play ${object.title}`}
+        />
+      )}
+
+      {object.kind === 'scoreboard' && (
+        <MatchScoreboard
+          homeTeam={
+            compare?.enabled ? compare.leftTeam : (object.homeTeam ?? 'Home')
+          }
+          awayTeam={
+            compare?.enabled ? compare.rightTeam : (object.awayTeam ?? 'Away')
+          }
+          homeScore={object.homeScore}
+          awayScore={object.awayScore}
+          status={object.matchStatus ?? 'FT'}
+          meta={
+            compare?.enabled
+              ? `Compare · ${compare.leftPeriod ?? 'Period A'} vs ${compare.rightPeriod ?? 'Period B'}`
+              : object.matchMeta
+          }
+          live={object.live}
+          ariaLabel={object.title}
+        />
+      )}
+
+      {object.kind === 'event-list' && object.events && (
+        <EventTimeline events={object.events} ariaLabel={object.title} />
+      )}
+
+      {object.kind === 'image' && (
+        <PlaceholderViz role="img" aria-label={object.placeholderLabel ?? object.title}>
+          {object.placeholderLabel ?? object.title}
+        </PlaceholderViz>
+      )}
     </ObjectCard>
   );
 }
 
-function ListPlayers() {
+function ChartSlot({ object }: { object: ReportObject }) {
+  const { activeReport } = useAppState();
+  const compare = activeReport?.compare;
+  const chart = object.chartId
+    ? renderChartById(
+        object.chartId,
+        compare?.enabled
+          ? { leftTeam: compare.leftTeam, rightTeam: compare.rightTeam }
+          : undefined,
+      )
+    : null;
+  if (chart) return chart;
   return (
-    <div style={{ display: 'grid', gap: 'var(--space-300)' }}>
+    <PlaceholderViz role="img" aria-label={object.placeholderLabel ?? object.title}>
+      {object.placeholderLabel ?? 'Visualization unavailable'}
+    </PlaceholderViz>
+  );
+}
+
+function ListPlayers({ onCompare }: { onCompare: () => void }) {
+  return (
+    <div style={{ display: 'grid', gap: 'var(--space-400)' }}>
       {englandPlayers.map((player) => (
         <SurfaceCard key={player.id} as="div">
           <MetaRow>
@@ -236,7 +383,7 @@ function ListPlayers() {
             {player.matches} matches · {player.minutes} min · {player.metric}
           </Muted>
           <BodyText>{player.observation}</BodyText>
-          <Button size="sm" intent="secondary" variant="ghost">
+          <Button size="sm" intent="secondary" variant="ghost" onClick={onCompare}>
             Compare
           </Button>
         </SurfaceCard>

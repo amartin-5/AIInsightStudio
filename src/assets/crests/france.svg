@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" role="img" aria-label="France">
+  <path fill="#002395" d="M60 4c22 0 44 6 52 14v72c0 28-28 46-52 50C36 136 8 118 8 90V18C16 10 38 4 60 4z"/>
+  <path fill="#fff" d="M40 18h40v98c-6 4-13 7-20 8-7-1-14-4-20-8V18z"/>
+  <path fill="#ED2939" d="M80 18h32c8 8 0 0 0 0v72c0 18-14 34-32 42V18z"/>
+  <path fill="#002395" d="M8 18h32v98c-10-8-24-24-24-42V18c8-8 0 0 0 0z"/>
+</svg>

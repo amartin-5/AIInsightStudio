@@ -9,13 +9,21 @@ import {
   ModalFooter,
   Notification,
   NotificationPanel,
-  Switch,
   TextInput,
+  Toast,
 } from '@cake-admin/cakeand';
-import { X } from 'lucide-react';
+import { Columns2, Database, X } from 'lucide-react';
+import { Toast as RadixToast } from 'radix-ui';
+import styled, { createGlobalStyle } from 'styled-components';
 
+import {
+  MATCH_SOURCE_COLUMNS,
+  matchRowsForRefs,
+} from '../../demos/wwc2023/dataset';
+import { WidgetLibraryPicker, widgetToReportObject } from '../../product/builder';
 import type { RefreshSchedule } from '../../product/types';
 import { useAppState } from '../AppState';
+import { CompareForm } from '../components/CompareStrip';
 import {
   ActionRow,
   BodyText,
@@ -23,11 +31,14 @@ import {
   DrawerHeader,
   ListStack,
   Muted,
+  NotificationsDrawer,
   SideDrawer,
+  SimpleTable,
   Strong,
   SurfaceCard,
-  ToastBar,
+  TableWrap,
 } from '../ui.styles';
+import { AutomationComposer } from './AutomationComposer';
 
 export function OverlayHost() {
   const {
@@ -42,6 +53,9 @@ export function OverlayHost() {
     saveSchedule,
     shareReport,
     exportReport,
+    setPresentMode,
+    lineageTarget,
+    closeLineage,
     snapshot,
     markNotificationRead,
     dismissNotification,
@@ -49,7 +63,24 @@ export function OverlayHost() {
     addObjectToPage,
     insertAiCreatedObject,
     resetDemo,
+    automationDraft,
+    selectedSlot,
+    setBuilderTourStep,
+    setCompareContext,
   } = useAppState();
+
+  const lineageObject = (() => {
+    if (!lineageTarget || !activeReport) return null;
+    for (const page of activeReport.pages) {
+      const found = page.objects.find((object) => object.id === lineageTarget.objectId);
+      if (found) return found;
+    }
+    return null;
+  })();
+  const lineageRows = matchRowsForRefs(
+    lineageObject?.sourceRefs ??
+      (lineageTarget?.metricKey ? [lineageTarget.metricKey] : undefined),
+  );
 
   const [preserveNotes, setPreserveNotes] = useState(true);
   const [generateSummary, setGenerateSummary] = useState(true);
@@ -63,11 +94,11 @@ export function OverlayHost() {
   return (
     <>
       {panel === 'notifications' && (
-        <SideDrawer aria-label="Notifications">
+        <NotificationsDrawer aria-label="Notifications">
           <NotificationPanel
             title="Notifications"
             onClose={() => setPanel(null)}
-            style={{ height: '100%', borderRadius: 0, boxShadow: 'none' }}
+            style={{ height: '100%', borderRadius: 0, boxShadow: 'none', maxWidth: 'none' }}
           >
             {snapshot.notifications.map((item) => (
               <Notification
@@ -90,7 +121,7 @@ export function OverlayHost() {
               />
             ))}
           </NotificationPanel>
-        </SideDrawer>
+        </NotificationsDrawer>
       )}
 
       {panel === 'share' && (
@@ -105,7 +136,7 @@ export function OverlayHost() {
               <Muted>You · Owner</Muted>
               <Muted>A. Patel · Can edit</Muted>
               <Muted>J. Kim · Can comment</Muted>
-              <Muted>Demo org viewers · Can view</Muted>
+              <Muted>Organization viewers · Can view</Muted>
             </ListStack>
             <TextInput label="Invite people" placeholder="name@example.com" />
             <Dropdown
@@ -129,7 +160,7 @@ export function OverlayHost() {
               defaultValue="org"
               options={[
                 { label: 'Restricted', value: 'restricted' },
-                { label: 'Anyone in the demo organization with the link', value: 'org' },
+                { label: 'Anyone in the organization with the link', value: 'org' },
                 { label: 'Specific people', value: 'people' },
               ]}
             />
@@ -139,7 +170,7 @@ export function OverlayHost() {
             <Checkbox label="Require review before publishing" />
             <ActionRow>
               <Button onClick={shareReport}>Share report</Button>
-              <Button intent="secondary" variant="outline" onClick={() => setToast({ message: 'Link copied (simulated)' })}>
+              <Button intent="secondary" variant="outline" onClick={() => setToast({ message: 'Link copied' })}>
                 Copy link
               </Button>
             </ActionRow>
@@ -155,13 +186,23 @@ export function OverlayHost() {
           </DrawerHeader>
           <DrawerBody>
             <ListStack>
-              {['PDF', 'PowerPoint', 'Image', 'CSV for selected data', 'Copy to another Space', 'Presentation mode'].map(
+              {['PDF', 'PowerPoint', 'Image', 'CSV for selected data', 'Copy to another Space'].map(
                 (item) => (
                   <Button key={item} intent="secondary" variant="outline" onClick={exportReport}>
                     {item}
                   </Button>
                 ),
               )}
+              <Button
+                intent="secondary"
+                variant="outline"
+                onClick={() => {
+                  setPanel(null);
+                  setPresentMode(true);
+                }}
+              >
+                Presentation mode
+              </Button>
             </ListStack>
             <Dropdown
               label="Scope"
@@ -180,35 +221,35 @@ export function OverlayHost() {
         </SideDrawer>
       )}
 
-      {panel === 'refresh' && (
-        <SideDrawer aria-label="Refresh report">
+      {panel === 'settings' && (
+        <SideDrawer aria-label="Report settings">
           <DrawerHeader>
-            <Strong>Refresh report</Strong>
+            <Strong>Report settings</Strong>
             <IconButton label="Close" icon={<X />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
           </DrawerHeader>
           <DrawerBody>
             <BodyText>Data sources to use</BodyText>
-            {(activeReport?.demoSources ?? []).map((source) => (
+            {(activeReport?.sourceLabels ?? []).map((source) => (
               <Checkbox key={source} label={source} defaultChecked />
             ))}
             <BodyText>Pages to refresh</BodyText>
             {(activeReport?.pages ?? []).map((page) => (
               <Checkbox key={page.id} label={page.name} defaultChecked />
             ))}
-            <Switch
+            <Checkbox
               label="Preserve analyst notes"
               checked={preserveNotes}
-              onCheckedChange={setPreserveNotes}
+              onCheckedChange={(checked) => setPreserveNotes(checked === true)}
             />
-            <Switch
+            <Checkbox
               label="Generate change summary"
               checked={generateSummary}
-              onCheckedChange={setGenerateSummary}
+              onCheckedChange={(checked) => setGenerateSummary(checked === true)}
             />
-            <Switch
+            <Checkbox
               label="Notify when complete"
               checked={notifyComplete}
-              onCheckedChange={setNotifyComplete}
+              onCheckedChange={(checked) => setNotifyComplete(checked === true)}
             />
             <Button
               onClick={() =>
@@ -219,7 +260,7 @@ export function OverlayHost() {
                 })
               }
             >
-              Refresh
+              Refresh now
             </Button>
             <Button intent="secondary" variant="ghost" onClick={() => setPanel('schedule')}>
               Schedule refresh
@@ -265,11 +306,11 @@ export function OverlayHost() {
                 { label: 'Both', value: 'both' },
               ]}
             />
-            <TextInput label="Recipients" placeholder="demo.user@example.com" />
-            <Switch
+            <TextInput label="Recipients" placeholder="name@example.com" />
+            <Checkbox
               label="Require review before sending"
               checked={requireReview}
-              onCheckedChange={setRequireReview}
+              onCheckedChange={(checked) => setRequireReview(checked === true)}
             />
             <Button
               onClick={() => {
@@ -289,6 +330,8 @@ export function OverlayHost() {
           </DrawerBody>
         </SideDrawer>
       )}
+
+      {panel === 'automation' && automationDraft && <AutomationComposer />}
 
       {panel === 'changes' && (
         <SideDrawer aria-label="What changed">
@@ -382,7 +425,7 @@ export function OverlayHost() {
                     id: `obj-${Date.now()}`,
                     kind: kind as never,
                     title: label,
-                    body: kind === 'metric' ? undefined : `New ${label.toLowerCase()} object (demo).`,
+                    body: kind === 'metric' ? undefined : `New ${label.toLowerCase()} object.`,
                     metricValue: kind === 'metric' ? '0' : undefined,
                     placeholderLabel:
                       kind === 'chart' || kind === 'timeline' || kind === 'image'
@@ -399,14 +442,166 @@ export function OverlayHost() {
         </SideDrawer>
       )}
 
+      {panel === 'lineage' && <SourcesDialogWiden />}
+      <Modal
+        open={panel === 'lineage'}
+        onOpenChange={(open) => !open && closeLineage()}
+        title="Sources"
+        subtitle={
+          lineageTarget?.metricKey
+            ? `${lineageTarget.title ?? lineageObject?.title ?? 'Selected object'} · ${lineageTarget.metricKey}`
+            : (lineageTarget?.title ?? lineageObject?.title ?? 'Selected object')
+        }
+        modalIconSlot={<Database />}
+        showClose
+        footer={
+          <ModalFooter
+            checkbox={false}
+            actions={
+              <Button intent="secondary" variant="outline" onClick={closeLineage}>
+                Close
+              </Button>
+            }
+          />
+        }
+      >
+        <ModalContent descriptionAsDialogDescription={false}>
+          <LineageBody>
+            <BodyText>
+              Match rows that feed this object. Values come from Women’s World Cup 2023 match
+              data.
+            </BodyText>
+            {(activeReport?.sourceLabels ?? []).length > 0 && (
+              <ListStack>
+                {(activeReport?.sourceLabels ?? []).slice(0, 3).map((label) => (
+                  <Muted key={label}>{label}</Muted>
+                ))}
+              </ListStack>
+            )}
+            {lineageObject?.events?.length ? (
+              <ListStack>
+                <Strong>Events</Strong>
+                {lineageObject.events.map((event) => (
+                  <Muted key={event.id}>
+                    {event.minute}′ · {event.text}
+                  </Muted>
+                ))}
+              </ListStack>
+            ) : null}
+            {lineageObject?.rows?.length && lineageObject.columns ? (
+              <TableWrap>
+                <SimpleTable>
+                  <thead>
+                    <tr>
+                      {lineageObject.columns.map((col) => (
+                        <th key={col}>{col}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lineageObject.rows.map((row, i) => (
+                      <tr key={i}>
+                        {row.map((cell, j) => (
+                          <td key={j}>{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </SimpleTable>
+              </TableWrap>
+            ) : (
+              <TableWrap>
+                <SimpleTable>
+                  <thead>
+                    <tr>
+                      {MATCH_SOURCE_COLUMNS.map((col) => (
+                        <th key={col}>{col}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lineageRows.map((row) => (
+                      <tr key={row.id}>
+                        <td>{row.opponent}</td>
+                        <td>{row.stage}</td>
+                        <td>{row.result}</td>
+                        <td>{row.goals}</td>
+                        <td>{row.possession}</td>
+                        <td>{row.shots}</td>
+                        <td>{row.xg}</td>
+                        <td>{row.note}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </SimpleTable>
+              </TableWrap>
+            )}
+          </LineageBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        open={panel === 'compare'}
+        onOpenChange={(open) => !open && setPanel(null)}
+        title="Compare"
+        subtitle="Choose teams and periods to compare side by side."
+        modalIconSlot={<Columns2 />}
+        showClose
+        footer={
+          <ModalFooter
+            checkbox={false}
+            primaryActionLabel={
+              activeReport?.compare?.enabled ? 'Update comparison' : 'Start comparison'
+            }
+            secondaryActionLabel={activeReport?.compare?.enabled ? 'Exit compare' : 'Cancel'}
+            onPrimaryAction={() => {
+              setCompareContext({ enabled: true });
+              setPanel(null);
+            }}
+            onSecondaryAction={() => {
+              if (activeReport?.compare?.enabled) {
+                setCompareContext({ enabled: false });
+              }
+              setPanel(null);
+            }}
+          />
+        }
+      >
+        <ModalContent descriptionAsDialogDescription={false}>
+          <CompareForm />
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        open={panel === 'widget-library'}
+        onOpenChange={(open) => !open && setPanel(null)}
+        title="Widget library"
+        subtitle="Pick a widget for your report."
+        showClose
+      >
+        <ModalContent descriptionAsDialogDescription={false}>
+          <WidgetLibraryPicker
+            onPick={(entry) => {
+              addObjectToPage(
+                widgetToReportObject(entry, {
+                  slot: selectedSlot ?? undefined,
+                }),
+              );
+              setBuilderTourStep(2);
+            }}
+          />
+        </ModalContent>
+      </Modal>
+
       <Modal
         open={panel === 'reset'}
         onOpenChange={(open) => !open && setPanel(null)}
-        title="Reset demo"
-        subtitle="Restore the initial reports, templates, chat, notifications, schedules, and layout."
+        title="Reset application"
+        subtitle="Restore the initial reports, templates, chat, notifications, automations, and layout."
         footer={
           <ModalFooter
-            primaryActionLabel="Reset demo"
+            checkbox={false}
+            primaryActionLabel="Reset"
             secondaryActionLabel="Cancel"
             onPrimaryAction={() => {
               resetDemo();
@@ -422,26 +617,68 @@ export function OverlayHost() {
       </Modal>
 
       {toast && (
-        <ToastBar role="status">
-          <span>{toast.message}</span>
-          {toast.actionLabel && (
-            <Button
-              size="sm"
-              intent="secondary"
-              variant="ghost"
-              onClick={() => {
-                toast.onAction?.();
-                setToast(null);
-              }}
-            >
-              {toast.actionLabel}
-            </Button>
-          )}
-          <Button size="sm" intent="secondary" variant="ghost" onClick={() => setToast(null)}>
-            Dismiss
-          </Button>
-        </ToastBar>
+        <Toast
+          status="info"
+          variant="pop-out"
+          title={toast.message}
+          open
+          type="background"
+          duration={toast.actionLabel ? Infinity : 5000}
+          onOpenChange={(open) => {
+            if (!open) setToast(null);
+          }}
+          onDismiss={() => setToast(null)}
+          primaryActionLabel={toast.actionLabel}
+          onPrimaryAction={
+            toast.actionLabel
+              ? () => {
+                  toast.onAction?.();
+                  setToast(null);
+                }
+              : undefined
+          }
+        />
       )}
+      <ToastViewport />
     </>
   );
 }
+
+/** Cake Modal keeps a fixed 480px surface; widen only while Sources is open. */
+const SourcesDialogWiden = createGlobalStyle`
+  [role='dialog'] {
+    width: min(56rem, calc(100vw - var(--space-800))) !important;
+    max-width: min(56rem, calc(100vw - var(--space-800))) !important;
+  }
+`;
+
+const LineageBody = styled.div`
+  display: grid;
+  gap: var(--space-300);
+  max-height: min(70vh, 32rem);
+  overflow: auto;
+  padding-right: var(--space-050);
+`;
+
+/** Bottom-center host for HelloPC Toast (portals into this viewport). */
+const ToastViewport = styled(RadixToast.Viewport)`
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-500);
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-200);
+  width: min(560px, calc(100% - var(--space-800)));
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: none;
+  transform: translateX(-50%);
+  pointer-events: none;
+
+  & > * {
+    pointer-events: auto;
+  }
+`;

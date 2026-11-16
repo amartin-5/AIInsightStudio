@@ -150,11 +150,11 @@ export const FormPane = styled.div`
   flex-direction: column;
   justify-content: safe center;
   align-items: stretch;
-  gap: var(--space-400);
+  gap: var(--space-500);
   min-width: 0;
   min-height: 0;
   height: 100%;
-  padding: var(--space-700) var(--space-600);
+  padding: var(--space-800) var(--space-700);
   background: var(--color-surfaces-container);
   overflow: auto;
 `;
@@ -168,11 +168,11 @@ export const FormClose = styled.div`
 export const FormStack = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--space-300);
+  gap: var(--space-600);
   width: 100%;
   max-width: 436px;
   margin-block: auto;
-  padding-block: var(--space-400);
+  padding-block: var(--space-500);
   animation: ${fadeRise} 480ms cubic-bezier(0.22, 1, 0.36, 1);
 `;
 
@@ -183,29 +183,36 @@ export const SignInStack = styled(FormStack)`
   height: 100%;
   min-height: 0;
   margin-block: 0;
-  padding-block: var(--space-200) 0;
-  gap: var(--space-500);
+  padding-block: var(--space-300) 0;
+  gap: var(--space-600);
   justify-content: flex-start;
 `;
 
 export const SignInBody = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--space-500);
+  gap: var(--space-600);
   width: 100%;
-  padding-top: var(--space-400);
+  padding-top: var(--space-500);
 `;
 
 export const SignInFooter = styled.div`
   margin-top: auto;
-  padding-top: var(--space-600);
+  padding-top: var(--space-700);
   padding-bottom: var(--space-100);
+`;
+
+export const TitleGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-300);
+  width: 100%;
 `;
 
 export const FormHeadline = styled.h1`
   margin: 0;
   color: var(--color-text-icon-primary);
-  font-size: var(--type-size-title);
+  font-size: var(--type-size-page);
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -215,13 +222,21 @@ export const FormSubhead = styled.p`
   margin: 0;
   color: var(--color-text-icon-secondary);
   font-size: var(--type-size-subject);
-  line-height: 1.45;
+  line-height: 1.5;
+  max-width: 36ch;
+`;
+
+export const OptionalNote = styled.p`
+  margin: 0;
+  color: var(--color-text-icon-placeholder);
+  font-size: var(--type-size-helper);
+  line-height: 1.4;
 `;
 
 export const FieldGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--space-400);
+  gap: var(--space-500);
   width: 100%;
 `;
 
@@ -270,7 +285,7 @@ export const AuthInput = styled.input`
 export const CheckboxStack = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--space-200);
+  gap: var(--space-400);
   color: var(--color-text-icon-primary);
 `;
 
@@ -279,8 +294,9 @@ export const ActionCluster = styled.div`
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-300);
+  gap: var(--space-400);
   width: 100%;
+  margin-top: var(--space-100);
 `;
 
 export const GhostLink = styled.button`
@@ -320,8 +336,8 @@ export const GhostLink = styled.button`
 
 export const StepDots = styled.div`
   display: flex;
-  gap: var(--space-100);
-  margin-top: var(--space-200);
+  gap: var(--space-150);
+  margin-top: var(--space-300);
 `;
 
 export const StepDot = styled.span<{ $active?: boolean; $done?: boolean }>`
@@ -342,7 +358,7 @@ export const StepDot = styled.span<{ $active?: boolean; $done?: boolean }>`
 export const LightFields = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--space-300);
+  gap: var(--space-500);
   width: 100%;
 `;
 

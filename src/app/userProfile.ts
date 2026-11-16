@@ -4,9 +4,9 @@ import { DEFAULT_AFFILIATION_ID } from '../demos/wwc2023/exploreProfiles';
 export type OnboardingStep =
   | 'welcome'
   | 'sign-in'
-  | 'profile'
   | 'affiliation'
-  | 'preferences';
+  | 'about'
+  | 'optional';
 
 export type UserProfile = {
   displayName: string;
@@ -55,22 +55,6 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   allowAnonymousUsage: true,
   defaultSharing: 'private',
 };
-
-export const ROLE_OPTIONS = [
-  { label: 'Performance analyst', value: 'performance-analyst' },
-  { label: 'Coach / staff', value: 'coach' },
-  { label: 'Scout', value: 'scout' },
-  { label: 'Sports scientist', value: 'sports-scientist' },
-  { label: 'Executive / leadership', value: 'executive' },
-  { label: 'Other', value: 'other' },
-];
-
-export const EXPERIENCE_OPTIONS = [
-  { label: 'New to analysis tools', value: 'new' },
-  { label: 'Comfortable with basics', value: 'basics' },
-  { label: 'Regular analyst', value: 'regular' },
-  { label: 'Advanced / power user', value: 'advanced' },
-];
 
 export const GOAL_OPTIONS = [
   { label: 'Prepare for upcoming matches', value: 'prep' },

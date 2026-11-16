@@ -186,7 +186,7 @@ const EmptyState = styled.div`
 `;
 
 export function LibraryView() {
-  const { activeReport, addObjectToPage, openWorkspace, startSetup, setToast } = useAppState();
+  const { activeReport, addObjectToPage, openWorkspace, openCreateReport, setToast } = useAppState();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<WidgetCategory | 'All'>('All');
   const [sort, setSort] = useState<'name' | 'category'>('name');
@@ -230,7 +230,7 @@ export function LibraryView() {
 
   const createNewReport = () => {
     setPreviewId(null);
-    startSetup('blank');
+    openCreateReport('blank');
   };
 
   return (
@@ -239,8 +239,7 @@ export function LibraryView() {
         <TitleBlock>
           <PageTitle>Library</PageTitle>
           <PageSubtitle>
-            Reusable Women’s World Cup data visualizations and match widgets for Insight Studio
-            reports.
+            Reusable data visualizations and widgets for Insight Studio reports.
           </PageSubtitle>
         </TitleBlock>
       </PageHeader>

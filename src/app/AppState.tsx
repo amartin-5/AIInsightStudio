@@ -11,6 +11,9 @@ import {
 
 import {
   builderSuggestedPrompts,
+  blankReportGreeting,
+  customAiBuildGreeting,
+  contextFromReport,
   resolveAiResponse,
   suggestedPrompts,
 } from '../demos/wwc2023/aiResponses';
@@ -26,11 +29,18 @@ import {
   DEFAULT_AFFILIATION_ID,
   getAffiliationOption,
   getExploreProfile,
+  type ExploreMatch,
   type ExploreTeamProfile,
 } from '../demos/wwc2023/exploreProfiles';
 import { createInitialSnapshot } from '../demos/wwc2023/initialState';
-import { templates } from '../demos/wwc2023/templates';
-import { CUSTOM_GRID_SLOTS } from '../product/builder';
+import { defaultRecentTemplateIds, templates as seedTemplates } from '../demos/wwc2023/templates';
+import {
+  CUSTOM_GRID_SLOTS,
+  matchContextFromExplore,
+  teamCodeLabel,
+  type MatchContext,
+} from '../product/builder';
+import { nextFreeGrid } from '../product/grid/layoutFromSlots';
 import type {
   Automation,
   ChartProposal,
@@ -42,11 +52,15 @@ import type {
   LineageTarget,
   NavId,
   NotificationItem,
+  ObjectGrid,
   RefreshSchedule,
+  ReportMatchContext,
   ReportObject,
   ReportObjectSlot,
   ReportPage,
   ReportRecord,
+  ReportTemplate,
+  TemplateEditableField,
   ViewMode,
 } from '../product/types';
 import {
@@ -62,7 +76,11 @@ export type SetupDraft = {
   team: string;
   period: string;
   audience: string;
+  matchContext: ReportMatchContext;
 };
+
+/** Preset selection when opening the create console (skips pick when set). */
+export type CreatePreset = 'custom-ai' | 'blank' | string;
 
 export type ToastState = { message: string; actionLabel?: string; onAction?: () => void } | null;
 
@@ -82,7 +100,8 @@ export type PanelKind =
   | 'compare'
   | 'pin'
   | 'template-preview'
-  | 'reset';
+  | 'reset'
+  | 'create-report';
 
 export type AutomationDraft = {
   id?: string;
@@ -120,7 +139,13 @@ type AppStateValue = {
   automationPending: boolean;
   toast: ToastState;
   statusMessage: string | null;
-  templates: typeof templates;
+  templates: ReportTemplate[];
+  saveReportAsTemplate: (input: {
+    name: string;
+    purpose?: string;
+    category?: string;
+    editableFields: TemplateEditableField[];
+  }) => void;
   config: typeof demoConfig;
   suggestedPrompts: string[];
   activeReport: ReportRecord | undefined;
@@ -147,9 +172,15 @@ type AppStateValue = {
   setNav: (nav: NavId) => void;
   openHome: () => void;
   openTemplates: () => void;
+  /** Fullscreen create-report shell (primary New report CTA). Optional preset skips pick. */
+  openCreateReport: (preset?: CreatePreset) => void;
+  createPreset: CreatePreset | null;
+  clearCreatePreset: () => void;
   openWorkspace: (reportId?: string) => void;
+  /** Open a match-scoped dashboard for an Explore past-match row. */
+  openMatchDashboard: (team: ExploreTeamProfile, match: ExploreMatch) => void;
   setPreviewTemplate: (id: string | null) => void;
-  startSetup: (templateId: string) => void;
+  startSetup: (templateId: string, matchContext?: MatchContext) => void;
   updateSetup: (patch: Partial<SetupDraft>) => void;
   createReportFromSetup: () => void;
   setActiveReport: (id: string) => void;
@@ -204,9 +235,23 @@ type AppStateValue = {
   resetDemo: () => void;
   askAiAboutObject: (title: string) => void;
   insertAiCreatedObject: (prompt: string) => void;
-  /** Blank custom-report builder entry (skips setup wizard). */
-  startCustomBuild: () => void;
-  renameReport: (name: string) => void;
+  /** Chat-led immersive Custom AI creation stage (requires match context). */
+  startCustomBuild: (matchContext: MatchContext) => void;
+  /** Empty modular canvas with standard chat in the workspace (requires match context). */
+  startBlankBuild: (matchContext: MatchContext) => void;
+  /** Update match scope in edit mode and refresh chart bindings. */
+  updateMatchContext: (next: MatchContext) => void;
+  /** Leave Custom AI stage and open the saved dashboard in the standard workspace. */
+  finishCustomAiBuild: () => void;
+  /** Cancel Custom AI stage without opening the workspace canvas. */
+  cancelCustomAiBuild: () => void;
+  /** Persist a draft dashboard; switches AI guide → normal Ask chat. */
+  saveReport: () => void;
+  recentTemplateIds: string[];
+  touchRecentTemplate: (templateId: string) => void;
+  renameReport: (name: string, options?: { silent?: boolean }) => void;
+  /** Replace dashboard tags (edit mode). */
+  setReportTags: (tags: string[]) => void;
   selectedSlot: ReportObjectSlot | null;
   setSelectedSlot: (slot: ReportObjectSlot | null) => void;
   builderTourStep: number;
@@ -216,9 +261,43 @@ type AppStateValue = {
   swapObjectSlots: (from: ReportObjectSlot, to: ReportObjectSlot) => void;
   addChartProposalToReport: (proposal: ChartProposal) => void;
   builderSuggestedPrompts: string[];
+  /** Persist free-form modular grid positions for a page. */
+  updateObjectGrids: (
+    pageId: string,
+    items: Array<{ id: string; grid: ObjectGrid }>,
+    options?: { mergeHeightOnly?: boolean },
+  ) => void;
 };
 
-function createBlankCustomReport(): ReportRecord {
+const RECENT_TEMPLATES_KEY = 'ais-recent-templates';
+
+function loadRecentTemplateIds(): string[] {
+  try {
+    const raw = window.localStorage.getItem(RECENT_TEMPLATES_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed) && parsed.every((id) => typeof id === 'string')) {
+        return parsed as string[];
+      }
+    }
+  } catch {
+    /* demo localStorage may be unavailable */
+  }
+  return [...defaultRecentTemplateIds];
+}
+
+function persistRecentTemplateIds(ids: string[]) {
+  try {
+    window.localStorage.setItem(RECENT_TEMPLATES_KEY, JSON.stringify(ids));
+  } catch {
+    /* ignore */
+  }
+}
+
+function createBlankCustomReport(
+  greeting: string = blankReportGreeting,
+  matchContext: MatchContext,
+): ReportRecord {
   const pageId = uid('page');
   return {
     id: uid('report'),
@@ -229,9 +308,11 @@ function createBlankCustomReport(): ReportRecord {
     status: 'Draft',
     owner: 'You',
     sharing: 'Private',
-    team: 'England',
-    period: 'Selected matches',
+    team: teamCodeLabel(matchContext.homeTeam),
+    period: matchContext.year ? `${matchContext.year} season` : 'Selected matches',
     audience: 'Analyst',
+    tags: ['Custom', teamCodeLabel(matchContext.homeTeam)].filter(Boolean),
+    matchContext: { ...matchContext },
     pages: [
       {
         id: pageId,
@@ -249,8 +330,7 @@ function createBlankCustomReport(): ReportRecord {
       {
         id: uid('a'),
         role: 'assistant',
-        content:
-          'Hi! I can help find some charts for your report. What kind of data are you looking for?',
+        content: greeting,
       },
     ],
     schedule: null,
@@ -280,6 +360,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [editMode, setEditMode] = useState(false);
   const [presentMode, setPresentMode] = useState(false);
   const [panel, setPanel] = useState<PanelKind>(null);
+  const [createPreset, setCreatePreset] = useState<CreatePreset | null>(null);
+  const [savedTemplates, setSavedTemplates] = useState<ReportTemplate[]>([]);
+  const templates = useMemo(
+    () => [...savedTemplates, ...seedTemplates],
+    [savedTemplates],
+  );
   const [pinPayload, setPinPayload] = useState<{ title: string; body: string } | null>(null);
   const [lineageTarget, setLineageTarget] = useState<LineageTarget | null>(null);
   const [automationDraft, setAutomationDraft] = useState<AutomationDraft | null>(null);
@@ -289,7 +375,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<ReportObjectSlot | null>('slot-1');
   const [builderTourStep, setBuilderTourStep] = useState(0);
-  const [builderTourOpen, setBuilderTourOpen] = useState(true);
+  const [builderTourOpen, setBuilderTourOpen] = useState(false);
+  const [recentTemplateIds, setRecentTemplateIds] = useState<string[]>(() =>
+    loadRecentTemplateIds(),
+  );
   const [affiliatedTeamId, setAffiliatedTeamIdState] = useState(DEFAULT_AFFILIATION_ID);
   const [exploreTeamId, setExploreTeamIdState] = useState(DEFAULT_AFFILIATION_ID);
   const [sessionReady, setSessionReady] = useState(false);
@@ -324,10 +413,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const teamId = getAffiliationOption(userProfile.affiliatedTeamId).id;
     const nextProfile: UserProfile = {
       ...userProfile,
-      displayName: userProfile.displayName.trim() || 'Alex Martin',
-      email: userProfile.email.trim() || 'alex.martin@lenovo.com',
-      jobTitle: userProfile.jobTitle.trim() || 'Performance Analyst',
+      displayName: userProfile.displayName.trim() || 'Guest',
+      email: userProfile.email.trim(),
+      jobTitle: userProfile.jobTitle.trim(),
       affiliatedTeamId: teamId,
+      affiliationKind: getAffiliationOption(teamId).kind,
     };
     setUserProfile(nextProfile);
     setAffiliatedTeamIdState(teamId);
@@ -385,6 +475,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setPreviewTemplateId(null);
   }, []);
 
+  const openCreateReport = useCallback((preset?: CreatePreset) => {
+    setCreatePreset(preset ?? null);
+    setPanel('create-report');
+  }, []);
+
+  const clearCreatePreset = useCallback(() => {
+    setCreatePreset(null);
+  }, []);
+
   const openWorkspace = useCallback((reportId?: string) => {
     setSnapshot((prev) => ({
       ...prev,
@@ -395,9 +494,80 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setActivePageId((current) => current || 'board');
   }, []);
 
-  const startSetup = useCallback((templateId: string) => {
-    if (templateId === 'blank') {
-      const report = createBlankCustomReport();
+  const openMatchDashboard = useCallback(
+    (team: ExploreTeamProfile, match: ExploreMatch) => {
+      const matchContext = matchContextFromExplore(team.crestTeam || team.name, match);
+      const base =
+        createInitialSnapshot().reports.find((r) => r.id === 'england-opponent') ??
+        createInitialSnapshot().reports[0];
+      const template = templates.find((t) => t.id === 'match-analysis');
+      const report: ReportRecord = {
+        ...base,
+        id: uid('report'),
+        name: `${team.name} vs ${match.opponent} · ${match.round}`,
+        templateId: 'match-analysis',
+        templateType: template?.name ?? 'Match analysis',
+        lastUpdated: 'Just now',
+        status: 'Updated',
+        owner: 'You',
+        sharing: 'Private',
+        team: team.name,
+        period: `${match.competition} · ${match.date}`,
+        audience: 'Analyst',
+        tags: ['Match', match.round, match.competition].filter(Boolean),
+        matchContext,
+        chat: [
+          {
+            id: uid('a'),
+            role: 'assistant',
+            content: `Match dashboard for ${team.name} vs ${match.opponent} (${match.round}, ${match.date}). Result ${match.result}. ${match.takeaway} Ask for deeper cuts or pin visuals to the board.`,
+          },
+        ],
+        schedule: null,
+        sourceLabels: demoConfig.dataSources.slice(0, 3).map((s) => s.label),
+        context: demoConfig.dataSources.slice(0, 3).map((s) => ({
+          id: s.id,
+          label: s.label,
+          kind: 'data' as const,
+        })),
+      };
+      setSnapshot((prev) => ({
+        ...prev,
+        reports: [report, ...prev.reports],
+        activeReportId: report.id,
+      }));
+      setActivePageId(report.pages[0]?.id ?? 'board');
+      setSelectedSlot('slot-1');
+      setEditMode(false);
+      setAiCollapsed(false);
+      setPreviewTemplateId(null);
+      setSetup(null);
+      setPanel(null);
+      setView('workspace');
+      setNav('reports');
+      setToast({ message: `Opened ${team.name} vs ${match.opponent}` });
+    },
+    [templates],
+  );
+
+  const touchRecentTemplate = useCallback((templateId: string) => {
+    if (!templateId || templateId === 'blank' || templateId === 'custom-ai') return;
+    setRecentTemplateIds((prev) => {
+      const next = [templateId, ...prev.filter((id) => id !== templateId)];
+      persistRecentTemplateIds(next);
+      return next;
+    });
+  }, []);
+
+  const openBlankReport = useCallback(
+    (options: {
+      greeting: string;
+      view: ViewMode;
+      toast: string;
+      matchContext: MatchContext;
+      tourOpen?: boolean;
+    }) => {
+      const report = createBlankCustomReport(options.greeting, options.matchContext);
       setSnapshot((prev) => ({
         ...prev,
         reports: [report, ...prev.reports],
@@ -406,35 +576,119 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setActivePageId(report.pages[0].id);
       setSelectedSlot('slot-1');
       setBuilderTourStep(0);
-      setBuilderTourOpen(true);
+      setBuilderTourOpen(options.tourOpen ?? false);
       setEditMode(true);
       setAiCollapsed(false);
       setPreviewTemplateId(null);
       setSetup(null);
-      setView('workspace');
+      setCreatePreset(null);
+      setPanel(null);
+      setView(options.view);
       setNav('reports');
-      setToast({ message: 'Custom report ready — chat or open the widget library' });
-      return;
-    }
-    const template = templates.find((t) => t.id === templateId);
-    setSetup({
-      templateId,
-      name:
-        templateId === 'opponent-analysis'
-          ? 'England opponent analysis'
-          : `${template?.name ?? 'New'} report`,
-      sources: demoConfig.dataSources.map((s) => s.id),
-      team: 'England',
-      period: 'Entire tournament',
-      audience: 'Analyst',
-    });
-    setPreviewTemplateId(null);
-    setView('setup');
+      setToast({ message: options.toast });
+    },
+    [],
+  );
+
+  const startBlankBuild = useCallback(
+    (matchContext: MatchContext) => {
+      openBlankReport({
+        greeting: blankReportGreeting,
+        view: 'workspace',
+        toast: 'Blank report ready — add widgets from the library or chat',
+        matchContext,
+      });
+    },
+    [openBlankReport],
+  );
+
+  const startCustomBuild = useCallback(
+    (matchContext: MatchContext) => {
+      openBlankReport({
+        greeting: customAiBuildGreeting,
+        view: 'custom-ai-build',
+        toast: 'Describe what you need — finish whenever you’re ready',
+        matchContext,
+      });
+    },
+    [openBlankReport],
+  );
+
+  const updateMatchContext = useCallback(
+    (next: MatchContext) => {
+      updateActiveReport((report) => ({
+        ...report,
+        matchContext: { ...next },
+        team: teamCodeLabel(next.homeTeam),
+        period: next.year ? `${next.year} season` : report.period,
+        lastUpdated: 'Just now',
+      }));
+      setStatusMessage('Updating charts for match context…');
+      window.setTimeout(() => setStatusMessage(null), 900);
+      setToast({ message: 'Charts updated for match context' });
+    },
+    [updateActiveReport],
+  );
+
+  const saveReport = useCallback(() => {
+    updateActiveReport((report) => ({
+      ...report,
+      status: report.status === 'Draft' ? 'Updated' : report.status,
+      lastUpdated: 'Just now',
+    }));
+    setBuilderTourOpen(false);
+    setToast({ message: 'Dashboard saved' });
+  }, [updateActiveReport]);
+
+  const finishCustomAiBuild = useCallback(() => {
+    updateActiveReport((report) => ({
+      ...report,
+      status: report.status === 'Draft' ? 'Updated' : report.status,
+      lastUpdated: 'Just now',
+    }));
+    setBuilderTourOpen(false);
+    setView('workspace');
+    setNav('reports');
+    setAiCollapsed(false);
+    setEditMode(true);
+    setToast({ message: 'Dashboard ready' });
+  }, [updateActiveReport]);
+
+  const cancelCustomAiBuild = useCallback(() => {
+    setView('reports');
+    setNav('reports');
+    setToast({ message: 'Draft saved in Reports' });
   }, []);
 
-  const startCustomBuild = useCallback(() => {
-    startSetup('blank');
-  }, [startSetup]);
+  const startSetup = useCallback(
+    (templateId: string, matchContext?: MatchContext) => {
+      if (templateId === 'blank') {
+        if (matchContext) startBlankBuild(matchContext);
+        else openCreateReport('blank');
+        return;
+      }
+      touchRecentTemplate(templateId);
+      const template = templates.find((t) => t.id === templateId);
+      const homeName = matchContext ? teamCodeLabel(matchContext.homeTeam) : 'England';
+      setSetup({
+        templateId,
+        name:
+          templateId === 'opponent-analysis'
+            ? `${homeName} opponent analysis`
+            : `${template?.name ?? 'New'} report`,
+        sources: demoConfig.dataSources.map((s) => s.id),
+        team: homeName,
+        period: matchContext?.year ? `${matchContext.year} season` : 'Entire tournament',
+        audience: template?.audience?.split('/')[0]?.trim() || 'Analyst',
+        matchContext: matchContext
+          ? { ...matchContext }
+          : { tournament: 'wwc', year: '2023', homeTeam: 'eng', awayTeam: '' },
+      });
+      setPreviewTemplateId(null);
+      setView('setup');
+    },
+    [startBlankBuild, touchRecentTemplate, openCreateReport, templates],
+  );
 
   const updateSetup = useCallback((patch: Partial<SetupDraft>) => {
     setSetup((prev) => (prev ? { ...prev, ...patch } : prev));
@@ -442,6 +696,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const createReportFromSetup = useCallback(() => {
     if (!setup) return;
+    touchRecentTemplate(setup.templateId);
     setView('generating');
     setGenerationStep(0);
     const steps = [0, 1, 2, 3, 4];
@@ -452,7 +707,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
           const template = templates.find((t) => t.id === setup.templateId);
           const isBlank = setup.templateId === 'blank';
           const base = createInitialSnapshot().reports.find((r) => r.id === 'england-opponent');
-          const blank = createBlankCustomReport();
+          const blank = createBlankCustomReport(blankReportGreeting, setup.matchContext);
           const newReport: ReportRecord = isBlank
             ? {
                 ...blank,
@@ -460,6 +715,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
                 team: setup.team,
                 period: setup.period,
                 audience: setup.audience,
+                matchContext: { ...setup.matchContext },
                 sourceLabels: demoConfig.dataSources
                   .filter((s) => setup.sources.includes(s.id))
                   .map((s) => s.label),
@@ -480,6 +736,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
                 team: setup.team,
                 period: setup.period,
                 audience: setup.audience,
+                matchContext: { ...setup.matchContext },
                 lastUpdated: 'Just now',
                 status: 'Updated',
                 owner: 'You',
@@ -506,8 +763,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
           if (isBlank) {
             setSelectedSlot('slot-1');
             setBuilderTourStep(0);
-            setBuilderTourOpen(true);
+            setBuilderTourOpen(false);
             setEditMode(true);
+            setAiCollapsed(false);
           }
           setSetup(null);
           setView('workspace');
@@ -516,7 +774,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         }
       }, index * 700);
     });
-  }, [setup]);
+  }, [setup, touchRecentTemplate, templates]);
 
   const setActiveReport = useCallback((id: string) => {
     setSnapshot((prev) => ({ ...prev, activeReportId: id }));
@@ -532,15 +790,21 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       const pending: ChatMessage = {
         id: uid('a'),
         role: 'assistant',
-        content: 'Working…',
+        content: 'Working from Women’s World Cup 2023 sources…',
         pending: true,
       };
+      const liveReport =
+        snapshot.reports.find((r) => r.id === snapshot.activeReportId) ??
+        snapshot.reports[0];
+      const reportCtx = liveReport
+        ? contextFromReport(liveReport, activePageId)
+        : undefined;
       updateActiveReport((report) => ({
         ...report,
         chat: [...report.chat, userMsg, pending],
       }));
       window.setTimeout(() => {
-        const answer = resolveAiResponse(prompt);
+        const answer = resolveAiResponse(prompt, reportCtx);
         updateActiveReport((report) => ({
           ...report,
           chat: report.chat.map((m) =>
@@ -549,6 +813,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
                   ...m,
                   pending: false,
                   content: answer.content,
+                  detail: answer.detail,
                   sources: answer.sources,
                   chartProposal: answer.chartProposal,
                 }
@@ -557,18 +822,32 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         }));
       }, 900);
     },
-    [updateActiveReport],
+    [updateActiveReport, activePageId, snapshot.activeReportId, snapshot.reports],
   );
 
   const renameReport = useCallback(
-    (name: string) => {
+    (name: string, options?: { silent?: boolean }) => {
       const next = name.trim() || 'Untitled';
       updateActiveReport((report) => ({
         ...report,
         name: next,
         lastUpdated: 'Just now',
       }));
-      setToast({ message: `Renamed to “${next}”` });
+      if (!options?.silent) setToast({ message: `Renamed to “${next}”` });
+    },
+    [updateActiveReport],
+  );
+
+  const setReportTags = useCallback(
+    (tags: string[]) => {
+      const cleaned = Array.from(
+        new Set(tags.map((tag) => tag.trim()).filter(Boolean)),
+      );
+      updateActiveReport((report) => ({
+        ...report,
+        tags: cleaned,
+        lastUpdated: 'Just now',
+      }));
     },
     [updateActiveReport],
   );
@@ -766,11 +1045,17 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         const slotted: ReportObject = needsSlot
           ? { ...object, slot: nextEmptySlot(page.objects, selectedSlot) }
           : object;
+        const withGrid: ReportObject = slotted.grid
+          ? slotted
+          : {
+              ...slotted,
+              grid: nextFreeGrid(page?.objects ?? [], slotted.kind),
+            };
         return {
           ...report,
           pages: report.pages.map((p) =>
             p.id === (page?.id ?? activePageId)
-              ? { ...p, objects: [...p.objects, slotted] }
+              ? { ...p, objects: [...p.objects, withGrid] }
               : p,
           ),
           lastUpdated: 'Just now',
@@ -780,6 +1065,36 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setToast({ message: 'Object added' });
     },
     [updateActiveReport, activePageId, nextEmptySlot, selectedSlot],
+  );
+
+  const updateObjectGrids = useCallback(
+    (
+      pageId: string,
+      items: Array<{ id: string; grid: ObjectGrid }>,
+      options?: { mergeHeightOnly?: boolean },
+    ) => {
+      const byId = new Map(items.map((item) => [item.id, item.grid]));
+      updateActiveReport((report) => ({
+        ...report,
+        pages: report.pages.map((p) => {
+          if (p.id !== pageId) return p;
+          return {
+            ...p,
+            objects: p.objects.map((object) => {
+              const next = byId.get(object.id);
+              if (!next) return object;
+              if (options?.mergeHeightOnly) {
+                const current = object.grid;
+                if (!current || next.h <= current.h) return object;
+                return { ...object, grid: { ...current, h: next.h } };
+              }
+              return { ...object, grid: next };
+            }),
+          };
+        }),
+      }));
+    },
+    [updateActiveReport],
   );
 
   const addPage = useCallback(() => {
@@ -1258,6 +1573,58 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }, 1200);
   }, []);
 
+  const saveReportAsTemplate = useCallback(
+    (input: {
+      name: string;
+      purpose?: string;
+      category?: string;
+      editableFields: TemplateEditableField[];
+    }) => {
+      const report = snapshot.reports.find((r) => r.id === snapshot.activeReportId);
+      if (!report) return;
+      const name = input.name.trim();
+      if (!name) return;
+
+      const objectTitles = report.pages.flatMap((page) =>
+        page.objects.map((object) => object.title),
+      );
+      const template: ReportTemplate = {
+        id: uid('tmpl'),
+        name,
+        purpose:
+          input.purpose?.trim() ||
+          `Reusable layout saved from “${report.name}”. Editable fields stay open when someone uses this template.`,
+        category: input.category?.trim() || 'Custom',
+        audience: report.audience || 'Analyst',
+        pages: Math.max(1, report.pages.length),
+        sections: report.pages.map((page) => page.name),
+        requiredData: report.sourceLabels.length
+          ? report.sourceLabels
+          : ['Connected sources'],
+        objects: objectTitles.length ? objectTitles.slice(0, 12) : ['Modular widgets'],
+        suggestedPrompts: [...builderSuggestedPrompts],
+        refreshBehavior:
+          'Refresh bound widgets from match context; preserve fields marked editable.',
+        recommended: true,
+        editableFields: input.editableFields,
+        savedFromReportId: report.id,
+      };
+
+      setSavedTemplates((prev) => [template, ...prev.filter((t) => t.id !== template.id)]);
+      touchRecentTemplate(template.id);
+      setPanel(null);
+      setToast({
+        message: `Template “${template.name}” saved`,
+        actionLabel: 'View templates',
+        onAction: () => {
+          setView('templates');
+          setNav('templates');
+        },
+      });
+    },
+    [snapshot.activeReportId, snapshot.reports, touchRecentTemplate],
+  );
+
   const resetDemo = useCallback(() => {
     if (automationTimerRef.current != null) {
       window.clearTimeout(automationTimerRef.current);
@@ -1274,6 +1641,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setLineageTarget(null);
     setAutomationDraft(null);
     setAutomationPending(false);
+    setSavedTemplates([]);
     setEditMode(true);
     setPresentMode(false);
     setAiCollapsed(false);
@@ -1283,7 +1651,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const askAiAboutObject = useCallback(
     (title: string) => {
       setAiCollapsed(false);
-      sendPrompt(`Explain and suggest updates for “${title}”.`);
+      sendPrompt(
+        `Explain “${title}” using Women’s World Cup 2023 data on this dashboard and suggest updates.`,
+      );
     },
     [sendPrompt],
   );
@@ -1357,7 +1727,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       },
       openHome,
       openTemplates,
+      openCreateReport,
+      createPreset,
+      clearCreatePreset,
       openWorkspace,
+      openMatchDashboard,
       setPreviewTemplate: setPreviewTemplateId,
       startSetup,
       updateSetup,
@@ -1406,11 +1780,20 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       dismissNotification,
       shareReport,
       exportReport,
+      saveReportAsTemplate,
       resetDemo,
       askAiAboutObject,
       insertAiCreatedObject,
       startCustomBuild,
+      startBlankBuild,
+      updateMatchContext,
+      finishCustomAiBuild,
+      cancelCustomAiBuild,
+      saveReport,
+      recentTemplateIds,
+      touchRecentTemplate,
       renameReport,
+      setReportTags,
       selectedSlot,
       setSelectedSlot,
       builderTourStep,
@@ -1420,6 +1803,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       swapObjectSlots,
       addChartProposalToReport,
       builderSuggestedPrompts,
+      updateObjectGrids,
     }),
     [
       view,
@@ -1459,7 +1843,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       signOut,
       openHome,
       openTemplates,
+      openCreateReport,
+      createPreset,
+      clearCreatePreset,
       openWorkspace,
+      openMatchDashboard,
       startSetup,
       updateSetup,
       createReportFromSetup,
@@ -1497,16 +1885,26 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       dismissNotification,
       shareReport,
       exportReport,
+      saveReportAsTemplate,
       resetDemo,
       askAiAboutObject,
       insertAiCreatedObject,
       startCustomBuild,
+      startBlankBuild,
+      updateMatchContext,
+      finishCustomAiBuild,
+      cancelCustomAiBuild,
+      saveReport,
+      recentTemplateIds,
+      touchRecentTemplate,
       renameReport,
+      setReportTags,
       selectedSlot,
       builderTourStep,
       builderTourOpen,
       swapObjectSlots,
       addChartProposalToReport,
+      updateObjectGrids,
     ],
   );
 

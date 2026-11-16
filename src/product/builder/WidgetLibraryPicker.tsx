@@ -13,6 +13,8 @@ import { ICON_SIZE } from '../../iconSize';
 
 type Props = {
   onPick: (entry: WidgetLibraryEntry) => void;
+  /** When true, the grid fills its parent instead of capping at a modal height. */
+  compact?: boolean;
 };
 
 const Toolbar = styled.div`
@@ -37,11 +39,14 @@ const SearchWrap = styled.div`
   min-width: 160px;
 `;
 
-const Grid = styled.div`
+const Grid = styled.div<{ $compact?: boolean }>`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
-  gap: var(--space-400);
-  max-height: min(60vh, 560px);
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, ${(p) => (p.$compact ? '10rem' : '220px')}), 1fr)
+  );
+  gap: ${(p) => (p.$compact ? 'var(--space-300)' : 'var(--space-400)')};
+  max-height: ${(p) => (p.$compact ? 'none' : 'min(60vh, 560px)')};
   overflow: auto;
   padding: var(--space-050);
 `;
@@ -90,7 +95,7 @@ const Description = styled.p`
  * Searchable widget catalog grid — used by the builder modal and anywhere
  * a report needs to pick from the library.
  */
-export function WidgetLibraryPicker({ onPick }: Props) {
+export function WidgetLibraryPicker({ onPick, compact }: Props) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<WidgetCategory | 'All'>('All');
 
@@ -137,7 +142,7 @@ export function WidgetLibraryPicker({ onPick }: Props) {
         </SearchWrap>
       </Toolbar>
 
-      <Grid>
+      <Grid $compact={compact}>
         {filtered.map((entry) => (
           <Card key={entry.id}>
             <Preview>{entry.render()}</Preview>

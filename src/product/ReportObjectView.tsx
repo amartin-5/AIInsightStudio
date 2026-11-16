@@ -3,13 +3,23 @@ import {
   ArrowDown,
   ArrowUp,
   Database,
+  GripVertical,
   MoreHorizontal,
   Sparkles,
   Trash2,
 } from 'lucide-react';
 import { DropdownMenu } from 'radix-ui';
 
-import { englandKpis, englandPlayers, finalMatchKpis } from '../demos/wwc2023/dataset';
+import {
+  australiaKpis,
+  australiaPlayers,
+  englandKpis,
+  englandPlayers,
+  finalMatchKpis,
+  knockoutKpis,
+  spainKpis,
+  type DemoPlayer,
+} from '../demos/wwc2023/dataset';
 import { useAppState } from '../app/AppState';
 import {
   BodyText,
@@ -22,25 +32,52 @@ import {
   PlaceholderViz,
   SimpleTable,
   Strong,
-  SurfaceCard,
   TableWrap,
+  WidgetDragHandle,
 } from '../app/ui.styles';
 import { renderChartById } from './charts';
 import { ComparisonBars } from './charts/ComparisonBars';
+import { teamAccent, teamPair } from './teams/teamColors';
+import { AiInsightCard } from './widgets/AiInsightCard';
 import { EventTimeline } from './widgets/EventTimeline';
 import { HeadToHead } from './widgets/HeadToHead';
 import { KpiStatRow } from './widgets/KpiStatRow';
 import { MatchScoreboard } from './widgets/MatchScoreboard';
+import { PlayerSpotlight } from './widgets/PlayerSpotlight';
 import { VideoWidget } from './widgets/VideoWidget';
 import type { ReportObject } from './types';
 import { ICON_SIZE } from '../iconSize';
 
+function kpisForHint(hint?: string) {
+  if (hint === 'final-match') return finalMatchKpis;
+  if (hint === 'australia') return australiaKpis;
+  if (hint === 'spain') return spainKpis;
+  if (hint === 'knockout') return knockoutKpis;
+  return englandKpis;
+}
+
+function playersForHint(hint?: string, team?: string): { team: string; players: DemoPlayer[] } {
+  if (hint === 'australia' || team === 'Australia') {
+    return { team: 'Australia', players: australiaPlayers };
+  }
+  return { team: team || 'England', players: englandPlayers };
+}
+
 type Props = {
   pageId: string;
   object: ReportObject;
+  /** Rendered inside ModularReportGrid — fill cell. */
+  modular?: boolean;
+  /** Show grip handle for free-form rearrange. */
+  showDragHandle?: boolean;
 };
 
-export function ReportObjectView({ pageId, object }: Props) {
+export function ReportObjectView({
+  pageId,
+  object,
+  modular = false,
+  showDragHandle = false,
+}: Props) {
   const {
     editMode,
     presentMode,
@@ -56,8 +93,15 @@ export function ReportObjectView({ pageId, object }: Props) {
 
   const chromeLess =
     !editMode &&
-    (object.kind === 'scoreboard' || object.kind === 'video' || object.kind === 'kpi-row');
+    (object.kind === 'scoreboard' ||
+      object.kind === 'video' ||
+      object.kind === 'kpi-row' ||
+      object.kind === 'ai-summary');
   const compare = activeReport?.compare;
+  const pair = teamPair(
+    compare?.leftTeam ?? activeReport?.team ?? 'England',
+    compare?.rightTeam ?? 'Spain',
+  );
   const canShowSources =
     Boolean(object.sourceRefs?.length) ||
     object.kind === 'metric' ||
@@ -74,12 +118,30 @@ export function ReportObjectView({ pageId, object }: Props) {
     });
   };
 
+  const bareInsight = object.kind === 'ai-summary' && !editMode;
+
   return (
-    <ObjectCard $editing={editMode}>
+    <ObjectCard $editing={editMode} $modular={modular} $bare={bareInsight}>
+      {chromeLess && showDragHandle && (
+        <WidgetDragHandle
+          className="widget-drag-handle"
+          aria-label="Drag to rearrange"
+          style={{ position: 'absolute', top: 8, left: 8, zIndex: 2 }}
+        >
+          <GripVertical size={ICON_SIZE} />
+        </WidgetDragHandle>
+      )}
       {!chromeLess && (
         <ObjectHeader>
           <ObjectTitleBlock>
-            <Strong style={{ fontSize: 'var(--type-size-subject)' }}>{object.title}</Strong>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-100)' }}>
+              {showDragHandle && (
+                <WidgetDragHandle className="widget-drag-handle" aria-label="Drag to rearrange">
+                  <GripVertical size={ICON_SIZE} />
+                </WidgetDragHandle>
+              )}
+              <Strong style={{ fontSize: 'var(--type-size-subject)' }}>{object.title}</Strong>
+            </div>
             {editMode && (
               <MetaRow>
                 {object.kind === 'ai-summary' && (
@@ -195,8 +257,18 @@ export function ReportObjectView({ pageId, object }: Props) {
         </button>
       )}
 
-      {(object.kind === 'ai-summary' ||
-        object.kind === 'text' ||
+      {object.kind === 'ai-summary' && object.body && !editMode && (
+        <AiInsightCard
+          eyebrow="AI insight"
+          title={object.title}
+          body={object.body}
+          footer={object.pinnedFromAi ? 'Pinned from chat' : undefined}
+        />
+      )}
+
+      {object.kind === 'ai-summary' && object.body && editMode && <BodyText>{object.body}</BodyText>}
+
+      {(object.kind === 'text' ||
         object.kind === 'analyst-note' ||
         object.kind === 'source-list') &&
         object.body &&
@@ -207,23 +279,23 @@ export function ReportObjectView({ pageId, object }: Props) {
           {object.body && <BodyText>{object.body}</BodyText>}
           {object.chartId ? (
             <ChartSlot object={object} />
-          ) : compare?.enabled ? (
+          ) : compare?.enabled || object.title.toLowerCase().includes('vs') ? (
             <HeadToHead
-              leftLabel={compare.leftTeam}
-              rightLabel={compare.rightTeam}
+              leftLabel={compare?.leftTeam ?? 'England'}
+              rightLabel={compare?.rightTeam ?? 'Spain'}
               leftWins={3}
               draws={1}
               rightWins={2}
-              leftColor="var(--color-primary-primary)"
-              rightColor="var(--color-secondary-secondary)"
-              ariaLabel={`${compare.leftTeam} vs ${compare.rightTeam}`}
+              leftColor={pair.leftColor}
+              rightColor={pair.rightColor}
+              ariaLabel={`${compare?.leftTeam ?? 'England'} vs ${compare?.rightTeam ?? 'Spain'}`}
             />
           ) : (
             <ComparisonBars
               leftLabel="Group"
               rightLabel="Knockout"
-              leftColor="var(--color-primary-primary)"
-              rightColor="var(--color-secondary-secondary)"
+              leftColor={teamAccent('England').primary}
+              rightColor={teamAccent('Spain').primary}
               rows={[
                 { label: 'Goals / match', left: 2.7, right: 1.3 },
                 { label: 'xG / match', left: 2.0, right: 1.4 },
@@ -287,7 +359,7 @@ export function ReportObjectView({ pageId, object }: Props) {
       {object.kind === 'kpi-row' && (
         <KpiStatRow
           ariaLabel={object.title}
-          items={(object.metricHint === 'final-match' ? finalMatchKpis : englandKpis).map((kpi) => ({
+          items={kpisForHint(object.metricHint).map((kpi) => ({
             id: kpi.id,
             label: kpi.title,
             value: kpi.value,
@@ -299,6 +371,8 @@ export function ReportObjectView({ pageId, object }: Props) {
 
       {object.kind === 'player-list' && (
         <ListPlayers
+          teamHint={object.metricHint}
+          reportTeam={activeReport?.team}
           onCompare={() => {
             setCompareContext({ enabled: activeReport?.compare?.enabled ?? false });
             setPanel('compare');
@@ -369,25 +443,45 @@ function ChartSlot({ object }: { object: ReportObject }) {
   );
 }
 
-function ListPlayers({ onCompare }: { onCompare: () => void }) {
+function ListPlayers({
+  onCompare,
+  teamHint,
+  reportTeam,
+}: {
+  onCompare: () => void;
+  teamHint?: string;
+  reportTeam?: string;
+}) {
+  const { team, players } = playersForHint(teamHint, reportTeam);
+  const accent = teamAccent(team).primary;
   return (
-    <div style={{ display: 'grid', gap: 'var(--space-400)' }}>
-      {englandPlayers.map((player) => (
-        <SurfaceCard key={player.id} as="div">
-          <MetaRow>
-            <Strong style={{ flex: '1 1 auto' }}>{player.label}</Strong>
-            <Badge color="secondary" tone="subtle" dot={false}>
-              {player.position}
-            </Badge>
-          </MetaRow>
-          <Muted>
-            {player.matches} matches · {player.minutes} min · {player.metric}
-          </Muted>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 'var(--space-400)',
+      }}
+    >
+      {players.map((player) => (
+        <div key={player.id} style={{ display: 'grid', gap: 'var(--space-200)' }}>
+          <PlayerSpotlight
+            name={player.label}
+            team={team}
+            position={player.position}
+            initial={player.initial}
+            accentColor={accent}
+            photo={player.photo}
+            stats={[
+              { label: 'Matches', value: player.matches },
+              { label: 'Minutes', value: player.minutes },
+              { label: 'Impact', value: player.metric },
+            ]}
+          />
           <BodyText>{player.observation}</BodyText>
-          <Button size="sm" intent="secondary" variant="ghost" onClick={onCompare}>
+          <Button size="sm" intent="secondary" variant="tonal" onClick={onCompare}>
             Compare
           </Button>
-        </SurfaceCard>
+        </div>
       ))}
     </div>
   );

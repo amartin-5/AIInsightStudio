@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Sidebar, SidebarItem, SidebarNav } from '@cake-admin/cakeand';
 import {
+  Bell,
   ChartColumn,
   Compass,
   FileText,
@@ -10,6 +11,7 @@ import {
   Settings,
   Workflow,
 } from 'lucide-react';
+import styled from 'styled-components';
 
 import { useAppState } from '../app/AppState';
 import type { NavId } from '../product/types';
@@ -17,11 +19,44 @@ import { LogoMark, SidebarHost, TokenHubNav } from './shell.styles';
 import { ICON_SIZE } from '../iconSize';
 
 /**
+ * Badge host only — do not size this box. SidebarItem forces leading svgs to
+ * 24px; a fixed 16px wrap clips/misaligns the bell vs the other nav icons.
+ */
+const BellIconWrap = styled.span`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const NavBadge = styled.span`
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-1000);
+  background: var(--color-error-error);
+  border: var(--stroke-100) solid var(--color-surfaces-container);
+  pointer-events: none;
+`;
+
+/**
  * Insight Studio navigation — TokenHub translucent SidebarNav + fill-only selection.
  * Opening a report collapses the rail; only the user expands it again (app-wide).
+ * Notifications opens the existing panel without changing the main view.
  */
 export function AppSidebar() {
-  const { nav, view, setNav, sidebarCollapsed, setSidebarCollapsed } = useAppState();
+  const {
+    nav,
+    view,
+    panel,
+    setNav,
+    sidebarCollapsed,
+    setSidebarCollapsed,
+    setPanel,
+    unreadCount,
+  } = useAppState();
   const previousView = useRef(view);
 
   useEffect(() => {
@@ -38,7 +73,14 @@ export function AppSidebar() {
       <TokenHubNav>
         <Sidebar
           value={nav}
-          onValueChange={(value) => setNav(value as NavId)}
+          onValueChange={(value) => {
+            if (value === 'notifications') {
+              setPanel(panel === 'notifications' ? null : 'notifications');
+              return;
+            }
+            if (panel === 'notifications') setPanel(null);
+            setNav(value as NavId);
+          }}
           style={{
             height: '100%',
             gap: 0,
@@ -59,6 +101,18 @@ export function AppSidebar() {
             onCollapsedChange={setSidebarCollapsed}
             style={{ flex: 'none', paddingBottom: 'var(--space-200)' }}
           >
+            <SidebarItem
+              value="notifications"
+              data-notifications-trigger=""
+              icon={
+                <BellIconWrap>
+                  <Bell size={ICON_SIZE} />
+                  {unreadCount > 0 && <NavBadge aria-hidden />}
+                </BellIconWrap>
+              }
+            >
+              Notifications
+            </SidebarItem>
             <SidebarItem value="home" icon={<Home size={ICON_SIZE} />}>
               Home
             </SidebarItem>
@@ -69,8 +123,6 @@ export function AppSidebar() {
               value="reports"
               icon={<FileText size={ICON_SIZE} />}
               onClick={() => {
-                // Radix skips onValueChange when already selected; force library
-                // return when leaving an open report workspace.
                 if (nav === 'reports') setNav('reports');
               }}
             >

@@ -3,8 +3,18 @@ export { ChartSlotPlaceholder } from './ChartSlotPlaceholder';
 export { CustomReportCanvas } from './CustomReportCanvas';
 export { GuidedTourCard } from './GuidedTourCard';
 export {
+  DEFAULT_MATCH_CONTEXT,
   DEFAULT_MATCH_FILTERS,
+  MatchContextFields,
   MatchFilterBar,
+  formatMatchContextSummary,
+  isMatchContextComplete,
+  matchContextFromExplore,
+  teamCodeLabel,
+  teamCodeShort,
+  teamLabelToCode,
+  tournamentLabel,
+  type MatchContext,
   type MatchFilters,
 } from './MatchFilterBar';
 export { AiChartProposal } from './AiChartProposal';

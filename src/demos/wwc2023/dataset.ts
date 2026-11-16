@@ -1,5 +1,10 @@
 /** Women’s World Cup 2023 scenario values for Insight Studio. */
 
+import photoForward from '../../assets/explore/spotlight-celebration.jpg';
+import photoMid from '../../assets/explore/card-match-1.jpg';
+import photoDef from '../../assets/explore/card-match-2.jpg';
+import photoWide from '../../assets/explore/card-match-3.jpg';
+
 export const englandKpis = [
   { id: 'matches', title: 'Matches played', value: '7', hint: 'Group + knockout' },
   { id: 'wins', title: 'Wins', value: '5', hint: '1 draw · 1 loss' },
@@ -9,6 +14,36 @@ export const englandKpis = [
   { id: 'poss', title: 'Possession', value: '54%', hint: 'Tournament average' },
   { id: 'shots', title: 'Shots / match', value: '14.2', hint: 'Average' },
   { id: 'pass', title: 'Passing accuracy', value: '86%', hint: 'Tournament average' },
+];
+
+export const australiaKpis = [
+  { id: 'matches', title: 'Matches played', value: '7', hint: 'Host run to SF' },
+  { id: 'wins', title: 'Wins', value: '5', hint: '1 draw · 1 loss' },
+  { id: 'goals', title: 'Goals', value: '11', hint: 'Tournament total' },
+  { id: 'conceded', title: 'Goals conceded', value: '5', hint: 'Tournament total' },
+  { id: 'xg', title: 'Expected goals', value: '10.4', hint: 'xG model' },
+  { id: 'poss', title: 'Possession', value: '51%', hint: 'Tournament average' },
+  { id: 'shots', title: 'Shots / match', value: '13.1', hint: 'Average' },
+  { id: 'ppda', title: 'PPDA', value: '9.8', hint: 'Press intensity' },
+];
+
+export const spainKpis = [
+  { id: 'matches', title: 'Matches played', value: '7', hint: 'Champions' },
+  { id: 'wins', title: 'Wins', value: '6', hint: '1 draw · 0 losses' },
+  { id: 'goals', title: 'Goals', value: '18', hint: 'Tournament total' },
+  { id: 'conceded', title: 'Goals conceded', value: '3', hint: 'Tournament total' },
+  { id: 'xg', title: 'Expected goals', value: '15.2', hint: 'xG model' },
+  { id: 'poss', title: 'Possession', value: '63%', hint: 'Tournament average' },
+  { id: 'shots', title: 'Shots / match', value: '16.4', hint: 'Average' },
+  { id: 'pass', title: 'Passing accuracy', value: '89%', hint: 'Tournament average' },
+];
+
+export const knockoutKpis = [
+  { id: 'matches', title: 'KO matches', value: '15', hint: 'R16 → Final' },
+  { id: 'avgXg', title: 'Avg xG / match', value: '1.4', hint: 'Down from group 2.1' },
+  { id: 'pens', title: 'Penalty shootouts', value: '3', hint: 'Including AUS–FRA' },
+  { id: 'lateGoals', title: 'Goals after 75′', value: '9', hint: 'Decisive windows' },
+  { id: 'clean', title: 'Clean sheets', value: '8', hint: '53% of KO games' },
 ];
 
 /** Final match strip — Shape / Possession / xG / Shots / PPDA */
@@ -131,42 +166,110 @@ export function matchRowsForRefs(refs?: string[]): MatchSourceRow[] {
   return filtered.length ? filtered : englandMatches;
 }
 
-export const englandPlayers = [
+export type DemoPlayer = {
+  id: string;
+  label: string;
+  position: string;
+  matches: string;
+  minutes: string;
+  metric: string;
+  observation: string;
+  photo: string;
+  initial: string;
+};
+
+/** Demo personas — photographic crops are stadium/match atmosphere stand-ins. */
+export const englandPlayers: DemoPlayer[] = [
   {
     id: 'p1',
-    label: 'Player A',
+    label: 'Ava Mercer',
     position: 'Forward',
     matches: '7',
     minutes: '612',
     metric: '5 goals',
     observation: 'Primary finishing outlet in open play.',
+    photo: photoForward,
+    initial: 'A',
   },
   {
     id: 'p2',
-    label: 'Player B',
+    label: 'Jordan Blake',
     position: 'Midfielder',
     matches: '7',
     minutes: '630',
     metric: '87% pass',
     observation: 'Stabilized buildup under pressure.',
+    photo: photoMid,
+    initial: 'J',
   },
   {
     id: 'p3',
-    label: 'Player C',
+    label: 'Casey Quinn',
     position: 'Defender',
     matches: '6',
     minutes: '540',
     metric: '18 recoveries',
     observation: 'Key in defensive rest shape.',
+    photo: photoDef,
+    initial: 'C',
   },
   {
     id: 'p4',
-    label: 'Player D',
+    label: 'Riley Shaw',
     position: 'Forward',
     matches: '7',
     minutes: '498',
     metric: '3 assists',
     observation: 'Created width in attacking channels.',
+    photo: photoWide,
+    initial: 'R',
+  },
+];
+
+export const australiaPlayers: DemoPlayer[] = [
+  {
+    id: 'ap1',
+    label: 'Sam Kerr',
+    position: 'Forward',
+    matches: '4',
+    minutes: '312',
+    metric: '2 goals',
+    observation: 'Injury-limited minutes; still the reference runner in behind.',
+    photo: photoForward,
+    initial: 'S',
+  },
+  {
+    id: 'ap2',
+    label: 'Hayley Raso',
+    position: 'Forward',
+    matches: '7',
+    minutes: '540',
+    metric: '3 goals',
+    observation: 'Width + early crosses created Australia’s best open-play looks.',
+    photo: photoWide,
+    initial: 'H',
+  },
+  {
+    id: 'ap3',
+    label: 'Katrina Gorry',
+    position: 'Midfielder',
+    matches: '7',
+    minutes: '598',
+    metric: '84% pass',
+    observation: 'Progressive carrier through the first press line.',
+    photo: photoMid,
+    initial: 'K',
+  },
+  {
+    id: 'ap4',
+    label: 'Alanna Kennedy',
+    position: 'Defender',
+    matches: '7',
+    minutes: '630',
+    metric: '22 clearances',
+    observation: 'Anchored rest defense when the mid-block sat deeper.',
+    photo: photoDef,
+    initial: 'A',
   },
 ];
 
@@ -490,14 +593,16 @@ export function buildAustraliaPages() {
         {
           id: 'aus-ai',
           kind: 'ai-summary' as const,
-          title: 'AI-generated overview',
-          body: 'Australia showed strong home-tournament intensity, progressive attacking width, and late-tournament fatigue indicators.',
+          title: 'Host run — what mattered',
+          body: 'Australia’s ceiling was the Canada 4–0: high press + early width created a +2.1 xG swing. The semi-final vs England flipped that script — rest-defense spacing opened after 60′, and England’s second and third goals came from the same half-space corridor.',
           slot: 'insight' as const,
         },
         {
           id: 'aus-kpis',
           kind: 'kpi-row' as const,
-          title: 'Key metrics',
+          title: 'Tournament metrics',
+          metricHint: 'australia',
+          sourceRefs: ['eng-australia'],
           slot: 'metrics' as const,
         },
         {
@@ -509,9 +614,9 @@ export function buildAustraliaPages() {
         },
         {
           id: 'aus-note',
-          kind: 'text' as const,
-          title: 'Tournament arc',
-          body: 'Peak efficiency vs Canada; transition vulnerability exposed in the semi-final against England.',
+          kind: 'ai-summary' as const,
+          title: 'Executive takeaway',
+          body: 'Peak efficiency vs Canada; transition vulnerability exposed in the semi-final. For future host cycles, prioritize rest-defense drills when the mid-block sits deeper than PPDA 11.',
           slot: 'notes' as const,
         },
       ],
@@ -525,33 +630,51 @@ export function buildAustraliaPages() {
           id: 'aus-table',
           kind: 'table' as const,
           title: 'Match progression',
-          columns: ['Opponent', 'Stage', 'Result', 'Observation'],
+          columns: ['Opponent', 'Stage', 'Result', 'xG', 'Observation'],
           rows: [
-            ['Ireland', 'Group', 'W 1–0', 'Controlled opener.'],
-            ['Nigeria', 'Group', 'D 3–2', 'Open transitional game.'],
-            ['Canada', 'Group', 'W 4–0', 'Peak attacking efficiency.'],
-            ['Denmark', 'R16', 'W 2–0', 'Structured mid-block break.'],
-            ['France', 'QF', 'W 0–0 (7–6 P)', 'Low chance volume; progressed.'],
-            ['England', 'SF', 'L 1–3', 'Transition vulnerability exposed.'],
+            ['Ireland', 'Group', 'W 1–0', '1.4', 'Controlled opener; low chaos.'],
+            ['Nigeria', 'Group', 'D 3–2', '2.6', 'Open transitional game.'],
+            ['Canada', 'Group', 'W 4–0', '3.1', 'Peak attacking efficiency.'],
+            ['Denmark', 'R16', 'W 2–0', '1.8', 'Structured mid-block break.'],
+            ['France', 'QF', 'W 7–6 P', '0.9', 'Low chance volume; progressed.'],
+            ['England', 'SF', 'L 1–3', '1.1', 'Transition vulnerability exposed.'],
           ],
           slot: 'main' as const,
         },
         {
-          id: 'aus-players-side',
-          kind: 'player-list' as const,
-          title: 'Key players',
+          id: 'aus-press',
+          kind: 'ai-summary' as const,
+          title: 'Pressing arc',
+          body: 'PPDA stayed under 10 through the quarter-final, then rose to 12.4 in the semi — England found switches into the vacated half-spaces once Australia’s first press fatigued.',
           slot: 'metrics' as const,
+        },
+        {
+          id: 'aus-compare',
+          kind: 'chart' as const,
+          title: 'Attacking contribution',
+          chartId: 'wwc-attack-stacked',
+          slot: 'chart-a' as const,
         },
       ],
     },
     {
       id: 'players',
       name: 'Key players',
+      layout: 'summary-dashboard' as const,
       objects: [
+        {
+          id: 'aus-players-ai',
+          kind: 'ai-summary' as const,
+          title: 'Player watchlist',
+          body: 'Raso’s width carried creation when Kerr’s minutes were limited. Gorry’s progressive carries were the reliable bridge through the first press line.',
+          slot: 'insight' as const,
+        },
         {
           id: 'aus-players',
           kind: 'player-list' as const,
-          title: 'Key players',
+          title: 'Matildas spotlights',
+          metricHint: 'australia',
+          slot: 'main' as const,
         },
       ],
     },
@@ -568,14 +691,16 @@ export function buildSpainPages() {
         {
           id: 'esp-ai',
           kind: 'ai-summary' as const,
-          title: 'AI summary',
-          body: 'Spain maintained high possession and structured chance creation, with efficient finishing in knockout matches.',
+          title: 'Champions profile',
+          body: 'Spain controlled 63% possession and converted knockout xG at 1.4 goals per 1.0 xG — the most efficient finishing rate among finalists. Structured chance creation from half-spaces, not volume crossing, defined the title run.',
           slot: 'insight' as const,
         },
         {
           id: 'esp-kpis',
           kind: 'kpi-row' as const,
-          title: 'Key metrics',
+          title: 'Tournament metrics',
+          metricHint: 'spain',
+          sourceRefs: ['eng-spain'],
           slot: 'metrics' as const,
         },
         {
@@ -584,6 +709,13 @@ export function buildSpainPages() {
           title: 'Chance creation (xG)',
           chartId: 'spain-xg-bar',
           slot: 'main' as const,
+        },
+        {
+          id: 'esp-exec',
+          kind: 'ai-summary' as const,
+          title: 'Why Spain won',
+          body: 'They never abandoned positional play under scoreboard pressure. England’s late width forced a deeper Spanish mid-block, but Spain still created the higher-quality late look that decided the final.',
+          slot: 'notes' as const,
         },
       ],
     },
@@ -604,8 +736,15 @@ export function buildSpainPages() {
           kind: 'metric' as const,
           title: 'Possession',
           metricValue: '63%',
-          metricHint: 'Tournament average',
+          metricHint: 'Tournament average · +9pp vs England',
           slot: 'metrics' as const,
+        },
+        {
+          id: 'esp-attack-ai',
+          kind: 'ai-summary' as const,
+          title: 'Creation pattern',
+          body: 'Primary threat: third-man combinations into the right half-space, then cutbacks. Cross share stayed under 18% of entries — unusual for a tournament winner.',
+          slot: 'notes' as const,
         },
         {
           id: 'esp-compare',
@@ -630,14 +769,14 @@ export function buildSpainPages() {
           homeScore: 1,
           awayScore: 0,
           matchStatus: 'FT',
-          matchMeta: 'Final · Sydney',
+          matchMeta: 'Final · Sydney · 20 Aug 2023',
           slot: 'header' as const,
         },
         {
           id: 'esp-final-video',
           kind: 'video' as const,
           title: 'Winning sequence replay',
-          body: 'Late chance conversion · Final third',
+          body: '86′ chance conversion · Final third',
           metricHint: '1:04',
           slot: 'media' as const,
         },
@@ -647,14 +786,16 @@ export function buildSpainPages() {
           title: 'Key events',
           slot: 'events' as const,
           events: [
-            { id: 'se1', minute: "70'", text: 'England introduce width', tone: 'sub' as const },
-            { id: 'se2', minute: "86'", text: 'Goal — Spain', tone: 'goal' as const },
+            { id: 'se1', minute: "29'", text: 'Yellow — England midfielder', tone: 'card' as const },
+            { id: 'se2', minute: "70'", text: 'England introduce width', tone: 'sub' as const },
+            { id: 'se3', minute: "86'", text: 'Goal — Spain convert late chance', tone: 'goal' as const },
+            { id: 'se4', minute: "90+3'", text: 'Final whistle — Spain 1–0', tone: 'neutral' as const },
           ],
         },
         {
           id: 'esp-final-pitch',
           kind: 'spatial' as const,
-          title: 'Spain shape',
+          title: 'Average positions',
           chartId: 'england-pitch',
           slot: 'side' as const,
         },
@@ -692,14 +833,21 @@ export function buildPlayerComparisonPages() {
       layout: 'compare-split' as const,
       objects: [
         {
+          id: 'cmp-header',
+          kind: 'ai-summary' as const,
+          title: 'England watchlist — role fit',
+          body: 'Three complementary profiles: Mercer finishes, Blake progresses, Quinn protects. Selection hinges on whether the next opponent forces a mid-block or a high press.',
+          slot: 'header' as const,
+        },
+        {
           id: 'cmp-table',
           kind: 'table' as const,
           title: 'Player comparison',
           columns: ['Player', 'Minutes', 'Goals', 'Assists', 'Shots', 'Passing', 'Defensive'],
           rows: [
-            ['Player A', '612', '5', '1', '18', '78%', '12'],
-            ['Player B', '630', '1', '3', '9', '87%', '28'],
-            ['Player C', '540', '0', '0', '2', '91%', '41'],
+            ['Ava Mercer', '612', '5', '1', '18', '78%', '12'],
+            ['Jordan Blake', '630', '1', '3', '9', '87%', '28'],
+            ['Casey Quinn', '540', '0', '0', '2', '91%', '41'],
           ],
           sourceRefs: [
             'eng-haiti',
@@ -715,14 +863,14 @@ export function buildPlayerComparisonPages() {
         {
           id: 'cmp-ai',
           kind: 'ai-summary' as const,
-          title: 'AI-generated comparison',
-          body: 'Player A leads finishing output; Player B balances creation and progression; Player C anchors defensive actions.',
+          title: 'Who to start',
+          body: 'Mercer leads finishing output (0.82 goals/90). Blake balances creation and progression — best vs mid-blocks. Quinn anchors defensive actions when protecting a lead after 70′.',
           slot: 'side' as const,
         },
         {
           id: 'cmp-radar',
           kind: 'chart' as const,
-          title: 'Player A profile',
+          title: 'Ava Mercer profile',
           chartId: 'player-compare-radar',
           sourceRefs: [
             'eng-haiti',
@@ -733,6 +881,86 @@ export function buildPlayerComparisonPages() {
             'eng-australia',
             'eng-spain',
           ],
+          slot: 'chart-a' as const,
+        },
+        {
+          id: 'cmp-players',
+          kind: 'player-list' as const,
+          title: 'Spotlight cards',
+          metricHint: 'england',
+          slot: 'chart-b' as const,
+        },
+      ],
+    },
+  ];
+}
+
+export function buildKnockoutPages() {
+  return [
+    {
+      id: 'ko-summary',
+      name: 'Knockout overview',
+      layout: 'summary-dashboard' as const,
+      objects: [
+        {
+          id: 'ko-ai',
+          kind: 'ai-summary' as const,
+          title: 'Knockout stage patterns',
+          body: 'Across 15 knockout matches, average xG fell from 2.1 (group) to 1.4. Clean sheets rose to 53%. The decisive games were decided after 75′ or on penalties — preparation should prioritize late-game rest defense and set-piece volume.',
+          slot: 'insight' as const,
+        },
+        {
+          id: 'ko-kpis',
+          kind: 'kpi-row' as const,
+          title: 'Knockout metrics',
+          metricHint: 'knockout',
+          slot: 'metrics' as const,
+        },
+        {
+          id: 'ko-chart',
+          kind: 'chart' as const,
+          title: 'Attacking contribution by stage',
+          chartId: 'wwc-attack-stacked',
+          slot: 'main' as const,
+        },
+        {
+          id: 'ko-note',
+          kind: 'ai-summary' as const,
+          title: 'Scouting implication',
+          body: 'Expect lower chance quality and tighter defensive spacing. Favor squads that can create without open transitions — Spain’s half-space combinations are the reference pattern.',
+          slot: 'notes' as const,
+        },
+      ],
+    },
+    {
+      id: 'ko-bracket',
+      name: 'Path to the final',
+      layout: 'analytics-split' as const,
+      objects: [
+        {
+          id: 'ko-table',
+          kind: 'table' as const,
+          title: 'Semi-final & final path',
+          columns: ['Match', 'Score', 'xG', 'Deciding factor'],
+          rows: [
+            ['AUS–ENG SF', '1–3', '1.1–2.4', 'England half-space switches after 60′'],
+            ['ESP–SWE SF', '2–1', '1.9–1.2', 'Spain late cutback quality'],
+            ['ESP–ENG Final', '1–0', '1.8–0.9', '86′ conversion after England width push'],
+          ],
+          slot: 'main' as const,
+        },
+        {
+          id: 'ko-h2h',
+          kind: 'comparison' as const,
+          title: 'England vs Spain — tournament',
+          body: 'Head-to-head across the competition cycle.',
+          slot: 'metrics' as const,
+        },
+        {
+          id: 'ko-form',
+          kind: 'chart' as const,
+          title: 'Form into the final',
+          chartId: 'england-spain-form',
           slot: 'chart-a' as const,
         },
       ],

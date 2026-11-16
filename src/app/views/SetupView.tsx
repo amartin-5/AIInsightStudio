@@ -2,6 +2,11 @@ import { Button, Checkbox, Dropdown, ProgressBar, TextInput } from '@cake-admin/
 import { ArrowLeft } from 'lucide-react';
 import styled from 'styled-components';
 
+import {
+  MatchContextFields,
+  isMatchContextComplete,
+  type MatchContext,
+} from '../../product/builder';
 import { TeamCrest } from '../../product/teams/TeamCrest';
 import { useAppState } from '../AppState';
 import {
@@ -140,7 +145,17 @@ export function SetupView() {
       </Section>
 
       <Section>
-        <SectionTitle>3. Configure the analysis</SectionTitle>
+        <SectionTitle>3. Match context</SectionTitle>
+        <Muted>Tournament, year, and home team are required. Away is optional.</Muted>
+        <MatchContextFields
+          value={setup.matchContext}
+          onChange={(next: MatchContext) => updateSetup({ matchContext: next })}
+          awayOptional
+        />
+      </Section>
+
+      <Section>
+        <SectionTitle>4. Configure the analysis</SectionTitle>
         <SetupGrid>
           <TeamField>
             <TeamCrest team={setup.team} size="lg" labelled />
@@ -170,7 +185,11 @@ export function SetupView() {
         <Button
           size="lg"
           onClick={createReportFromSetup}
-          disabled={!setup.name.trim() || setup.sources.length === 0}
+          disabled={
+            !setup.name.trim() ||
+            setup.sources.length === 0 ||
+            !isMatchContextComplete(setup.matchContext)
+          }
         >
           Create report
         </Button>

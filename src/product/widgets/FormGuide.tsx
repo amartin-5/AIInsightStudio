@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 import { DATAVIS } from '../charts/datavis';
 import { TeamMark } from '../teams/TeamCrest';
+import { teamAccent } from '../teams/teamColors';
 
 export type FormResult = 'W' | 'D' | 'L';
 
@@ -15,7 +16,8 @@ type Props = {
 
 const Root = styled.div`
   display: grid;
-  gap: var(--space-300);
+  gap: var(--space-400);
+  padding: var(--space-200) 0;
 `;
 
 const Row = styled.div`
@@ -24,6 +26,10 @@ const Row = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: var(--space-200);
+  padding: var(--space-250) var(--space-300);
+  border-radius: var(--radius-200);
+  background: var(--color-surfaces-on-container-high);
+  border: var(--stroke-100) solid var(--color-stroke-border);
 `;
 
 const Dots = styled.div`
@@ -35,14 +41,18 @@ const Dot = styled.span<{ $result: FormResult }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-1000);
   background: ${(p) =>
-    p.$result === 'W' ? DATAVIS.jade : p.$result === 'D' ? DATAVIS.neutral : DATAVIS.red};
-  color: #ffffff;
+    p.$result === 'W'
+      ? 'var(--color-success-success)'
+      : p.$result === 'D'
+        ? DATAVIS.neutral
+        : 'var(--color-error-error)'};
+  color: var(--color-text-icon-inverse);
   font-family: var(--font-family);
-  font-size: 10px;
+  font-size: var(--type-size-caption);
   font-weight: var(--font-weight-bold);
 `;
 
@@ -64,7 +74,7 @@ export function FormGuide({
 }: Props) {
   return (
     <Root role="img" aria-label={ariaLabel}>
-      <Row>
+      <Row style={{ borderLeft: `3px solid ${teamAccent(leftLabel).primary}` }}>
         <TeamMark team={leftLabel} size="sm" />
         <Dots>
           {leftForm.map((result, index) => (
@@ -74,7 +84,7 @@ export function FormGuide({
           ))}
         </Dots>
       </Row>
-      <Row>
+      <Row style={{ borderLeft: `3px solid ${teamAccent(rightLabel).primary}` }}>
         <TeamMark team={rightLabel} size="sm" />
         <Dots>
           {rightForm.map((result, index) => (

@@ -102,7 +102,7 @@ function statusBadgeColor(status: ReportRecord['status']) {
 }
 
 export function ReportsLibraryView() {
-  const { snapshot, openWorkspace, openTemplates, startCustomBuild } = useAppState();
+  const { snapshot, openWorkspace, openCreateReport } = useAppState();
   const [recommendedOpen, setRecommendedOpen] = useState(true);
   const [filter, setFilter] = useState<FilterTab>('recent');
   const [query, setQuery] = useState('');
@@ -164,11 +164,11 @@ export function ReportsLibraryView() {
             intent="secondary"
             variant="outline"
             startIcon={<Sparkles size={ICON_SIZE} />}
-            onClick={startCustomBuild}
+            onClick={() => openCreateReport('custom-ai')}
           >
             Custom AI build
           </Button>
-          <Button size="md" startIcon={<Plus size={ICON_SIZE} />} onClick={openTemplates}>
+          <Button size="md" startIcon={<Plus size={ICON_SIZE} />} onClick={() => openCreateReport()}>
             New report
           </Button>
         </ActionRow>

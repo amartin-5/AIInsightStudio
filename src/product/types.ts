@@ -19,7 +19,8 @@ export type ViewMode =
   | 'settings'
   | 'setup'
   | 'workspace'
-  | 'generating';
+  | 'generating'
+  | 'custom-ai-build';
 
 export type ReportStatus =
   | 'Updated'
@@ -93,6 +94,14 @@ export type ReportObjectSlot =
   | 'slot-5'
   | 'slot-6';
 
+/** Free-form dashboard placement on a 12-column modular grid. */
+export type ObjectGrid = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
 export type ReportObject = {
   id: string;
   kind: ObjectKind;
@@ -109,6 +118,8 @@ export type ReportObject = {
   pinnedFromAi?: boolean;
   /** Placement inside a non-stack page layout */
   slot?: ReportObjectSlot;
+  /** Free-form x/y/w/h when the page uses the modular grid editor */
+  grid?: ObjectGrid;
   /** Scoreboard fields when kind is `scoreboard` */
   homeTeam?: string;
   awayTeam?: string;
@@ -150,11 +161,23 @@ export type ChatMessage = {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
+  /** Optional deeper WWC 2023 grounding shown via the answer info control. */
+  detail?: string;
   sources?: string[];
   pending?: boolean;
   /** When set, the chat UI can preview and pin this chart onto the canvas. */
   chartProposal?: ChartProposal;
 };
+
+/** Fields callers can leave editable when reusing a saved template. */
+export type TemplateEditableField =
+  | 'match-context'
+  | 'report-name'
+  | 'data-sources'
+  | 'audience'
+  | 'team-period'
+  | 'widget-layout'
+  | 'analyst-notes';
 
 export type ReportTemplate = {
   id: string;
@@ -169,6 +192,17 @@ export type ReportTemplate = {
   suggestedPrompts: string[];
   refreshBehavior: string;
   recommended: boolean;
+  /** Present when the template was saved from a report. */
+  editableFields?: TemplateEditableField[];
+  savedFromReportId?: string;
+};
+
+/** Match scope chosen before create; editable later in edit mode. */
+export type ReportMatchContext = {
+  tournament: string;
+  year: string;
+  homeTeam: string;
+  awayTeam: string;
 };
 
 export type ReportRecord = {
@@ -183,6 +217,8 @@ export type ReportRecord = {
   team?: string;
   period?: string;
   audience?: string;
+  /** Freeform labels for library filters and board chrome. */
+  tags?: string[];
   pages: ReportPage[];
   context: ContextItem[];
   chat: ChatMessage[];
@@ -190,6 +226,8 @@ export type ReportRecord = {
   sourceLabels: string[];
   /** Optional A/B compare context for workspace compare mode. */
   compare?: CompareContext;
+  /** Tournament / year / home (+ optional away) that seed charts. */
+  matchContext?: ReportMatchContext;
 };
 
 export type RefreshSchedule = {

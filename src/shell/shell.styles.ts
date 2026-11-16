@@ -143,11 +143,12 @@ export const HeaderBar = styled.header`
   display: flex;
   flex: none;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-300);
+  justify-content: flex-end;
+  gap: var(--space-100);
   box-sizing: border-box;
   width: 100%;
-  padding: var(--space-300) var(--space-300) var(--space-100) var(--space-500);
+  padding: var(--space-050) var(--space-200) var(--space-050) var(--space-200);
+  min-height: 0;
 `;
 
 export const HeaderCenter = styled.div`
@@ -162,7 +163,7 @@ export const HeaderUtilities = styled.div`
   display: flex;
   flex: none;
   align-items: center;
-  gap: var(--space-500);
+  gap: var(--space-100);
 `;
 
 export const UtilityCluster = styled.div`
@@ -174,14 +175,30 @@ export const UtilityCluster = styled.div`
 export const WindowControlCluster = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--space-025);
+  gap: 2px;
+`;
 
-  /* IconButton xs is 24×24 — WCAG 2.5.8 Target Size (Minimum) AA floor. */
-  & button {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    min-height: 24px;
+export const WindowControlButton = styled.button`
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-50);
+  background: transparent;
+  color: var(--color-text-icon-secondary);
+  cursor: default;
+
+  &:hover {
+    background: var(--color-surfaces-on-container);
+    color: var(--color-text-icon-primary);
+  }
+
+  svg {
+    display: block;
   }
 `;
 

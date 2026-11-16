@@ -18,6 +18,8 @@ import { HeadToHead } from '../widgets/HeadToHead';
 import { MirrorStatBars } from '../widgets/MirrorStatBars';
 import { PlayerSpotlight } from '../widgets/PlayerSpotlight';
 import { PossessionSplit } from '../widgets/PossessionSplit';
+import { englandPlayers } from '../../demos/wwc2023/dataset';
+import { teamPair } from '../teams/teamColors';
 
 /** Parsed Women’s World Cup 2023 England match series from dataset rows. */
 export const englandOpponents = [
@@ -276,13 +278,14 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
           ]}
         />
       );
-    case 'england-spain-team-stats':
+    case 'england-spain-team-stats': {
+      const pair = teamPair(options?.leftTeam ?? 'England', options?.rightTeam ?? 'Spain');
       return (
         <MirrorStatBars
           leftLabel={options?.leftTeam ?? 'England'}
           rightLabel={options?.rightTeam ?? 'Spain'}
-          leftColor={DATAVIS.indigo}
-          rightColor={DATAVIS.gold}
+          leftColor={pair.leftColor}
+          rightColor={pair.rightColor}
           ariaLabel={`${options?.leftTeam ?? 'England'} versus ${options?.rightTeam ?? 'Spain'} team stats`}
           rows={[
             { label: 'Possession', left: 48, right: 52, format: (v) => `${v}%` },
@@ -293,13 +296,15 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
           ]}
         />
       );
-    case 'england-spain-zones':
+    }
+    case 'england-spain-zones': {
+      const pair = teamPair('England', 'Spain');
       return (
         <ZoneTerritory
           leftLabel="England"
           rightLabel="Spain"
-          leftColor={DATAVIS.indigo}
-          rightColor={DATAVIS.gold}
+          leftColor={pair.leftColor}
+          rightColor={pair.rightColor}
           ariaLabel="England versus Spain activity zones"
           leftZones={[
             { percent: 28, count: 64 },
@@ -313,6 +318,7 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
           ]}
         />
       );
+    }
     case 'england-spain-shot-map':
       return (
         <ScatterChart
@@ -340,7 +346,8 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
           ariaLabel={`${options?.leftTeam ?? 'England'} and ${options?.rightTeam ?? 'Spain'} recent form`}
         />
       );
-    case 'england-spain-h2h':
+    case 'england-spain-h2h': {
+      const pair = teamPair(options?.leftTeam ?? 'England', options?.rightTeam ?? 'Spain');
       return (
         <HeadToHead
           leftLabel={options?.leftTeam ?? 'England'}
@@ -348,12 +355,14 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
           leftWins={4}
           draws={3}
           rightWins={5}
-          leftColor={DATAVIS.indigo}
-          rightColor={DATAVIS.gold}
+          leftColor={pair.leftColor}
+          rightColor={pair.rightColor}
           ariaLabel={`${options?.leftTeam ?? 'England'} versus ${options?.rightTeam ?? 'Spain'} head to head`}
         />
       );
-    case 'england-spain-possession':
+    }
+    case 'england-spain-possession': {
+      const pair = teamPair(options?.leftTeam ?? 'England', options?.rightTeam ?? 'Spain');
       return (
         <div style={{ display: 'grid', gap: 'var(--space-300)' }}>
           <PossessionSplit
@@ -361,8 +370,8 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
             rightLabel={options?.rightTeam ?? 'Spain'}
             leftValue={48}
             rightValue={52}
-            leftColor={DATAVIS.indigo}
-            rightColor={DATAVIS.gold}
+            leftColor={pair.leftColor}
+            rightColor={pair.rightColor}
             ariaLabel={`${options?.leftTeam ?? 'England'} versus ${options?.rightTeam ?? 'Spain'} possession`}
           />
           <PossessionSplit
@@ -370,14 +379,16 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
             rightLabel={`${options?.rightTeam ?? 'Spain'} shots`}
             leftValue={9}
             rightValue={16}
-            leftColor={DATAVIS.indigo}
-            rightColor={DATAVIS.gold}
+            leftColor={pair.leftColor}
+            rightColor={pair.rightColor}
             unit=""
             ariaLabel={`${options?.leftTeam ?? 'England'} versus ${options?.rightTeam ?? 'Spain'} shots`}
           />
         </div>
       );
-    case 'england-spain-factors':
+    }
+    case 'england-spain-factors': {
+      const pair = teamPair(options?.leftTeam ?? 'England', options?.rightTeam ?? 'Spain');
       return (
         <div style={{ display: 'grid', gap: 'var(--space-300)' }}>
           <PossessionSplit
@@ -385,8 +396,8 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
             rightLabel={options?.rightTeam ?? 'Spain'}
             leftValue={48}
             rightValue={52}
-            leftColor={DATAVIS.indigo}
-            rightColor={DATAVIS.gold}
+            leftColor={pair.leftColor}
+            rightColor={pair.rightColor}
             ariaLabel={`${options?.leftTeam ?? 'England'} versus ${options?.rightTeam ?? 'Spain'} possession`}
           />
           <FactorBars
@@ -414,6 +425,7 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
           />
         </div>
       );
+    }
     case 'england-final-goals':
       return (
         <GoalTimeline
@@ -435,11 +447,12 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
           }}
         >
           <PlayerSpotlight
-            name="Player A"
+            name="Ava Mercer"
             team="England"
             position="FW"
             initial="A"
             accentColor={DATAVIS.indigo}
+            photo={englandPlayers[0]?.photo}
             stats={[
               { label: 'xG', value: '0.4' },
               { label: 'Shots', value: '3' },
@@ -447,11 +460,12 @@ export function renderChartById(chartId: string, options?: ChartRenderOptions) {
             ]}
           />
           <PlayerSpotlight
-            name="Player B"
+            name="Jordan Blake"
             team="England"
             position="MF"
-            initial="B"
+            initial="J"
             accentColor={DATAVIS.cyan}
+            photo={englandPlayers[1]?.photo}
             stats={[
               { label: 'Pass %', value: '84%' },
               { label: 'Progressive', value: '11' },

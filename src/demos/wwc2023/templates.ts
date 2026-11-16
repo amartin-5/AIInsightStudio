@@ -129,33 +129,27 @@ export const templates: ReportTemplate[] = [
     refreshBehavior: 'Re-scan sources on demand.',
     recommended: false,
   },
-  {
-    id: 'blank',
-    name: 'Custom AI guided build',
-    purpose:
-      'Start from an empty canvas — generate charts in chat or drag widgets from the library, then rearrange and rename.',
-    category: 'Blank',
-    audience: 'Any',
-    pages: 1,
-    sections: ['Custom grid'],
-    requiredData: ['Optional'],
-    objects: [],
-    suggestedPrompts: [
-      'Generate a chart',
-      'Show me a bar chart of World Cup wins by country.',
-    ],
-    refreshBehavior: 'Refresh only objects that have data bindings.',
-    recommended: true,
-  },
 ];
 
 export const templateCategories = [
   'All',
   'Recommended',
+  'Custom',
   'Performance',
   'Comparison',
   'Trends',
   'Briefings',
   'Summaries',
-  'Blank',
+] as const;
+
+/** Demo seed for Create report “recently used” ordering. */
+export const defaultRecentTemplateIds = [
+  'opponent-analysis',
+  'match-analysis',
+  'team-performance',
+  'player-comparison',
+  'tournament-overview',
+  'player-performance',
+  'executive-summary',
+  'data-quality',
 ] as const;

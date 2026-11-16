@@ -19,6 +19,7 @@ import {
   CatalogResultMeta,
   CatalogToolbar,
 } from '../components/CatalogToolbar';
+import { TemplatePreviewArt } from '../components/TemplatePreviewArt';
 import {
   ActionRow,
   BodyText,
@@ -67,40 +68,11 @@ const TemplateCardShell = styled.div`
   }
 `;
 
-const MediaFrame = styled.div`
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  min-height: 148px;
-  padding: var(--space-400);
-  background:
-    linear-gradient(
-      155deg,
-      var(--color-primary-primary) 0%,
-      var(--color-primary-primary-hover) 48%,
-      var(--color-surfaces-inverse-container) 120%
-    );
-  color: var(--color-text-icon-on-primary);
-`;
-
-const MediaLabel = styled.span`
-  max-width: 100%;
-  color: var(--color-text-icon-on-primary);
-  font-family: var(--font-family);
-  font-size: var(--type-size-caption);
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.04em;
-  line-height: 1.35;
-  text-transform: uppercase;
-  opacity: 0.88;
-  overflow-wrap: break-word;
-`;
-
 const MediaBadge = styled.div`
   position: absolute;
   top: var(--space-300);
   right: var(--space-300);
+  z-index: 3;
 `;
 
 const CardMeta = styled.div`
@@ -122,16 +94,10 @@ const EmptyState = styled.div`
 
 const ListMedia = styled.div`
   flex: none;
-  width: 88px;
-  min-height: 72px;
+  width: 112px;
+  min-height: 84px;
   border-radius: var(--radius-200);
-  background:
-    linear-gradient(
-      155deg,
-      var(--color-primary-primary) 0%,
-      var(--color-primary-primary-hover) 48%,
-      var(--color-surfaces-inverse-container) 120%
-    );
+  overflow: hidden;
 `;
 
 const PreviewStack = styled.div`
@@ -140,9 +106,10 @@ const PreviewStack = styled.div`
   min-width: 0;
 `;
 
-const PreviewMedia = styled(MediaFrame)`
-  min-height: 168px;
+const PreviewMedia = styled.div`
+  min-width: 0;
   border-radius: var(--radius-300);
+  overflow: hidden;
 `;
 
 const PreviewFacts = styled.div`
@@ -170,8 +137,7 @@ const FactLabel = styled.span`
 export function TemplatesView() {
   const {
     templates,
-    startSetup,
-    startCustomBuild,
+    openCreateReport,
     previewTemplateId,
     setPreviewTemplate,
   } = useAppState();
@@ -222,12 +188,12 @@ export function TemplatesView() {
               intent="secondary"
               variant="outline"
               startIcon={<Sparkles size={ICON_SIZE} />}
-              onClick={startCustomBuild}
+              onClick={() => openCreateReport('custom-ai')}
             >
-              Custom AI guided build
+              Custom AI build
             </Button>
-            <Button size="md" startIcon={<Plus size={ICON_SIZE} />} onClick={() => startSetup('blank')}>
-              New report
+            <Button size="md" startIcon={<Plus size={ICON_SIZE} />} onClick={() => openCreateReport('blank')}>
+              Blank template
             </Button>
           </HeaderActions>
         </PageHeader>
@@ -286,16 +252,19 @@ export function TemplatesView() {
               <Card elevation="low">
                 <SimpleCard
                   media={
-                    <MediaFrame>
-                      {template.recommended && (
-                        <MediaBadge>
-                          <Chip size="sm" type="info" leadingIcon={<Sparkles size={ICON_SIZE} />}>
-                            Recommended
-                          </Chip>
-                        </MediaBadge>
-                      )}
-                      <MediaLabel>{template.category}</MediaLabel>
-                    </MediaFrame>
+                    <TemplatePreviewArt
+                      templateId={template.id}
+                      category={template.category}
+                      badge={
+                        template.recommended ? (
+                          <MediaBadge>
+                            <Chip size="sm" type="info" leadingIcon={<Sparkles size={ICON_SIZE} />}>
+                              Recommended
+                            </Chip>
+                          </MediaBadge>
+                        ) : undefined
+                      }
+                    />
                   }
                   title={template.name}
                   body={
@@ -321,7 +290,7 @@ export function TemplatesView() {
                       >
                         Preview
                       </Button>
-                      <Button size="sm" onClick={() => startSetup(template.id)}>
+                      <Button size="sm" onClick={() => openCreateReport(template.id)}>
                         Use template
                       </Button>
                     </ActionRow>
@@ -335,7 +304,14 @@ export function TemplatesView() {
         <ListStack>
           {filtered.map((template) => (
             <ListRowCard key={template.id} as="div">
-              <ListMedia aria-hidden />
+              <ListMedia aria-hidden>
+                <TemplatePreviewArt
+                  templateId={template.id}
+                  category={template.category}
+                  compact
+                  showCategory={false}
+                />
+              </ListMedia>
               <div
                 style={{
                   display: 'grid',
@@ -366,7 +342,7 @@ export function TemplatesView() {
                 >
                   Preview
                 </Button>
-                <Button size="sm" onClick={() => startSetup(template.id)}>
+                <Button size="sm" onClick={() => openCreateReport(template.id)}>
                   Use template
                 </Button>
               </CardFooter>
@@ -385,7 +361,11 @@ export function TemplatesView() {
             checkbox={false}
             primaryActionLabel="Use this template"
             secondaryActionLabel="Close"
-            onPrimaryAction={() => preview && startSetup(preview.id)}
+            onPrimaryAction={() => {
+              if (!preview) return;
+              setPreviewTemplate(null);
+              openCreateReport(preview.id);
+            }}
             onSecondaryAction={() => setPreviewTemplate(null)}
           />
         }
@@ -394,14 +374,20 @@ export function TemplatesView() {
           <ModalContent descriptionAsDialogDescription={false}>
             <PreviewStack>
               <PreviewMedia>
-                {preview.recommended && (
-                  <MediaBadge>
-                    <Chip size="sm" type="info" leadingIcon={<Sparkles size={ICON_SIZE} />}>
-                      Recommended
-                    </Chip>
-                  </MediaBadge>
-                )}
-                <MediaLabel>{preview.category}</MediaLabel>
+                <TemplatePreviewArt
+                  templateId={preview.id}
+                  category={preview.category}
+                  tall
+                  badge={
+                    preview.recommended ? (
+                      <MediaBadge>
+                        <Chip size="sm" type="info" leadingIcon={<Sparkles size={ICON_SIZE} />}>
+                          Recommended
+                        </Chip>
+                      </MediaBadge>
+                    ) : undefined
+                  }
+                />
               </PreviewMedia>
               <PreviewFacts>
                 <Fact>
@@ -428,6 +414,16 @@ export function TemplatesView() {
                   <FactLabel>Refresh behavior</FactLabel>
                   <BodyText>{preview.refreshBehavior}</BodyText>
                 </Fact>
+                {preview.editableFields && preview.editableFields.length > 0 && (
+                  <Fact>
+                    <FactLabel>Editable fields</FactLabel>
+                    <BodyText>
+                      {preview.editableFields
+                        .map((field) => field.replace(/-/g, ' '))
+                        .join(' · ')}
+                    </BodyText>
+                  </Fact>
+                )}
               </PreviewFacts>
             </PreviewStack>
           </ModalContent>

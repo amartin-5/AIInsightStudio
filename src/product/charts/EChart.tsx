@@ -3,6 +3,7 @@ import * as echarts from 'echarts';
 import styled from 'styled-components';
 
 import { ChartScroll } from './ChartScroll';
+import { AXIS_STYLE, CHART_FONT } from './datavis';
 
 const Frame = styled.div<{ $height: number }>`
   width: 100%;
@@ -18,7 +19,29 @@ type Props = {
   ariaLabel: string;
 };
 
-export function EChart({ option, height = 260, ariaLabel }: Props) {
+function withSportsTheme(option: echarts.EChartsOption): echarts.EChartsOption {
+  const baseGrid =
+    typeof option.grid === 'object' && !Array.isArray(option.grid) ? option.grid : {};
+  return {
+    ...option,
+    backgroundColor: 'transparent',
+    textStyle: {
+      fontFamily: CHART_FONT,
+      color: AXIS_STYLE.color,
+      ...(typeof option.textStyle === 'object' ? option.textStyle : {}),
+    },
+    grid: {
+      left: 48,
+      right: 24,
+      top: 36,
+      bottom: 40,
+      containLabel: true,
+      ...baseGrid,
+    },
+  };
+}
+
+export function EChart({ option, height = 320, ariaLabel }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
 
@@ -26,7 +49,7 @@ export function EChart({ option, height = 260, ariaLabel }: Props) {
     const frame = frameRef.current;
     if (!frame) return undefined;
 
-    const chart = echarts.init(frame);
+    const chart = echarts.init(frame, undefined, { renderer: 'canvas' });
     chartRef.current = chart;
     const observer = new ResizeObserver(() => chart.resize());
     observer.observe(frame);
@@ -39,7 +62,7 @@ export function EChart({ option, height = 260, ariaLabel }: Props) {
   }, []);
 
   useEffect(() => {
-    chartRef.current?.setOption(option, true);
+    chartRef.current?.setOption(withSportsTheme(option), true);
   }, [option]);
 
   return (

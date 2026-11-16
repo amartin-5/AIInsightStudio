@@ -38,6 +38,7 @@ import { MirrorStatBars } from './MirrorStatBars';
 import { PlayerSpotlight } from './PlayerSpotlight';
 import { PossessionSplit } from './PossessionSplit';
 import { VideoWidget } from './VideoWidget';
+import { englandPlayers } from '../../demos/wwc2023/dataset';
 
 export type WidgetCategory =
   | 'Charts'
@@ -634,11 +635,12 @@ export const WIDGET_LIBRARY: WidgetLibraryEntry[] = [
         }}
       >
         <PlayerSpotlight
-          name="Player A"
+          name="Ava Mercer"
           team="England"
           position="FW"
           initial="A"
           accentColor={DATAVIS.indigo}
+          photo={englandPlayers[0]?.photo}
           stats={[
             { label: 'Goals', value: '5' },
             { label: 'Assists', value: '1' },
@@ -646,11 +648,12 @@ export const WIDGET_LIBRARY: WidgetLibraryEntry[] = [
           ]}
         />
         <PlayerSpotlight
-          name="Player B"
+          name="Jordan Blake"
           team="England"
           position="MF"
-          initial="B"
+          initial="J"
           accentColor={DATAVIS.cyan}
+          photo={englandPlayers[1]?.photo}
           stats={[
             { label: 'Pass %', value: '87%' },
             { label: 'Recoveries', value: '24' },

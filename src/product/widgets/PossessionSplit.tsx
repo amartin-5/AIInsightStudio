@@ -15,7 +15,8 @@ type Props = {
 
 const Root = styled.div`
   display: grid;
-  gap: var(--space-200);
+  gap: var(--space-300);
+  padding: var(--space-200) 0;
 `;
 
 const Labels = styled.div`
@@ -24,23 +25,27 @@ const Labels = styled.div`
   gap: var(--space-200);
   color: var(--color-text-icon-primary);
   font-family: var(--font-family);
-  font-size: var(--type-size-caption);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--type-size-body);
+  font-weight: var(--font-weight-bold);
 `;
 
 const Track = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-100);
-  height: 10px;
+  height: 14px;
+  padding: var(--space-050);
+  border-radius: var(--radius-1000);
+  background: var(--color-surfaces-on-container);
+  border: var(--stroke-100) solid var(--color-stroke-border);
 `;
 
 const Slot = styled.div<{ $align: 'left' | 'right' }>`
   display: flex;
   justify-content: ${(p) => (p.$align === 'left' ? 'flex-end' : 'flex-start')};
   border-radius: var(--radius-1000);
-  background: var(--color-surfaces-on-container);
   overflow: hidden;
+  min-width: 0;
 `;
 
 const Fill = styled.div<{ $color: string; $pct: number }>`
@@ -53,9 +58,17 @@ const Fill = styled.div<{ $color: string; $pct: number }>`
 const Values = styled.div`
   display: flex;
   justify-content: space-between;
+  color: var(--color-text-icon-primary);
+  font-family: var(--font-family);
+  font-size: var(--type-size-subject);
+  font-weight: var(--font-weight-bold);
+`;
+
+const Hint = styled.div`
   color: var(--color-text-icon-secondary);
   font-family: var(--font-family);
   font-size: var(--type-size-caption);
+  text-align: center;
 `;
 
 export function PossessionSplit({
@@ -94,6 +107,7 @@ export function PossessionSplit({
           {unit}
         </span>
       </Values>
+      <Hint>Share of possession</Hint>
     </Root>
   );
 }

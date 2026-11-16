@@ -1,4 +1,26 @@
-import styled, { css } from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
+
+const drawerSlideIn = keyframes`
+  from {
+    transform: translateX(12px);
+    opacity: 0.72;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+`;
+
+const drawerSlideInFromLeft = keyframes`
+  from {
+    transform: translateX(-12px);
+    opacity: 0.72;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+`;
 
 /**
  * HelloPC Button/Chip/Badge labels default to nowrap + ellipsis.
@@ -360,9 +382,11 @@ export const AiPanel = styled.aside<{ $width: number; $collapsed: boolean }>`
   min-width: ${(p) => (p.$collapsed ? '44px' : '240px')};
   max-width: 320px;
   border-right: var(--stroke-100) solid var(--color-stroke-border);
-  background: var(--color-surfaces-container-blur-high);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  border-left: 3px solid var(--color-primary-primary);
+  background: var(--color-surfaces-container-blur);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  box-shadow: var(--elevation-3);
   min-height: 0;
   overflow: hidden;
 `;
@@ -378,11 +402,12 @@ export const FloatingChat = styled.aside`
   width: min(360px, calc(100% - var(--space-800)));
   height: min(520px, calc(100% - var(--space-800)));
   border: var(--stroke-100) solid var(--color-stroke-border);
-  border-radius: var(--radius-300);
-  background: var(--color-surfaces-container-blur-high);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: var(--elevation-4);
+  border-left: 3px solid var(--color-primary-primary);
+  border-radius: var(--radius-400);
+  background: var(--color-surfaces-container-blur);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  box-shadow: var(--elevation-5);
   overflow: hidden;
 `;
 
@@ -401,6 +426,7 @@ export const AiPanelHeader = styled.div<{ $collapsed?: boolean }>`
   min-height: 48px;
   padding: var(--space-200) var(--space-300);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
+  background: var(--color-surfaces-primary);
   min-width: 0;
 `;
 
@@ -445,16 +471,39 @@ export const AiEmptyState = styled.div`
   min-width: 0;
   padding: var(--space-200) 0;
   color: var(--color-text-icon-secondary);
+
+  & > strong,
+  & > span:first-child {
+    color: var(--color-text-icon-primary);
+    font-size: var(--type-size-body);
+    font-weight: var(--font-weight-bold);
+  }
 `;
 
 export const AiComposer = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-150);
-  align-items: end;
+  align-items: center;
   padding: var(--space-250) var(--space-300) var(--space-300);
   border-top: var(--stroke-100) solid var(--color-stroke-border);
+  background: var(--color-surfaces-container-blur-high);
   min-width: 0;
+
+  /* Keep send glyph optically centered in the circular fill control */
+  & > button {
+    transition: transform 120ms ease;
+  }
+
+  & > button:not(:disabled):hover {
+    transform: scale(1.06);
+  }
+
+  & > button svg {
+    width: 14px;
+    height: 14px;
+    margin-inline-start: 1px;
+  }
 `;
 
 export const ChatMessageBlock = styled.div`
@@ -480,7 +529,7 @@ export const Toolbar = styled.div`
   justify-content: space-between;
   gap: var(--space-200) var(--space-300);
   flex: none;
-  padding: var(--space-250) var(--space-400);
+  padding: var(--space-150) var(--space-300);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
   background: var(--color-surfaces-container-blur-high);
   backdrop-filter: blur(24px);
@@ -503,7 +552,7 @@ export const PageTabs = styled.div`
   flex: none;
   box-sizing: border-box;
   /* Equal block padding — kept intact via flex:none so the pane cannot crush it. */
-  padding: var(--space-200) var(--space-400);
+  padding: var(--space-150) var(--space-300);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
   background: var(--color-surfaces-container-blur-high);
   backdrop-filter: blur(24px);
@@ -564,19 +613,60 @@ export const SideDrawer = styled.aside`
   display: flex;
   flex-direction: column;
   width: min(400px, 100%);
-  border-left: var(--stroke-100) solid var(--color-stroke-border);
-  background: var(--color-surfaces-container);
-  box-shadow: var(--elevation-3);
+  border-left: 3px solid var(--color-primary-primary);
+  background: var(--color-surfaces-container-blur);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow: var(--elevation-4);
   min-width: 0;
+  animation: ${drawerSlideIn} 200ms ease;
+`;
+
+export const DrawerSubtitle = styled.p`
+  margin: 0;
+  color: var(--color-text-icon-secondary);
+  font-family: var(--font-family);
+  font-size: var(--type-size-caption);
+`;
+
+export const FormatTile = styled.button<{ $active?: boolean }>`
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-250) var(--space-300);
+  border: var(--stroke-100) solid
+    ${(p) => (p.$active ? 'var(--color-primary-primary)' : 'var(--color-stroke-border)')};
+  border-radius: var(--radius-200);
+  background: ${(p) =>
+    p.$active ? 'var(--color-primary-primary-overlay)' : 'var(--color-surfaces-container)'};
+  color: var(--color-text-icon-primary);
+  font-family: var(--font-family);
+  font-size: var(--type-size-body);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  text-align: start;
+  transition: background 140ms ease, border-color 140ms ease;
+
+  &:hover {
+    background: var(--color-primary-primary-overlay);
+  }
 `;
 
 /**
  * Wider notifications host — HelloPC NotificationPanel caps at 432px and
  * Notification cards at 480px; the footer packs timestamp + actions on one
  * row, which overlaps when the drawer is narrow.
+ * Opens from the left, next to the sidebar notifications item.
  */
 export const NotificationsDrawer = styled(SideDrawer)`
+  right: auto;
+  left: 0;
   width: min(560px, 100%);
+  border-left: none;
+  border-right: 3px solid var(--color-primary-primary);
+  animation-name: ${drawerSlideInFromLeft};
 
   & > section {
     max-width: none;
@@ -613,6 +703,7 @@ export const DrawerHeader = styled.div`
   gap: var(--space-200);
   padding: var(--space-500);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
+  background: var(--color-surfaces-primary);
   min-width: 0;
 `;
 
@@ -632,15 +723,19 @@ export const ChatBubble = styled.div<{ $role: 'user' | 'assistant' | 'system' }>
   box-sizing: border-box;
   max-width: 100%;
   min-width: 0;
-  padding: var(--space-200) var(--space-250);
+  padding: var(--space-200) var(--space-300);
   border-radius: var(--radius-200);
+  border: var(--stroke-100) solid
+    ${(p) =>
+      p.$role === 'user' ? 'transparent' : 'var(--color-stroke-border)'};
   background: ${(p) =>
     p.$role === 'user'
       ? 'var(--color-primary-primary-overlay)'
-      : 'var(--color-surfaces-on-container)'};
+      : 'var(--color-surfaces-on-container-high)'};
+  box-shadow: ${(p) => (p.$role === 'assistant' ? 'var(--elevation-1)' : 'none')};
   color: var(--color-text-icon-primary);
   font-family: var(--font-family);
-  font-size: var(--type-size-caption);
+  font-size: var(--type-size-body);
   line-height: 1.45;
   white-space: pre-wrap;
   overflow-wrap: break-word;
@@ -716,21 +811,62 @@ export const SoftBadge = styled.span`
   overflow-wrap: break-word;
 `;
 
-export const ObjectCard = styled.article<{ $editing?: boolean }>`
+export const ObjectCard = styled.article<{
+  $editing?: boolean;
+  $modular?: boolean;
+  $bare?: boolean;
+}>`
   display: flex;
   flex-direction: column;
-  gap: ${(p) => (p.$editing ? 'var(--space-400)' : 'var(--space-200)')};
+  gap: ${(p) => (p.$bare ? 0 : p.$editing ? 'var(--space-400)' : 'var(--space-200)')};
   min-width: 0;
+  width: 100%;
   height: auto;
-  padding: ${(p) => (p.$editing ? 'var(--space-500)' : 'var(--space-300)')};
-  border: var(--stroke-100) solid
-    ${(p) =>
-      p.$editing ? 'var(--color-primary-primary)' : 'var(--color-stroke-border)'};
-  border-radius: var(--radius-300);
-  background: var(--color-surfaces-container);
-  box-shadow: var(--elevation-2);
-  /* Never clip or scroll widgets — the report page scrolls instead. */
+  padding: ${(p) =>
+    p.$bare ? 0 : p.$editing ? 'var(--space-500)' : 'var(--space-300)'};
+  border: ${(p) =>
+    p.$bare
+      ? 'none'
+      : `var(--stroke-100) solid ${
+          p.$editing ? 'var(--color-primary-primary)' : 'var(--color-stroke-border)'
+        }`};
+  border-radius: ${(p) => (p.$bare ? 0 : 'var(--radius-400)')};
+  background: ${(p) => (p.$bare ? 'transparent' : 'var(--color-surfaces-container)')};
+  box-shadow: ${(p) => (p.$bare ? 'none' : 'var(--elevation-2)')};
   overflow: visible;
+  position: relative;
+
+  &::before {
+    content: ${(p) => (p.$bare ? 'none' : "''")};
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: var(--radius-400) var(--radius-400) 0 0;
+    background: var(--color-primary-primary-overlay);
+    pointer-events: none;
+  }
+`;
+
+export const WidgetDragHandle = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-100);
+  color: var(--color-text-icon-secondary);
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:hover {
+    background: var(--color-surfaces-on-container);
+    color: var(--color-text-icon-primary);
+  }
 `;
 
 export const ObjectHeader = styled.div`

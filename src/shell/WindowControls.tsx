@@ -1,43 +1,23 @@
-import { IconButton } from '@cake-admin/cakeand';
 import { Minus, Square, X } from 'lucide-react';
 
-import { WindowControlCluster } from './shell.styles';
-import { ICON_SIZE } from '../iconSize';
+import { WindowControlButton, WindowControlCluster } from './shell.styles';
 
 /**
  * Decorative Windows chrome. Non-functional for this demo shell.
- * Sized to HelloPC IconButton xs (24px) — WCAG 2.5.8 Target Size Minimum.
+ * Compact 16px targets so OS chrome does not compete with report canvas.
  */
 export function WindowControls() {
   return (
     <WindowControlCluster aria-hidden>
-      <IconButton
-        label="Minimize"
-        icon={<Minus size={ICON_SIZE} />}
-        size="xs"
-        intent="secondary"
-        variant="ghost"
-        tabIndex={-1}
-        onClick={(event) => event.preventDefault()}
-      />
-      <IconButton
-        label="Maximize"
-        icon={<Square size={ICON_SIZE} />}
-        size="xs"
-        intent="secondary"
-        variant="ghost"
-        tabIndex={-1}
-        onClick={(event) => event.preventDefault()}
-      />
-      <IconButton
-        label="Close"
-        icon={<X size={ICON_SIZE} />}
-        size="xs"
-        intent="secondary"
-        variant="ghost"
-        tabIndex={-1}
-        onClick={(event) => event.preventDefault()}
-      />
+      <WindowControlButton type="button" tabIndex={-1} aria-label="Minimize" onClick={(e) => e.preventDefault()}>
+        <Minus size={10} strokeWidth={2.5} />
+      </WindowControlButton>
+      <WindowControlButton type="button" tabIndex={-1} aria-label="Maximize" onClick={(e) => e.preventDefault()}>
+        <Square size={9} strokeWidth={2.5} />
+      </WindowControlButton>
+      <WindowControlButton type="button" tabIndex={-1} aria-label="Close" onClick={(e) => e.preventDefault()}>
+        <X size={10} strokeWidth={2.5} />
+      </WindowControlButton>
     </WindowControlCluster>
   );
 }

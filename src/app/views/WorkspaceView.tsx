@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Badge,
   Button,
@@ -8,6 +8,7 @@ import {
   TextInput,
 } from '@cake-admin/cakeand';
 import {
+  ArrowUp,
   ChevronLeft,
   ChevronRight,
   Columns2,
@@ -19,10 +20,9 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Pencil,
-  Pin,
   Plus,
   RefreshCw,
-  Send,
+  Save,
   Settings,
   Share2,
   Sparkles,
@@ -36,6 +36,9 @@ import { ICON_SIZE, ICON_SIZE_LG } from '../../iconSize';
 import { ReportPageCanvas } from '../../product/ReportPageCanvas';
 import { TeamCrest } from '../../product/teams/TeamCrest';
 import { useAppState } from '../AppState';
+import { ChatAnswerActions } from '../components/ChatAnswerActions';
+import { DashboardDetailsEditor } from '../components/DashboardDetailsEditor';
+import { DashboardMetaLine } from '../components/DashboardMetaLine';
 import { PresentChrome } from '../components/PresentChrome';
 import {
   ActionRow,
@@ -51,7 +54,6 @@ import {
   EditBarGroup,
   FloatingChat,
   FloatingChatFab,
-  MetaRow,
   Muted,
   PageTabs,
   PromptChipRow,
@@ -94,10 +96,16 @@ export function WorkspaceView() {
     movePage,
     setCompareContext,
     quickRefresh,
+    saveReport,
   } = useAppState();
 
   const [draft, setDraft] = useState('');
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const page = activeReport?.pages.find((p) => p.id === activePageId) ?? activeReport?.pages[0];
+
+  useEffect(() => {
+    if (!editMode) setDetailsOpen(false);
+  }, [editMode]);
   const floating = chatPlacement === 'floating';
   const showEmbedded = !floating;
   const showFloatingCard = floating && !aiCollapsed;
@@ -148,7 +156,7 @@ export function WorkspaceView() {
       <AiChatScroll>
         {activeReport.chat.length === 0 && (
           <AiEmptyState>
-            <Muted>Ask about this report</Muted>
+            <Muted>Ask about Women’s World Cup 2023 data on this board</Muted>
             <PromptChipRow>
               {suggestedPrompts.slice(0, 3).map((prompt) => (
                 <WrapButtonSlot key={prompt}>
@@ -170,30 +178,16 @@ export function WorkspaceView() {
           <ChatMessageBlock key={message.id}>
             <ChatBubble $role={message.role}>{message.content}</ChatBubble>
             {message.role === 'assistant' && !message.pending && (
-              <ActionRow>
-                <IconButton
-                  label="Pin to report"
-                  icon={<Pin size={ICON_SIZE} />}
-                  size="xs"
-                  intent="secondary"
-                  variant="ghost"
-                  onClick={() => {
-                    setPinPayload({
-                      title: 'Pinned AI insight',
-                      body: message.content,
-                    });
-                    setPanel('pin');
-                  }}
-                />
-                <IconButton
-                  label="Copy answer"
-                  icon={<Copy size={ICON_SIZE} />}
-                  size="xs"
-                  intent="secondary"
-                  variant="ghost"
-                  onClick={() => navigator.clipboard?.writeText(message.content)}
-                />
-              </ActionRow>
+              <ChatAnswerActions
+                message={message}
+                onPin={() => {
+                  setPinPayload({
+                    title: 'Pinned WWC 2023 insight',
+                    body: message.content,
+                  });
+                  setPanel('pin');
+                }}
+              />
             )}
           </ChatMessageBlock>
         ))}
@@ -202,7 +196,7 @@ export function WorkspaceView() {
       <AiComposer>
         <TextInput
           aria-label="Ask Insight Studio"
-          placeholder="Ask anything…"
+          placeholder="Ask about WWC 2023, this board, or Spain…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -211,7 +205,7 @@ export function WorkspaceView() {
         />
         <IconButton
           label="Send"
-          icon={<Send size={ICON_SIZE_LG} />}
+          icon={<ArrowUp size={14} strokeWidth={2.5} />}
           size="sm"
           intent="primary"
           variant="fill"
@@ -276,7 +270,14 @@ export function WorkspaceView() {
                 {activeReport.team ? <TeamCrest team={activeReport.team} size="lg" /> : null}
                 <Strong>{activeReport.name}</Strong>
               </TitleWithCrest>
-              <MetaRow>
+              <DashboardMetaLine
+                report={activeReport}
+                statusLabel={activeReport.status}
+                editMode={editMode}
+                detailsOpen={detailsOpen}
+                onEditSelections={() => setDetailsOpen((open) => !open)}
+              />
+              <MetaExtras>
                 <Muted as="span" style={{ display: 'inline' }}>
                   {config.competitionLabel}
                 </Muted>
@@ -286,81 +287,113 @@ export function WorkspaceView() {
                 <Muted as="span" style={{ display: 'inline' }}>
                   Updated {activeReport.lastUpdated}
                 </Muted>
-              </MetaRow>
+              </MetaExtras>
             </ToolbarTitle>
             <ActionRow>
-              {floating && (
-                <IconButton
-                  label="Dock chat to side"
-                  icon={<PanelLeftOpen size={ICON_SIZE} />}
-                  size="xs"
-                  intent="secondary"
-                  variant="ghost"
-                  onClick={() => {
-                    setChatPlacement('embedded');
-                    setAiCollapsed(false);
-                  }}
-                />
+              {editMode ? (
+                <>
+                  <Button
+                    size="sm"
+                    intent="secondary"
+                    variant="ghost"
+                    underline={false}
+                    onClick={() => {
+                      setDetailsOpen(false);
+                      setEditMode(false);
+                    }}
+                  >
+                    Discard
+                  </Button>
+                  <Button
+                    size="sm"
+                    intent="primary"
+                    variant="fill"
+                    startIcon={<Save size={ICON_SIZE} />}
+                    onClick={() => {
+                      saveReport();
+                      setDetailsOpen(false);
+                      setEditMode(false);
+                    }}
+                  >
+                    Save
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {floating && (
+                    <IconButton
+                      label="Dock chat to side"
+                      icon={<PanelLeftOpen size={ICON_SIZE} />}
+                      size="xs"
+                      intent="secondary"
+                      variant="ghost"
+                      onClick={() => {
+                        setChatPlacement('embedded');
+                        setAiCollapsed(false);
+                      }}
+                    />
+                  )}
+                  <IconButton
+                    label="Refresh"
+                    icon={<RefreshCw size={ICON_SIZE} />}
+                    size="xs"
+                    intent="secondary"
+                    variant="ghost"
+                    onClick={quickRefresh}
+                  />
+                  <IconButton
+                    label="Share"
+                    icon={<Share2 size={ICON_SIZE} />}
+                    size="xs"
+                    intent="secondary"
+                    variant="ghost"
+                    onClick={() => setPanel('share')}
+                  />
+                  <IconButton
+                    label="Export"
+                    icon={<Download size={ICON_SIZE} />}
+                    size="xs"
+                    intent="secondary"
+                    variant="ghost"
+                    onClick={() => setPanel('export')}
+                  />
+                  <IconButton
+                    label={activeReport.compare?.enabled ? 'Comparing' : 'Compare'}
+                    icon={<Columns2 size={ICON_SIZE} />}
+                    size="xs"
+                    intent="secondary"
+                    variant={activeReport.compare?.enabled ? 'tonal' : 'ghost'}
+                    onClick={() => {
+                      setCompareContext({ enabled: activeReport.compare?.enabled ?? false });
+                      setPanel('compare');
+                    }}
+                  />
+                  <IconButton
+                    label="Present"
+                    icon={<Maximize2 size={ICON_SIZE} />}
+                    size="xs"
+                    intent="secondary"
+                    variant="ghost"
+                    onClick={() => setPresentMode(true)}
+                  />
+                  <IconButton
+                    label="Report settings"
+                    icon={<Settings size={ICON_SIZE} />}
+                    size="xs"
+                    intent="secondary"
+                    variant="ghost"
+                    onClick={() => setPanel('settings')}
+                  />
+                  <IconButton
+                    label="Edit"
+                    icon={<Pencil size={ICON_SIZE} />}
+                    size="xs"
+                    intent="secondary"
+                    variant="ghost"
+                    onClick={() => setEditMode(true)}
+                  />
+                </>
               )}
-              <IconButton
-                label="Refresh"
-                icon={<RefreshCw size={ICON_SIZE} />}
-                size="xs"
-                intent="secondary"
-                variant="ghost"
-                onClick={quickRefresh}
-              />
-              <IconButton
-                label="Share"
-                icon={<Share2 size={ICON_SIZE} />}
-                size="xs"
-                intent="secondary"
-                variant="ghost"
-                onClick={() => setPanel('share')}
-              />
-              <IconButton
-                label="Export"
-                icon={<Download size={ICON_SIZE} />}
-                size="xs"
-                intent="secondary"
-                variant="ghost"
-                onClick={() => setPanel('export')}
-              />
-              <IconButton
-                label={activeReport.compare?.enabled ? 'Comparing' : 'Compare'}
-                icon={<Columns2 size={ICON_SIZE} />}
-                size="xs"
-                intent="secondary"
-                variant={activeReport.compare?.enabled ? 'tonal' : 'ghost'}
-                onClick={() => {
-                  setCompareContext({ enabled: activeReport.compare?.enabled ?? false });
-                  setPanel('compare');
-                }}
-              />
-              <IconButton
-                label="Present"
-                icon={<Maximize2 size={ICON_SIZE} />}
-                size="xs"
-                intent="secondary"
-                variant="ghost"
-                onClick={() => setPresentMode(true)}
-              />
-              <IconButton
-                label="Report settings"
-                icon={<Settings size={ICON_SIZE} />}
-                size="xs"
-                intent="secondary"
-                variant="ghost"
-                onClick={() => setPanel('settings')}
-              />
-              <IconButton
-                label={editMode ? 'Exit edit mode' : 'Edit'}
-                icon={<Pencil size={ICON_SIZE} />}
-                size="xs"
-                intent="secondary"
-                variant={editMode ? 'tonal' : 'ghost'}
-                onClick={() => setEditMode(!editMode)}
-              />
             </ActionRow>
           </Toolbar>
 
@@ -480,21 +513,28 @@ export function WorkspaceView() {
           )}
 
           <ReportCanvas $editing={editMode}>
-            {page.objects.length === 0 ? (
-              <SurfaceCard>
-                <Strong>This page is empty</Strong>
-                <BodyText>Add an object or ask AI to create content for “{page.name}”.</BodyText>
-                {editMode ? (
-                  <Button onClick={() => setPanel('widget-library')}>Add object</Button>
-                ) : (
-                  <Button intent="secondary" variant="outline" onClick={() => setEditMode(true)}>
-                    Enter edit mode
-                  </Button>
-                )}
-              </SurfaceCard>
-            ) : (
-              <ReportPageCanvas page={page} />
-            )}
+            <CanvasStack>
+              <DashboardDetailsEditor
+                open={editMode && detailsOpen}
+                report={activeReport}
+                onClose={() => setDetailsOpen(false)}
+              />
+              {page.objects.length === 0 ? (
+                <SurfaceCard>
+                  <Strong>This page is empty</Strong>
+                  <BodyText>Add an object or ask AI to create content for “{page.name}”.</BodyText>
+                  {editMode ? (
+                    <Button onClick={() => setPanel('widget-library')}>Add object</Button>
+                  ) : (
+                    <Button intent="secondary" variant="outline" onClick={() => setEditMode(true)}>
+                      Enter edit mode
+                    </Button>
+                  )}
+                </SurfaceCard>
+              ) : (
+                <ReportPageCanvas page={page} />
+              )}
+            </CanvasStack>
           </ReportCanvas>
         </ReportPane>
 
@@ -550,6 +590,20 @@ const TitleWithCrest = styled.div`
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-200);
+  min-width: 0;
+`;
+
+const MetaExtras = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-200);
+  min-width: 0;
+`;
+
+const CanvasStack = styled.div`
+  display: grid;
+  gap: var(--space-400);
   min-width: 0;
 `;
 

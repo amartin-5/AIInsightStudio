@@ -11,16 +11,19 @@ type Props = {
 
 const Root = styled.div`
   display: grid;
-  gap: var(--space-200);
-  padding: var(--space-400);
-  border-radius: var(--radius-300);
+  gap: var(--space-250);
+  padding: var(--space-500);
+  border-radius: var(--radius-400);
   border: var(--stroke-100) solid var(--color-stroke-border);
+  border-left: 3px solid var(--color-primary-primary);
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--color-primary-primary) 8%, var(--color-surfaces-container)) 0%,
-    var(--color-surfaces-container) 55%
+    var(--color-surfaces-primary) 0%,
+    var(--color-surfaces-container) 48%,
+    var(--color-surfaces-on-container-high) 100%
   );
-  box-shadow: var(--elevation-1);
+  box-shadow: var(--elevation-3);
+  min-height: 100%;
 `;
 
 const Eyebrow = styled.div`

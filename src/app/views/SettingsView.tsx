@@ -22,7 +22,7 @@ import {
 } from '../../demos/wwc2023/exploreProfiles';
 import { TeamCrest } from '../../product/teams/TeamCrest';
 import { useAppState } from '../AppState';
-import { initialsFromName } from '../userProfile';
+import { GOAL_OPTIONS, initialsFromName } from '../userProfile';
 import {
   ActionRow,
   BodyText,
@@ -47,7 +47,27 @@ type NotificationSettings = {
   automations: boolean;
   weeklyDigest: boolean;
   mentionAlerts: boolean;
+  matchData: boolean;
+  teamOnly: boolean;
 };
+
+function notificationsFromProfile(profile: {
+  inAppNotifications: boolean;
+  emailNotifications: boolean;
+  notifyMatchData: boolean;
+  notifyTeamOnly: boolean;
+}): NotificationSettings {
+  return {
+    inApp: profile.inAppNotifications,
+    email: profile.emailNotifications,
+    reportRefresh: true,
+    automations: true,
+    weeklyDigest: false,
+    mentionAlerts: true,
+    matchData: profile.notifyMatchData,
+    teamOnly: profile.notifyTeamOnly,
+  };
+}
 
 /** Fills the workspace: sticky header + sticky nav, scrolling panel only. */
 const SettingsPage = styled.div`
@@ -187,33 +207,45 @@ export function SettingsView() {
     updateUserProfile,
   } = useAppState();
   const [tab, setTab] = useState<SettingsTab>('profile');
-  const [draftAffiliationId, setDraftAffiliationId] = useState(affiliatedTeamId);
-  const [notifications, setNotifications] = useState<NotificationSettings>({
-    inApp: userProfile.inAppNotifications,
-    email: userProfile.emailNotifications,
-    reportRefresh: true,
-    automations: true,
-    weeklyDigest: false,
-    mentionAlerts: userProfile.notifyMatchData,
-  });
+  const [draftAffiliationId, setDraftAffiliationId] = useState(
+    userProfile.affiliatedTeamId || affiliatedTeamId,
+  );
+  const [notifications, setNotifications] = useState<NotificationSettings>(() =>
+    notificationsFromProfile(userProfile),
+  );
 
   const draftAffiliation = getAffiliationOption(draftAffiliationId);
   const affiliationOptions = affiliationDropdownOptions(userProfile.affiliationKind);
-  const avatarInitials = initialsFromName(userProfile.displayName);
+  const avatarInitials = initialsFromName(userProfile.displayName || userProfile.email);
+  const primaryGoalLabel =
+    GOAL_OPTIONS.find((option) => option.value === userProfile.primaryGoal)?.label ?? '';
 
   useEffect(() => {
-    setDraftAffiliationId(affiliatedTeamId);
-  }, [affiliatedTeamId]);
+    setDraftAffiliationId(userProfile.affiliatedTeamId || affiliatedTeamId);
+  }, [affiliatedTeamId, userProfile.affiliatedTeamId]);
+
+  useEffect(() => {
+    setNotifications(notificationsFromProfile(userProfile));
+  }, [
+    userProfile.inAppNotifications,
+    userProfile.emailNotifications,
+    userProfile.notifyMatchData,
+    userProfile.notifyTeamOnly,
+  ]);
 
   const save = (label: string) => {
     setToast({ message: `${label} saved` });
   };
 
   const saveProfile = () => {
-    updateUserProfile({ affiliatedTeamId: draftAffiliationId });
-    setAffiliatedTeamId(draftAffiliationId);
+    const option = getAffiliationOption(draftAffiliationId);
+    updateUserProfile({
+      affiliatedTeamId: option.id,
+      affiliationKind: option.kind,
+    });
+    setAffiliatedTeamId(option.id);
     setToast({
-      message: `Profile saved · Explore centers on ${getAffiliationOption(draftAffiliationId).name}`,
+      message: `Profile saved · Explore centers on ${option.name}`,
     });
   };
 
@@ -253,14 +285,18 @@ export function SettingsView() {
                 <ProfileHeader>
                   <Avatar
                     initials={avatarInitials}
-                    alt={userProfile.displayName}
+                    alt={userProfile.displayName || userProfile.email || 'Profile'}
                     size="lg"
                     badge={userProfile.sharePresence}
                     badgeLabel="Online"
                   />
                   <div>
-                    <Strong>{userProfile.displayName}</Strong>
-                    <Muted>{userProfile.jobTitle}</Muted>
+                    <Strong>{userProfile.displayName || 'Add a display name'}</Strong>
+                    <Muted>
+                      {[userProfile.jobTitle, primaryGoalLabel].filter(Boolean).join(' · ') ||
+                        userProfile.email ||
+                        'Complete your profile'}
+                    </Muted>
                   </div>
                 </ProfileHeader>
 
@@ -278,12 +314,20 @@ export function SettingsView() {
                       type="email"
                       value={userProfile.email}
                       onChange={(e) => updateUserProfile({ email: e.target.value })}
-                      helperText="Used for digests and shared-report alerts"
+                      helperText="From sign-in · used for digests and shared-report alerts"
                     />
                     <TextInput
                       label="Job title"
                       value={userProfile.jobTitle}
                       onChange={(e) => updateUserProfile({ jobTitle: e.target.value })}
+                    />
+                    <Dropdown
+                      label="Primary need"
+                      placeholder="Select"
+                      value={userProfile.primaryGoal || undefined}
+                      onValueChange={(value) => updateUserProfile({ primaryGoal: value })}
+                      options={GOAL_OPTIONS}
+                      helperText="Collected during onboarding"
                     />
                   </SetupGrid>
                 </FieldStack>
@@ -450,6 +494,34 @@ export function SettingsView() {
                   <Divider weight="weak" />
                   <SettingRow>
                     <SettingCopy>
+                      <Strong>New match data</Strong>
+                      <Muted>Updates when new match data is available.</Muted>
+                    </SettingCopy>
+                    <Switch
+                      aria-label="New match data"
+                      checked={notifications.matchData}
+                      onCheckedChange={(checked) =>
+                        setNotifications((prev) => ({ ...prev, matchData: checked }))
+                      }
+                    />
+                  </SettingRow>
+                  <Divider weight="weak" />
+                  <SettingRow>
+                    <SettingCopy>
+                      <Strong>Only my team</Strong>
+                      <Muted>Limit match-data alerts to your home affiliation.</Muted>
+                    </SettingCopy>
+                    <Switch
+                      aria-label="Only my team"
+                      checked={notifications.teamOnly}
+                      onCheckedChange={(checked) =>
+                        setNotifications((prev) => ({ ...prev, teamOnly: checked }))
+                      }
+                    />
+                  </SettingRow>
+                  <Divider weight="weak" />
+                  <SettingRow>
+                    <SettingCopy>
                       <Strong>Weekly digest</Strong>
                       <Muted>A Monday summary of report activity across your workspace.</Muted>
                     </SettingCopy>
@@ -469,7 +541,8 @@ export function SettingsView() {
                       updateUserProfile({
                         inAppNotifications: notifications.inApp,
                         emailNotifications: notifications.email,
-                        notifyMatchData: notifications.mentionAlerts,
+                        notifyMatchData: notifications.matchData,
+                        notifyTeamOnly: notifications.teamOnly,
                       });
                       save('Notification settings');
                     }}

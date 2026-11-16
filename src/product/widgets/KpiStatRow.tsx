@@ -22,15 +22,22 @@ const Root = styled.div`
 
 const Cell = styled.button`
   display: grid;
-  gap: var(--space-050);
-  padding: var(--space-300);
-  border-radius: var(--radius-200);
-  background: var(--color-surfaces-on-container);
+  gap: var(--space-100);
+  padding: var(--space-400) var(--space-300);
+  border-radius: var(--radius-300);
+  background: var(--color-surfaces-on-container-high);
+  box-shadow: var(--elevation-1);
   text-align: center;
-  border: none;
+  border: var(--stroke-100) solid var(--color-stroke-border);
   cursor: pointer;
   font: inherit;
   color: inherit;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-2);
+  }
 
   &:focus-visible {
     outline: var(--stroke-200) solid var(--color-primary-primary);
@@ -48,15 +55,17 @@ const Value = styled.span<{ $tone: NonNullable<KpiStat['tone']> }>`
           ? 'var(--color-primary-primary)'
           : 'var(--color-text-icon-primary)'};
   font-family: var(--font-family);
-  font-size: var(--type-size-greeting);
+  font-size: var(--type-size-page);
   font-weight: var(--font-weight-bold);
-  line-height: 1.1;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
 `;
 
 const Label = styled.span`
   color: var(--color-text-icon-secondary);
   font-family: var(--font-family);
-  font-size: var(--type-size-caption);
+  font-size: var(--type-size-body);
+  font-weight: var(--font-weight-bold);
 `;
 
 const Hint = styled.span<{ $tone: NonNullable<KpiStat['tone']> }>`

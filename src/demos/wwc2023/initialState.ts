@@ -2,6 +2,7 @@ import type { Automation, DemoSnapshot, ReportRecord } from '../../product/types
 import {
   buildAustraliaPages,
   buildEnglandPages,
+  buildKnockoutPages,
   buildPlayerComparisonPages,
   buildSpainPages,
 } from './dataset';
@@ -19,6 +20,13 @@ function englandReport(): ReportRecord {
     team: 'England',
     period: 'Entire tournament',
     audience: 'Analyst',
+    tags: ['Performance', 'Scouting'],
+    matchContext: {
+      tournament: 'wwc',
+      year: '2023',
+      homeTeam: 'eng',
+      awayTeam: 'esp',
+    },
     sourceLabels: [
       'Women’s World Cup 2023 match data',
       'Team performance data',
@@ -63,6 +71,13 @@ function australiaReport(): ReportRecord {
     team: 'Australia',
     period: 'Entire tournament',
     audience: 'Executive',
+    tags: ['Summaries', 'Executive'],
+    matchContext: {
+      tournament: 'wwc',
+      year: '2023',
+      homeTeam: 'aus',
+      awayTeam: '',
+    },
     sourceLabels: ['Women’s World Cup 2023 match data', 'Team performance data'],
     context: [
       { id: 'a1', label: 'Women’s World Cup 2023 match data', kind: 'data' },
@@ -95,6 +110,13 @@ function spainReport(): ReportRecord {
     team: 'Spain',
     period: 'Entire tournament',
     audience: 'Analyst',
+    tags: ['Performance'],
+    matchContext: {
+      tournament: 'wwc',
+      year: '2023',
+      homeTeam: 'esp',
+      awayTeam: '',
+    },
     sourceLabels: ['Women’s World Cup 2023 match data', 'Team performance data'],
     context: [
       { id: 's1', label: 'Spain team performance', kind: 'data' },
@@ -119,6 +141,13 @@ function playerCompareReport(): ReportRecord {
     team: 'England',
     period: 'Entire tournament',
     audience: 'Analyst',
+    tags: ['Comparison'],
+    matchContext: {
+      tournament: 'wwc',
+      year: '2023',
+      homeTeam: 'eng',
+      awayTeam: 'esp',
+    },
     sourceLabels: ['Player performance data'],
     context: [{ id: 'pc1', label: 'Player performance data', kind: 'data' }],
     chat: [],
@@ -146,6 +175,13 @@ function knockoutReport(): ReportRecord {
     sharing: 'Shared with 1',
     period: 'Knockout stage',
     audience: 'General audience',
+    tags: ['Summaries'],
+    matchContext: {
+      tournament: 'wwc',
+      year: '2023',
+      homeTeam: 'esp',
+      awayTeam: 'eng',
+    },
     sourceLabels: ['Women’s World Cup 2023 match data'],
     context: [{ id: 'k1', label: 'Women’s World Cup 2023 match data', kind: 'data' }],
     chat: [],
@@ -157,20 +193,7 @@ function knockoutReport(): ReportRecord {
       notify: 'in-app',
       requireReview: true,
     },
-    pages: [
-      {
-        id: 'ko-1',
-        name: 'Summary',
-        objects: [
-          {
-            id: 'ko-ai',
-            kind: 'ai-summary',
-            title: 'Knockout stage summary',
-            body: 'Knockout matches featured lower chance quality and tighter defensive spacing across several teams.',
-          },
-        ],
-      },
-    ],
+    pages: buildKnockoutPages(),
   };
 }
 

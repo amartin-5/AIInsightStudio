@@ -38,7 +38,7 @@ function outcomeTone(outcome: ExploreMatch['outcome']) {
 }
 
 export function ExploreView() {
-  const { affiliatedTeam, openWorkspace, setNav, snapshot } = useAppState();
+  const { affiliatedTeam, openMatchDashboard, openWorkspace, setNav, snapshot } = useAppState();
   const team = affiliatedTeam;
 
   const openReport = (reportId?: string) => {
@@ -48,6 +48,10 @@ export function ExploreView() {
     }
     const exists = snapshot.reports.some((r) => r.id === reportId);
     openWorkspace(exists ? reportId : snapshot.activeReportId);
+  };
+
+  const openMatch = (match: ExploreMatch) => {
+    openMatchDashboard(team, match);
   };
 
   const recentMatches = team.pastMatches.slice(0, 4);
@@ -286,6 +290,13 @@ export function ExploreView() {
                     <StatChip>{match.xg} xG</StatChip>
                     <StatChip>{match.possession} poss.</StatChip>
                   </PathStats>
+                  <Button
+                    size="sm"
+                    endIcon={<ArrowUpRight size={ICON_SIZE} />}
+                    onClick={() => openMatch(match)}
+                  >
+                    Open match dashboard
+                  </Button>
                 </PathAside>
               </PathItem>
             ))}
@@ -316,7 +327,7 @@ export function ExploreView() {
                         <Button
                           size="sm"
                           endIcon={<ArrowUpRight size={ICON_SIZE} />}
-                          onClick={() => openReport(team.reportId)}
+                          onClick={() => openMatch(match)}
                         >
                           Review match
                         </Button>

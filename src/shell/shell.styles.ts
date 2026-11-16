@@ -114,7 +114,7 @@ export const TokenHubNav = styled.div`
   }
 
   /*
-   * HelloPC SidebarNav always mounts a footer SidebarDivider. With no `user`
+   * HelloPC SidebarNav always mounts a footer SidebarDivider. With no user
    * row that rule sits alone under the collapse toggle as a stray white bar.
    * aria-label lives on the inner tablist, so target the nav footer's
    * non-control children instead.

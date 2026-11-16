@@ -149,18 +149,20 @@ export const FormPane = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: safe center;
+  align-items: stretch;
   gap: var(--space-400);
   min-width: 0;
   min-height: 0;
-  padding: var(--space-600) var(--space-500);
+  height: 100%;
+  padding: var(--space-700) var(--space-600);
   background: var(--color-surfaces-container);
   overflow: auto;
 `;
 
 export const FormClose = styled.div`
   position: absolute;
-  top: var(--space-300);
-  right: var(--space-300);
+  top: var(--space-400);
+  right: var(--space-400);
 `;
 
 export const FormStack = styled.div`
@@ -172,6 +174,32 @@ export const FormStack = styled.div`
   margin-block: auto;
   padding-block: var(--space-400);
   animation: ${fadeRise} 480ms cubic-bezier(0.22, 1, 0.36, 1);
+`;
+
+/** Full-height sign-in column: form content up top, guest link pinned to the bottom. */
+export const SignInStack = styled(FormStack)`
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  margin-block: 0;
+  padding-block: var(--space-200) 0;
+  gap: var(--space-500);
+  justify-content: flex-start;
+`;
+
+export const SignInBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-500);
+  width: 100%;
+  padding-top: var(--space-400);
+`;
+
+export const SignInFooter = styled.div`
+  margin-top: auto;
+  padding-top: var(--space-600);
+  padding-bottom: var(--space-100);
 `;
 
 export const FormHeadline = styled.h1`
@@ -193,7 +221,7 @@ export const FormSubhead = styled.p`
 export const FieldGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--space-300);
+  gap: var(--space-400);
   width: 100%;
 `;
 

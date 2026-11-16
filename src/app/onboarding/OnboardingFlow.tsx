@@ -39,9 +39,13 @@ import {
   GhostLink,
   LightFields,
   OnboardingStage,
+  SignInBody,
+  SignInFooter,
+  SignInStack,
   StepDot,
   StepDots,
 } from './onboarding.styles';
+import { ICON_SIZE, ICON_SIZE_LG } from '../../iconSize';
 
 const FLOW_STEPS: OnboardingStep[] = [
   'welcome',
@@ -135,7 +139,7 @@ export function OnboardingFlow() {
             <FormClose>
               <IconButton
                 label={onboardingStep === 'sign-in' ? 'Close sign in' : 'Back to sign in'}
-                icon={<X />}
+                icon={<X size={ICON_SIZE_LG} />}
                 size="lg"
                 intent="secondary"
                 variant="ghost"
@@ -159,47 +163,51 @@ export function OnboardingFlow() {
           )}
 
           {onboardingStep === 'sign-in' && (
-            <FormStack key="sign-in">
-              <FormHeadline id="onboarding-title">Sign in</FormHeadline>
-              <FieldGroup>
-                <AuthField>
-                  Email
-                  <AuthInput
-                    type="email"
-                    autoComplete="username"
-                    placeholder="Email"
-                    value={draft.email}
-                    onChange={(e) => patch({ email: e.target.value })}
+            <SignInStack key="sign-in">
+              <SignInBody>
+                <FormHeadline id="onboarding-title">Sign in</FormHeadline>
+                <FieldGroup>
+                  <AuthField>
+                    Email
+                    <AuthInput
+                      type="email"
+                      autoComplete="username"
+                      placeholder="Email"
+                      value={draft.email}
+                      onChange={(e) => patch({ email: e.target.value })}
+                    />
+                  </AuthField>
+                  <AuthField>
+                    Password
+                    <AuthInput
+                      type="password"
+                      autoComplete="current-password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </AuthField>
+                </FieldGroup>
+                <CheckboxStack>
+                  <Checkbox
+                    label="Agree to terms and conditions"
+                    checked={acceptedTerms}
+                    onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
                   />
-                </AuthField>
-                <AuthField>
-                  Password
-                  <AuthInput
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </AuthField>
-              </FieldGroup>
-              <CheckboxStack>
-                <Checkbox
-                  label="Agree to terms and conditions"
-                  checked={acceptedTerms}
-                  onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
-                />
-              </CheckboxStack>
-              {signInError && <FooterNote role="alert">{signInError}</FooterNote>}
-              <ActionCluster>
-                <Button size="lg" onClick={handleSignIn}>
-                  Sign in
-                </Button>
-              </ActionCluster>
-              <GhostLink type="button" onClick={() => completeOnboarding()}>
-                Don’t have an account? <strong>Continue as guest</strong>
-              </GhostLink>
-            </FormStack>
+                </CheckboxStack>
+                {signInError && <FooterNote role="alert">{signInError}</FooterNote>}
+                <ActionCluster>
+                  <Button size="lg" onClick={handleSignIn}>
+                    Sign in
+                  </Button>
+                </ActionCluster>
+              </SignInBody>
+              <SignInFooter>
+                <GhostLink type="button" onClick={() => completeOnboarding()}>
+                  Don’t have an account? <strong>Continue as guest</strong>
+                </GhostLink>
+              </SignInFooter>
+            </SignInStack>
           )}
 
           {onboardingStep === 'profile' && (
@@ -238,7 +246,7 @@ export function OnboardingFlow() {
                 <Button
                   intent="secondary"
                   variant="ghost"
-                  startIcon={<ArrowLeft size={16} />}
+                  startIcon={<ArrowLeft size={ICON_SIZE} />}
                   onClick={() => go('sign-in')}
                 >
                   Back
@@ -322,7 +330,7 @@ export function OnboardingFlow() {
                 <Button
                   intent="secondary"
                   variant="ghost"
-                  startIcon={<ArrowLeft size={16} />}
+                  startIcon={<ArrowLeft size={ICON_SIZE} />}
                   onClick={() => go('profile')}
                 >
                   Back
@@ -406,7 +414,7 @@ export function OnboardingFlow() {
                 <Button
                   intent="secondary"
                   variant="ghost"
-                  startIcon={<ArrowLeft size={16} />}
+                  startIcon={<ArrowLeft size={ICON_SIZE} />}
                   onClick={() => go('affiliation')}
                 >
                   Back

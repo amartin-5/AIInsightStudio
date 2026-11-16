@@ -113,12 +113,17 @@ export const TokenHubNav = styled.div`
     box-shadow: none !important;
   }
 
-  /* Hide orphan divider under collapse toggle (TokenHub pattern). */
-  & [aria-label='Main navigation'] > div:last-child > div:not(:has(button)) {
-    display: none;
+  /*
+   * HelloPC SidebarNav always mounts a footer SidebarDivider. With no `user`
+   * row that rule sits alone under the collapse toggle as a stray white bar.
+   * aria-label lives on the inner tablist, so target the nav footer's
+   * non-control children instead.
+   */
+  & nav > div:last-child > *:not(:has(button)) {
+    display: none !important;
   }
 
-  & [aria-label='Main navigation'] > div:last-child > div:has(button) {
+  & nav > div:last-child > div:has(button) {
     padding-bottom: 0;
   }
 `;
@@ -315,7 +320,7 @@ export const LogoMark = styled.span`
   color: var(--color-text-icon-inverse);
 
   svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 `;

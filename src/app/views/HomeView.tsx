@@ -1,5 +1,5 @@
 import { Badge, Button } from '@cake-admin/cakeand';
-import { Plus, Upload } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import styled from 'styled-components';
 
 import { TeamCrest } from '../../product/teams/TeamCrest';
@@ -26,10 +26,10 @@ import {
   SurfaceCard,
   TitleBlock,
 } from '../ui.styles';
+import { ICON_SIZE } from '../../iconSize';
 
 export function HomeView() {
-  const { snapshot, config, openTemplates, openWorkspace, templates, setNav } = useAppState();
-  const recommended = templates.filter((t) => t.recommended).slice(0, 4);
+  const { snapshot, config, openTemplates, openWorkspace, startCustomBuild } = useAppState();
 
   return (
     <ScrollArea>
@@ -39,17 +39,17 @@ export function HomeView() {
           <HeroSubtitle>{config.tagline}</HeroSubtitle>
         </TitleBlock>
         <ActionRow>
-          <Button size="md" startIcon={<Plus size={16} />} onClick={openTemplates}>
-            New report
-          </Button>
           <Button
             size="md"
             intent="secondary"
             variant="outline"
-            startIcon={<Upload size={16} />}
-            onClick={() => undefined}
+            startIcon={<Sparkles size={ICON_SIZE} />}
+            onClick={startCustomBuild}
           >
-            Import data
+            Custom AI build
+          </Button>
+          <Button size="md" startIcon={<Plus size={ICON_SIZE} />} onClick={openTemplates}>
+            New report
           </Button>
         </ActionRow>
       </HeroBanner>
@@ -102,80 +102,10 @@ export function HomeView() {
                 <Button size="sm" onClick={() => openWorkspace(report.id)}>
                   Open
                 </Button>
-                <Button size="sm" intent="secondary" variant="ghost">
-                  More
-                </Button>
               </CardFooter>
             </SurfaceCard>
           ))}
         </CardGrid>
-      </Section>
-
-      <Section>
-        <SectionHeader>
-          <SectionTitle>Templates</SectionTitle>
-          <Button size="sm" intent="secondary" variant="ghost" onClick={openTemplates}>
-            View all templates
-          </Button>
-        </SectionHeader>
-        <CardGrid>
-          {recommended.map((template) => (
-            <SurfaceCard key={template.id}>
-              <PreviewThumb>{template.name} preview</PreviewThumb>
-              <CardBody>
-                <Strong>{template.name}</Strong>
-                <BodyText>{template.purpose}</BodyText>
-                <Muted>
-                  {template.audience} · {template.pages} pages
-                </Muted>
-              </CardBody>
-              <CardFooter>
-                <Button size="sm" onClick={openTemplates}>
-                  Browse
-                </Button>
-              </CardFooter>
-            </SurfaceCard>
-          ))}
-        </CardGrid>
-      </Section>
-
-      <Section>
-        <SectionHeader>
-          <SectionTitle>Automations</SectionTitle>
-          <Button
-            size="sm"
-            intent="secondary"
-            variant="ghost"
-            onClick={() => setNav('automations')}
-          >
-            View all
-          </Button>
-        </SectionHeader>
-        <ListStack>
-          {snapshot.automations.slice(0, 3).map((item) => (
-            <SurfaceCard key={item.id} as="div">
-              <AutomationTitle>
-                {item.triggerKind === 'team' && item.team ? (
-                  <TeamCrest team={item.team} size="sm" />
-                ) : null}
-                <Strong>{item.name}</Strong>
-              </AutomationTitle>
-              <BodyText>
-                {item.triggerKind === 'any-match'
-                  ? 'Every match'
-                  : item.triggerKind === 'team'
-                    ? `When ${item.team} plays`
-                    : (item.requirements ?? 'Custom match filter')}
-                {' · '}
-                {item.templateName}
-              </BodyText>
-              <Muted>
-                {item.enabled ? 'Active' : 'Paused'}
-                {item.lastRun ? ` · Last run ${item.lastRun}` : ''}
-              </Muted>
-            </SurfaceCard>
-          ))}
-        </ListStack>
       </Section>
 
       <Section>
@@ -202,12 +132,4 @@ const TeamPreview = styled.span`
   font-family: var(--font-family);
   font-size: var(--type-size-caption);
   font-weight: var(--font-weight-medium);
-`;
-
-const AutomationTitle = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-150);
-  min-width: 0;
 `;

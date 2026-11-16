@@ -109,6 +109,8 @@ type AppStateValue = {
   aiCollapsed: boolean;
   aiWidth: number;
   chatPlacement: ChatPlacement;
+  /** App nav rail — opening a report collapses it; only the user expands it. */
+  sidebarCollapsed: boolean;
   editMode: boolean;
   presentMode: boolean;
   panel: PanelKind;
@@ -155,6 +157,7 @@ type AppStateValue = {
   setAiCollapsed: (v: boolean) => void;
   setAiWidth: (v: number) => void;
   setChatPlacement: (v: ChatPlacement) => void;
+  setSidebarCollapsed: (v: boolean) => void;
   setEditMode: (v: boolean) => void;
   setPresentMode: (v: boolean) => void;
   advancePresentPage: (direction: 1 | -1) => void;
@@ -273,6 +276,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [aiCollapsed, setAiCollapsed] = useState(false);
   const [chatPlacement, setChatPlacement] = useState<'embedded' | 'floating'>('embedded');
   const [aiWidth, setAiWidth] = useState(300);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [presentMode, setPresentMode] = useState(false);
   const [panel, setPanel] = useState<PanelKind>(null);
@@ -1313,6 +1317,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       aiCollapsed,
       aiWidth,
       chatPlacement,
+      sidebarCollapsed,
       editMode,
       presentMode,
       panel,
@@ -1362,6 +1367,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setAiCollapsed,
       setAiWidth,
       setChatPlacement,
+      setSidebarCollapsed,
       setEditMode,
       setPresentMode,
       advancePresentPage,
@@ -1426,6 +1432,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       aiCollapsed,
       aiWidth,
       chatPlacement,
+      sidebarCollapsed,
       editMode,
       presentMode,
       panel,

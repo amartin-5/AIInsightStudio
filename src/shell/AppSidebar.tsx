@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Sidebar, SidebarItem, SidebarNav } from '@cake-admin/cakeand';
 import {
   ChartColumn,
@@ -14,19 +14,24 @@ import {
 import { useAppState } from '../app/AppState';
 import type { NavId } from '../product/types';
 import { LogoMark, SidebarHost, TokenHubNav } from './shell.styles';
+import { ICON_SIZE } from '../iconSize';
 
 /**
  * Insight Studio navigation — TokenHub translucent SidebarNav + fill-only selection.
- * Collapses automatically while a report workspace is open; expands on library views.
+ * Opening a report collapses the rail; only the user expands it again (app-wide).
  */
 export function AppSidebar() {
-  const { nav, view, setNav } = useAppState();
-  const autoCollapsed = view === 'workspace';
-  const [collapsed, setCollapsed] = useState(autoCollapsed);
+  const { nav, view, setNav, sidebarCollapsed, setSidebarCollapsed } = useAppState();
+  const previousView = useRef(view);
 
   useEffect(() => {
-    setCollapsed(autoCollapsed);
-  }, [autoCollapsed]);
+    const enteredWorkspace =
+      view === 'workspace' && previousView.current !== 'workspace';
+    previousView.current = view;
+    if (enteredWorkspace) {
+      setSidebarCollapsed(true);
+    }
+  }, [view, setSidebarCollapsed]);
 
   return (
     <SidebarHost>
@@ -45,24 +50,24 @@ export function AppSidebar() {
             surface="translucent"
             logo={
               <LogoMark aria-hidden>
-                <ChartColumn strokeWidth={2} />
+                <ChartColumn size={ICON_SIZE} />
               </LogoMark>
             }
             productName="Lenovo"
             appName="Insight Studio"
-            collapsed={collapsed}
-            onCollapsedChange={setCollapsed}
+            collapsed={sidebarCollapsed}
+            onCollapsedChange={setSidebarCollapsed}
             style={{ flex: 'none', paddingBottom: 'var(--space-200)' }}
           >
-            <SidebarItem value="home" icon={<Home />}>
+            <SidebarItem value="home" icon={<Home size={ICON_SIZE} />}>
               Home
             </SidebarItem>
-            <SidebarItem value="explore" icon={<Compass />}>
+            <SidebarItem value="explore" icon={<Compass size={ICON_SIZE} />}>
               Explore
             </SidebarItem>
             <SidebarItem
               value="reports"
-              icon={<FileText />}
+              icon={<FileText size={ICON_SIZE} />}
               onClick={() => {
                 // Radix skips onValueChange when already selected; force library
                 // return when leaving an open report workspace.
@@ -71,16 +76,16 @@ export function AppSidebar() {
             >
               Reports
             </SidebarItem>
-            <SidebarItem value="templates" icon={<LayoutTemplate />}>
+            <SidebarItem value="templates" icon={<LayoutTemplate size={ICON_SIZE} />}>
               Templates
             </SidebarItem>
-            <SidebarItem value="library" icon={<LayoutGrid />}>
+            <SidebarItem value="library" icon={<LayoutGrid size={ICON_SIZE} />}>
               Library
             </SidebarItem>
-            <SidebarItem value="automations" icon={<Workflow />}>
+            <SidebarItem value="automations" icon={<Workflow size={ICON_SIZE} />}>
               Automations
             </SidebarItem>
-            <SidebarItem value="settings" icon={<Settings />}>
+            <SidebarItem value="settings" icon={<Settings size={ICON_SIZE} />}>
               Settings
             </SidebarItem>
           </SidebarNav>

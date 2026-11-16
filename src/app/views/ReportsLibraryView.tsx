@@ -1,12 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  Badge,
-  Button,
-  ContentSwitcher,
-  Dropdown,
-  IconButton,
-  TextInput,
-} from '@cake-admin/cakeand';
+import { Badge, Button, IconButton } from '@cake-admin/cakeand';
 import {
   ChevronDown,
   ChevronUp,
@@ -14,8 +7,8 @@ import {
   MessageSquare,
   Plus,
   RefreshCw,
-  Search,
   Share2,
+  Sparkles,
   Star,
 } from 'lucide-react';
 import styled from 'styled-components';
@@ -23,11 +16,12 @@ import styled from 'styled-components';
 import { TeamCrest } from '../../product/teams/TeamCrest';
 import type { ReportRecord } from '../../product/types';
 import { useAppState } from '../AppState';
+import { CatalogToolbar } from '../components/CatalogToolbar';
 import {
+  ActionRow,
   BodyText,
   CardBody,
   CardFooter,
-  FilterBar,
   Muted,
   PreviewThumb,
   ScrollArea,
@@ -37,6 +31,7 @@ import {
   Strong,
   SurfaceCard,
 } from '../ui.styles';
+import { ICON_SIZE } from '../../iconSize';
 
 type FilterTab = 'recent' | 'favorites' | 'shared';
 type SortKey = 'modified' | 'name' | 'status';
@@ -59,7 +54,7 @@ function greetingForNow(date = new Date()) {
 function activityForReport(report: ReportRecord) {
   if (report.status === 'Shared' || report.sharing.toLowerCase().includes('shared')) {
     return {
-      icon: <Share2 size={14} aria-hidden />,
+      icon: <Share2 size={ICON_SIZE} aria-hidden />,
       label:
         report.owner === 'You'
           ? `Shared · ${report.sharing}`
@@ -68,7 +63,7 @@ function activityForReport(report: ReportRecord) {
   }
   if (report.status === 'Refresh scheduled' || report.schedule) {
     return {
-      icon: <RefreshCw size={14} aria-hidden />,
+      icon: <RefreshCw size={ICON_SIZE} aria-hidden />,
       label: report.schedule
         ? `Refresh scheduled · ${report.schedule.when}`
         : 'Refresh scheduled',
@@ -76,18 +71,18 @@ function activityForReport(report: ReportRecord) {
   }
   if (report.status === 'Needs review') {
     return {
-      icon: <MessageSquare size={14} aria-hidden />,
+      icon: <MessageSquare size={ICON_SIZE} aria-hidden />,
       label: 'Needs review before sharing',
     };
   }
   if (report.status === 'Draft') {
     return {
-      icon: <FileText size={14} aria-hidden />,
+      icon: <FileText size={ICON_SIZE} aria-hidden />,
       label: 'Draft · only you can see this',
     };
   }
   return {
-    icon: <RefreshCw size={14} aria-hidden />,
+    icon: <RefreshCw size={ICON_SIZE} aria-hidden />,
     label: `Updated · ${report.lastUpdated}`,
   };
 }
@@ -107,7 +102,7 @@ function statusBadgeColor(status: ReportRecord['status']) {
 }
 
 export function ReportsLibraryView() {
-  const { snapshot, openWorkspace, openTemplates } = useAppState();
+  const { snapshot, openWorkspace, openTemplates, startCustomBuild } = useAppState();
   const [recommendedOpen, setRecommendedOpen] = useState(true);
   const [filter, setFilter] = useState<FilterTab>('recent');
   const [query, setQuery] = useState('');
@@ -163,9 +158,20 @@ export function ReportsLibraryView() {
     <ScrollArea>
       <GreetingBlock>
         <Greeting>{greetingForNow()}</Greeting>
-        <Button size="md" startIcon={<Plus size={16} />} onClick={openTemplates}>
-          New blank report
-        </Button>
+        <ActionRow>
+          <Button
+            size="md"
+            intent="secondary"
+            variant="outline"
+            startIcon={<Sparkles size={ICON_SIZE} />}
+            onClick={startCustomBuild}
+          >
+            Custom AI build
+          </Button>
+          <Button size="md" startIcon={<Plus size={ICON_SIZE} />} onClick={openTemplates}>
+            New report
+          </Button>
+        </ActionRow>
       </GreetingBlock>
 
       <Section>
@@ -176,7 +182,7 @@ export function ReportsLibraryView() {
             onClick={() => setRecommendedOpen((v) => !v)}
           >
             <SectionTitle>Recommended for you</SectionTitle>
-            {recommendedOpen ? <ChevronUp size={18} aria-hidden /> : <ChevronDown size={18} aria-hidden />}
+            {recommendedOpen ? <ChevronUp size={ICON_SIZE} aria-hidden /> : <ChevronDown size={ICON_SIZE} aria-hidden />}
           </SectionToggle>
         </SectionHeader>
 
@@ -216,42 +222,25 @@ export function ReportsLibraryView() {
       </Section>
 
       <Section>
-        <ToolbarRow>
-          <FilterSwitcherSlot>
-            <ContentSwitcher
-              aria-label="Report filters"
-              size="sm"
-              value={filter}
-              onValueChange={(value) => setFilter(value as FilterTab)}
-              options={FILTER_OPTIONS}
-            />
-          </FilterSwitcherSlot>
-          <ToolbarControls>
-            <SearchSlot>
-              <TextInput
-                aria-label="Search for a report"
-                placeholder="Search for a report"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                startIcon={<Search size={16} />}
-                size="sm"
-              />
-            </SearchSlot>
-            <SortSlot>
-              <Dropdown
-                aria-label="Sort reports"
-                placeholder="Sort"
-                value={sort}
-                onValueChange={(value) => setSort(value as SortKey)}
-                options={[
-                  { label: 'Date modified', value: 'modified' },
-                  { label: 'Name', value: 'name' },
-                  { label: 'Status', value: 'status' },
-                ]}
-              />
-            </SortSlot>
-          </ToolbarControls>
-        </ToolbarRow>
+        <CatalogToolbar
+          filterOptions={FILTER_OPTIONS}
+          filterValue={filter}
+          onFilterChange={(value) => setFilter(value as FilterTab)}
+          filterAriaLabel="Report filters"
+          searchValue={query}
+          onSearchChange={setQuery}
+          searchPlaceholder="Search for a report"
+          searchAriaLabel="Search for a report"
+          sortMode="dropdown"
+          sortValue={sort}
+          onSortChange={(value) => setSort(value as SortKey)}
+          sortAriaLabel="Sort reports"
+          sortOptions={[
+            { label: 'Date modified', value: 'modified' },
+            { label: 'Name', value: 'name' },
+            { label: 'Status', value: 'status' },
+          ]}
+        />
 
         <FileList aria-label="Reports">
           <FileHeader>
@@ -289,7 +278,7 @@ export function ReportsLibraryView() {
                 <FileRow key={report.id}>
                   <FileMain type="button" onClick={() => openWorkspace(report.id)}>
                     <FileIcon aria-hidden>
-                      {report.team ? <TeamCrest team={report.team} size={22} /> : <FileText size={18} />}
+                      {report.team ? <TeamCrest team={report.team} size={22} /> : <FileText size={ICON_SIZE} />}
                     </FileIcon>
                     <FileTextBlock>
                       <FileName>{report.name}</FileName>
@@ -305,11 +294,11 @@ export function ReportsLibraryView() {
                   <FileDate>{report.lastUpdated}</FileDate>
                   <FileActions>
                     <IconButton
-                      size="sm"
+                      size="xs"
                       intent="secondary"
                       variant="ghost"
                       label={isFavorite ? `Remove ${report.name} from favorites` : `Add ${report.name} to favorites`}
-                      icon={<Star size={16} fill={isFavorite ? 'currentColor' : 'none'} />}
+                      icon={<Star size={ICON_SIZE} fill={isFavorite ? 'currentColor' : 'none'} />}
                       onClick={() => toggleFavorite(report.id)}
                     />
                   </FileActions>
@@ -325,9 +314,10 @@ export function ReportsLibraryView() {
 
 const GreetingBlock = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-400);
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-300) var(--space-400);
   margin-bottom: var(--space-600);
 `;
 
@@ -446,52 +436,6 @@ const RecTeamPreview = styled.span`
   font-family: var(--font-family);
   font-size: var(--type-size-caption);
   font-weight: var(--font-weight-medium);
-`;
-
-const ToolbarRow = styled(FilterBar)`
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-300);
-  margin-bottom: var(--space-300);
-`;
-
-/** Keep ContentSwitcher segments content-sized instead of equal-flex. */
-const FilterSwitcherSlot = styled.div`
-  flex: 0 0 auto;
-  width: max-content;
-  max-width: 100%;
-
-  & > div {
-    width: max-content;
-    max-width: 100%;
-  }
-
-  & button {
-    flex: 0 0 auto;
-    width: auto;
-    min-width: max-content;
-  }
-`;
-
-const ToolbarControls = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--space-200);
-  min-width: 0;
-  flex: 1 1 280px;
-  justify-content: flex-end;
-`;
-
-const SearchSlot = styled.div`
-  flex: 1 1 220px;
-  max-width: 360px;
-  min-width: 0;
-`;
-
-const SortSlot = styled.div`
-  flex: 0 1 180px;
-  min-width: 148px;
 `;
 
 const FileList = styled.div`

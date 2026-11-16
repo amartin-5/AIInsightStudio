@@ -1,11 +1,17 @@
 import type { ReactNode } from 'react';
 import styled from 'styled-components';
-import { Button, Chip, ContentSwitcher, TextInput } from '@cake-admin/cakeand';
+import { Button, Chip, ContentSwitcher, Dropdown, TextInput } from '@cake-admin/cakeand';
 import { LayoutGrid, List, Search } from 'lucide-react';
 
 import { FilterBar, MetaRow, Muted } from '../ui.styles';
+import { ICON_SIZE } from '../../iconSize';
 
 export type CatalogSortOption = {
+  value: string;
+  label: string;
+};
+
+export type CatalogFilterOption = {
   value: string;
   label: string;
 };
@@ -15,9 +21,17 @@ export type CatalogToolbarProps = {
   onSearchChange: (value: string) => void;
   searchPlaceholder?: string;
   searchAriaLabel?: string;
+  /** Optional leading segmented filter (e.g. Recent / Favorites / Shared). */
+  filterOptions?: CatalogFilterOption[];
+  filterValue?: string;
+  onFilterChange?: (value: string) => void;
+  filterAriaLabel?: string;
   sortValue: string;
   onSortChange: (value: string) => void;
   sortOptions: CatalogSortOption[];
+  /** `buttons` matches Templates/Library; `dropdown` matches Reports. */
+  sortMode?: 'buttons' | 'dropdown';
+  sortAriaLabel?: string;
   layoutValue?: 'grid' | 'list';
   onLayoutChange?: (value: 'grid' | 'list') => void;
   showLayoutToggle?: boolean;
@@ -51,9 +65,30 @@ const Toolbar = styled(FilterBar)`
   box-shadow: var(--elevation-0);
 `;
 
+const FilterSlot = styled.div`
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+`;
+
 const SearchSlot = styled.div`
-  flex: 1 1 240px;
+  flex: 1 1 220px;
   max-width: 360px;
+  min-width: 0;
+`;
+
+const SortSlot = styled.div`
+  flex: 0 1 180px;
+  min-width: 148px;
+`;
+
+const Trailing = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-200);
+  margin-left: auto;
   min-width: 0;
 `;
 
@@ -81,56 +116,89 @@ const ResultLabel = styled.span`
   line-height: 1.35;
 `;
 
-/** Shared search / sort / layout chrome used by Templates, Library, and similar catalogs. */
+/** Shared search / filter / sort / layout chrome for Reports, Templates, and Library. */
 export function CatalogToolbar({
   searchValue,
   onSearchChange,
   searchPlaceholder = 'Search',
   searchAriaLabel = 'Search',
+  filterOptions,
+  filterValue,
+  onFilterChange,
+  filterAriaLabel = 'Filters',
   sortValue,
   onSortChange,
   sortOptions,
+  sortMode = 'buttons',
+  sortAriaLabel = 'Sort',
   layoutValue = 'grid',
   onLayoutChange,
   showLayoutToggle = false,
   layoutAriaLabel = 'Layout',
 }: CatalogToolbarProps) {
+  const showFilters = Boolean(filterOptions?.length && onFilterChange && filterValue !== undefined);
+
   return (
     <Toolbar>
+      {showFilters && (
+        <FilterSlot>
+          <ContentSwitcher
+            aria-label={filterAriaLabel}
+            size="sm"
+            value={filterValue}
+            onValueChange={onFilterChange}
+            options={filterOptions!}
+          />
+        </FilterSlot>
+      )}
       <SearchSlot>
         <TextInput
           aria-label={searchAriaLabel}
           placeholder={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
-          startIcon={<Search size={16} />}
+          startIcon={<Search size={ICON_SIZE} />}
           size="sm"
         />
       </SearchSlot>
-      {sortOptions.map((option) => (
-        <Button
-          key={option.value}
-          size="sm"
-          intent="secondary"
-          variant={sortValue === option.value ? 'tonal' : 'ghost'}
-          onClick={() => onSortChange(option.value)}
-        >
-          {option.label}
-        </Button>
-      ))}
-      {showLayoutToggle && onLayoutChange && (
-        <ContentSwitcher
-          aria-label={layoutAriaLabel}
-          size="sm"
-          iconOnly
-          value={layoutValue}
-          onValueChange={(value) => onLayoutChange(value as 'grid' | 'list')}
-          options={[
-            { value: 'grid', label: 'Grid', icon: <LayoutGrid size={16} /> },
-            { value: 'list', label: 'List', icon: <List size={16} /> },
-          ]}
-        />
-      )}
+      <Trailing>
+        {sortMode === 'dropdown' ? (
+          <SortSlot>
+            <Dropdown
+              aria-label={sortAriaLabel}
+              placeholder="Sort"
+              value={sortValue}
+              onValueChange={onSortChange}
+              options={sortOptions}
+            />
+          </SortSlot>
+        ) : (
+          sortOptions.map((option) => (
+            <Button
+              key={option.value}
+              size="sm"
+              intent="secondary"
+              variant={sortValue === option.value ? 'tonal' : 'ghost'}
+              onClick={() => onSortChange(option.value)}
+            >
+              {option.label}
+            </Button>
+          ))
+        )}
+        {showLayoutToggle && onLayoutChange && (
+          <ContentSwitcher
+            aria-label={layoutAriaLabel}
+            size="sm"
+            iconOnly
+            value={layoutValue}
+            onValueChange={(value) => onLayoutChange(value as 'grid' | 'list')}
+            options={[
+              { value: 'grid', label: 'Grid', icon: <LayoutGrid size={ICON_SIZE} /> },
+              { value: 'list', label: 'List', icon: <List size={ICON_SIZE} /> },
+            ]}
+          />
+        )}
+      </Trailing>
     </Toolbar>
   );
 }

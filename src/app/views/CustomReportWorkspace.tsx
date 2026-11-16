@@ -7,7 +7,6 @@ import {
   Download,
   LayoutGrid,
   Maximize2,
-  MessageSquare,
   PanelLeftClose,
   PanelLeftOpen,
   Pencil,
@@ -21,17 +20,16 @@ import {
   CustomReportCanvas,
   DEFAULT_MATCH_CONTEXT,
   GuidedTourCard,
-  teamCodeShort,
+  teamCodeLabel,
   type MatchContext,
 } from '../../product/builder';
 import type { ReportObjectSlot } from '../../product/types';
 import { useAppState } from '../AppState';
 import { ChatAnswerActions } from '../components/ChatAnswerActions';
 import { DashboardDetailsEditor } from '../components/DashboardDetailsEditor';
-import { DashboardMetaLine } from '../components/DashboardMetaLine';
 import { PresentChrome } from '../components/PresentChrome';
+import { ReportDashboardHeader } from '../components/ReportDashboardHeader';
 import {
-  ActionRow,
   AiChatScroll,
   AiComposer,
   AiEmptyState,
@@ -45,29 +43,9 @@ import {
   ReportPane,
   SplitWorkspace,
   Strong,
-  Toolbar,
-  ToolbarTitle,
   WrapButtonSlot,
 } from '../ui.styles';
 import { ICON_SIZE } from '../../iconSize';
-
-const MatchHeader = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-300);
-  margin: var(--space-400) 0;
-`;
-
-const ScoreLine = styled.p`
-  margin: 0;
-  color: var(--color-text-icon-primary);
-  font-family: var(--font-family);
-  font-size: var(--type-size-title);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.2;
-`;
 
 const CanvasPad = styled.div`
   display: grid;
@@ -83,18 +61,6 @@ const PanelHeader = styled.div`
   padding: var(--space-300) var(--space-400);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
   min-width: 0;
-`;
-
-const TitleText = styled.h2`
-  margin: 0;
-  color: var(--color-text-icon-primary);
-  font-family: var(--font-family);
-  font-size: var(--type-size-subject);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 `;
 
 /**
@@ -173,8 +139,9 @@ export function CustomReportWorkspace() {
     setDraft('');
   };
 
-  const homeShort = teamCodeShort(matchContext.homeTeam);
-  const awayShort = matchContext.awayTeam ? teamCodeShort(matchContext.awayTeam) : null;
+  const crestTeam =
+    activeReport.team ||
+    (matchContext.homeTeam ? teamCodeLabel(matchContext.homeTeam) : undefined);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
@@ -323,19 +290,15 @@ export function CustomReportWorkspace() {
         </AiPanel>
 
         <ReportPane aria-label="Custom report canvas">
-          <Toolbar>
-            <ToolbarTitle>
-              <TitleText>{activeReport.name}</TitleText>
-              <DashboardMetaLine
-                report={activeReport}
-                statusLabel={isGuide ? 'Draft' : activeReport.status}
-                editMode={editMode}
-                detailsOpen={detailsOpen}
-                onEditSelections={() => setDetailsOpen((open) => !open)}
-              />
-            </ToolbarTitle>
-            <ActionRow>
-              {editMode ? (
+          <ReportDashboardHeader
+            report={activeReport}
+            team={crestTeam}
+            statusLabel={isGuide ? 'Draft' : activeReport.status}
+            editMode={editMode}
+            detailsOpen={detailsOpen}
+            onEditSelections={() => setDetailsOpen((open) => !open)}
+            actions={
+              editMode ? (
                 <>
                   <Button
                     size="sm"
@@ -375,14 +338,15 @@ export function CustomReportWorkspace() {
                       onClick={saveReport}
                     />
                   )}
-                  <IconButton
-                    label="Edit"
-                    icon={<Pencil size={ICON_SIZE} />}
-                    size="xs"
-                    intent="secondary"
-                    variant="ghost"
+                  <Button
+                    size="sm"
+                    intent="primary"
+                    variant="tonal"
+                    startIcon={<Pencil size={ICON_SIZE} />}
                     onClick={() => setEditMode(true)}
-                  />
+                  >
+                    Edit
+                  </Button>
                   <IconButton
                     label="Share"
                     icon={<Share2 size={ICON_SIZE} />}
@@ -418,17 +382,10 @@ export function CustomReportWorkspace() {
                     variant="ghost"
                     onClick={() => setPresentMode(true)}
                   />
-                  <IconButton
-                    label="Comments"
-                    icon={<MessageSquare size={ICON_SIZE} />}
-                    size="xs"
-                    intent="secondary"
-                    variant="ghost"
-                  />
                 </>
-              )}
-            </ActionRow>
-          </Toolbar>
+              )
+            }
+          />
 
           <ReportCanvas>
             <CanvasPad>
@@ -437,18 +394,6 @@ export function CustomReportWorkspace() {
                 report={activeReport}
                 onClose={() => setDetailsOpen(false)}
               />
-              <MatchHeader>
-                <ScoreLine>
-                  {awayShort
-                    ? `2 ${homeShort} vs ${awayShort} 1`
-                    : `${homeShort} · ${matchContext.year || '—'}`}
-                </ScoreLine>
-                <Muted>
-                  {matchContext.tournament
-                    ? `${matchContext.tournament.toUpperCase()} · ${matchContext.year}`
-                    : 'Match context'}
-                </Muted>
-              </MatchHeader>
               <CustomReportCanvas
                 page={page}
                 selectedSlot={selectedSlot}

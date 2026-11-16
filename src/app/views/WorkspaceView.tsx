@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Badge,
   Button,
   IconButton,
   MenuContainer,
@@ -34,14 +33,12 @@ import styled from 'styled-components';
 
 import { ICON_SIZE, ICON_SIZE_LG } from '../../iconSize';
 import { ReportPageCanvas } from '../../product/ReportPageCanvas';
-import { TeamCrest } from '../../product/teams/TeamCrest';
 import { useAppState } from '../AppState';
 import { ChatAnswerActions } from '../components/ChatAnswerActions';
 import { DashboardDetailsEditor } from '../components/DashboardDetailsEditor';
-import { DashboardMetaLine } from '../components/DashboardMetaLine';
 import { PresentChrome } from '../components/PresentChrome';
+import { ReportDashboardHeader } from '../components/ReportDashboardHeader';
 import {
-  ActionRow,
   AiChatScroll,
   AiComposer,
   AiEmptyState,
@@ -63,8 +60,6 @@ import {
   StatusBanner,
   Strong,
   SurfaceCard,
-  Toolbar,
-  ToolbarTitle,
   WrapButtonSlot,
 } from '../ui.styles';
 import { CustomReportWorkspace } from './CustomReportWorkspace';
@@ -264,33 +259,16 @@ export function WorkspaceView() {
         )}
 
         <ReportPane aria-label="Standing report">
-          <Toolbar>
-            <ToolbarTitle>
-              <TitleWithCrest>
-                {activeReport.team ? <TeamCrest team={activeReport.team} size="lg" /> : null}
-                <Strong>{activeReport.name}</Strong>
-              </TitleWithCrest>
-              <DashboardMetaLine
-                report={activeReport}
-                statusLabel={activeReport.status}
-                editMode={editMode}
-                detailsOpen={detailsOpen}
-                onEditSelections={() => setDetailsOpen((open) => !open)}
-              />
-              <MetaExtras>
-                <Muted as="span" style={{ display: 'inline' }}>
-                  {config.competitionLabel}
-                </Muted>
-                <Badge color="secondary" tone="subtle" dot={false}>
-                  {activeReport.sharing}
-                </Badge>
-                <Muted as="span" style={{ display: 'inline' }}>
-                  Updated {activeReport.lastUpdated}
-                </Muted>
-              </MetaExtras>
-            </ToolbarTitle>
-            <ActionRow>
-              {editMode ? (
+          <ReportDashboardHeader
+            report={activeReport}
+            team={activeReport.team}
+            statusLabel={activeReport.status}
+            competitionLabel={config.competitionLabel}
+            editMode={editMode}
+            detailsOpen={detailsOpen}
+            onEditSelections={() => setDetailsOpen((open) => !open)}
+            actions={
+              editMode ? (
                 <>
                   <Button
                     size="sm"
@@ -384,18 +362,19 @@ export function WorkspaceView() {
                     variant="ghost"
                     onClick={() => setPanel('settings')}
                   />
-                  <IconButton
-                    label="Edit"
-                    icon={<Pencil size={ICON_SIZE} />}
-                    size="xs"
-                    intent="secondary"
-                    variant="ghost"
+                  <Button
+                    size="sm"
+                    intent="primary"
+                    variant="tonal"
+                    startIcon={<Pencil size={ICON_SIZE} />}
                     onClick={() => setEditMode(true)}
-                  />
+                  >
+                    Edit
+                  </Button>
                 </>
-              )}
-            </ActionRow>
-          </Toolbar>
+              )
+            }
+          />
 
           <PageTabs>
             {activeReport.pages.map((p) => (
@@ -584,22 +563,6 @@ export function WorkspaceView() {
     </div>
   );
 }
-
-const TitleWithCrest = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-200);
-  min-width: 0;
-`;
-
-const MetaExtras = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-200);
-  min-width: 0;
-`;
 
 const CanvasStack = styled.div`
   display: grid;

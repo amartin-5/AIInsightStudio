@@ -552,11 +552,9 @@ export const PageTabs = styled.div`
   flex: none;
   box-sizing: border-box;
   /* Equal block padding — kept intact via flex:none so the pane cannot crush it. */
-  padding: var(--space-150) var(--space-300);
+  padding: var(--space-100) var(--space-400);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
-  background: var(--color-surfaces-container-blur-high);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: var(--color-surfaces-container);
   overflow-x: auto;
   min-width: 0;
 

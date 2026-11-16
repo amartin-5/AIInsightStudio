@@ -297,6 +297,7 @@ export function buildEnglandPages() {
           matchStatus: 'FT',
           matchMeta: 'Final · Sydney · Full match',
           slot: 'header' as const,
+          grid: { x: 0, y: 0, w: 12, h: 3 },
         },
         {
           id: 'board-kpis',
@@ -305,6 +306,7 @@ export function buildEnglandPages() {
           metricHint: 'final-match',
           sourceRefs: ['eng-spain'],
           slot: 'metrics' as const,
+          grid: { x: 0, y: 3, w: 12, h: 4 },
         },
         {
           id: 'board-ins-1',
@@ -312,6 +314,7 @@ export function buildEnglandPages() {
           title: 'What changed',
           body: 'Chance quality dropped in the second half while Spain’s progressive carries into the box increased.',
           slot: 'insight' as const,
+          grid: { x: 0, y: 7, w: 4, h: 4 },
         },
         {
           id: 'board-ins-2',
@@ -319,6 +322,7 @@ export function buildEnglandPages() {
           title: 'Pressing',
           body: 'PPDA rose after 60′ — England’s mid-block sat deeper and Spain found half-space switches.',
           slot: 'insight' as const,
+          grid: { x: 4, y: 7, w: 4, h: 4 },
         },
         {
           id: 'board-ins-3',
@@ -326,14 +330,7 @@ export function buildEnglandPages() {
           title: 'Set pieces',
           body: 'England’s clearest looks came from dead-ball delivery; open-play xG stayed below 0.5.',
           slot: 'insight' as const,
-        },
-        {
-          id: 'board-form',
-          kind: 'chart' as const,
-          title: 'Form guide',
-          chartId: 'england-spain-form',
-          sourceRefs: ['eng-spain'],
-          slot: 'insight' as const,
+          grid: { x: 8, y: 7, w: 4, h: 4 },
         },
         {
           id: 'board-pitch',
@@ -341,6 +338,7 @@ export function buildEnglandPages() {
           title: 'Lineup & formation',
           chartId: 'england-pitch',
           slot: 'chart-a' as const,
+          grid: { x: 0, y: 11, w: 4, h: 7 },
         },
         {
           id: 'board-shots',
@@ -349,6 +347,7 @@ export function buildEnglandPages() {
           chartId: 'england-spain-shot-map',
           sourceRefs: ['eng-spain'],
           slot: 'chart-b' as const,
+          grid: { x: 4, y: 11, w: 4, h: 7 },
         },
         {
           id: 'board-xg',
@@ -357,14 +356,7 @@ export function buildEnglandPages() {
           chartId: 'england-spain-momentum',
           sourceRefs: ['eng-spain'],
           slot: 'chart-c' as const,
-        },
-        {
-          id: 'board-passes',
-          kind: 'spatial' as const,
-          title: 'Pass network',
-          chartId: 'england-final-passes',
-          sourceRefs: ['eng-spain'],
-          slot: 'notes' as const,
+          grid: { x: 8, y: 11, w: 4, h: 7 },
         },
         {
           id: 'board-donut',
@@ -373,12 +365,14 @@ export function buildEnglandPages() {
           chartId: 'england-shot-donut',
           sourceRefs: ['eng-spain'],
           slot: 'media' as const,
+          grid: { x: 0, y: 18, w: 6, h: 6 },
         },
         {
           id: 'board-events',
           kind: 'event-list' as const,
           title: 'Key events',
           slot: 'events' as const,
+          grid: { x: 6, y: 18, w: 6, h: 6 },
           events: [
             { id: 'be1', minute: "29'", text: 'Yellow card — England midfielder', tone: 'card' as const },
             { id: 'be2', minute: "70'", text: 'Substitution — England introduce width', tone: 'sub' as const },
@@ -393,6 +387,7 @@ export function buildEnglandPages() {
           chartId: 'england-spain-team-stats',
           sourceRefs: ['eng-spain'],
           slot: 'main' as const,
+          grid: { x: 0, y: 24, w: 8, h: 7 },
         },
         {
           id: 'board-zones',
@@ -401,6 +396,25 @@ export function buildEnglandPages() {
           chartId: 'england-spain-zones',
           sourceRefs: ['eng-spain'],
           slot: 'side' as const,
+          grid: { x: 8, y: 24, w: 4, h: 7 },
+        },
+        {
+          id: 'board-form',
+          kind: 'chart' as const,
+          title: 'Form guide',
+          chartId: 'england-spain-form',
+          sourceRefs: ['eng-spain'],
+          slot: 'insight' as const,
+          grid: { x: 0, y: 31, w: 4, h: 7 },
+        },
+        {
+          id: 'board-passes',
+          kind: 'spatial' as const,
+          title: 'Pass network',
+          chartId: 'england-final-passes',
+          sourceRefs: ['eng-spain'],
+          slot: 'notes' as const,
+          grid: { x: 4, y: 31, w: 4, h: 7 },
         },
         {
           id: 'board-factors',
@@ -409,6 +423,7 @@ export function buildEnglandPages() {
           chartId: 'england-spain-factors',
           sourceRefs: ['eng-spain'],
           slot: 'slot-1' as const,
+          grid: { x: 8, y: 31, w: 4, h: 7 },
         },
         {
           id: 'board-players',
@@ -417,6 +432,7 @@ export function buildEnglandPages() {
           chartId: 'england-key-players',
           sourceRefs: ['eng-spain'],
           slot: 'slot-2' as const,
+          grid: { x: 0, y: 38, w: 6, h: 7 },
         },
         {
           id: 'board-replay',
@@ -425,6 +441,7 @@ export function buildEnglandPages() {
           body: 'Key moments · Final third & late goal sequence',
           metricHint: '3:48',
           slot: 'slot-3' as const,
+          grid: { x: 6, y: 38, w: 6, h: 7 },
         },
       ],
     },
@@ -444,6 +461,7 @@ export function buildEnglandPages() {
           matchStatus: 'FT',
           matchMeta: 'Final · Sydney · 20 Aug 2023',
           slot: 'header' as const,
+          grid: { x: 0, y: 0, w: 12, h: 3 },
         },
         {
           id: 'review-video',
@@ -452,12 +470,14 @@ export function buildEnglandPages() {
           body: 'AI-selected sequences · Final third transitions',
           metricHint: '4:12',
           slot: 'media' as const,
+          grid: { x: 0, y: 3, w: 6, h: 6 },
         },
         {
           id: 'review-events',
           kind: 'event-list' as const,
           title: 'Key events',
           slot: 'events' as const,
+          grid: { x: 6, y: 3, w: 6, h: 6 },
           events: [
             { id: 're1', minute: "29'", text: 'Yellow card — England midfielder', tone: 'card' as const },
             { id: 're2', minute: "70'", text: 'Substitution — England introduce width', tone: 'sub' as const },
@@ -471,6 +491,7 @@ export function buildEnglandPages() {
           title: 'Average positions',
           chartId: 'england-pitch',
           slot: 'side' as const,
+          grid: { x: 0, y: 9, w: 6, h: 7 },
         },
         {
           id: 'review-momentum',
@@ -478,6 +499,7 @@ export function buildEnglandPages() {
           title: 'Match momentum',
           chartId: 'england-spain-momentum',
           slot: 'chart-a' as const,
+          grid: { x: 6, y: 9, w: 6, h: 7 },
         },
         {
           id: 'review-passes',
@@ -485,6 +507,7 @@ export function buildEnglandPages() {
           title: 'Pass network',
           chartId: 'england-final-passes',
           slot: 'chart-b' as const,
+          grid: { x: 0, y: 16, w: 6, h: 7 },
         },
         {
           id: 'review-shots',
@@ -492,6 +515,7 @@ export function buildEnglandPages() {
           title: 'Shot outcomes',
           chartId: 'england-shot-donut',
           slot: 'chart-c' as const,
+          grid: { x: 6, y: 16, w: 6, h: 7 },
         },
       ],
     },
@@ -500,13 +524,6 @@ export function buildEnglandPages() {
       name: 'Tournament',
       layout: 'summary-dashboard' as const,
       objects: [
-        {
-          id: 'tour-ai',
-          kind: 'ai-summary' as const,
-          title: 'Tournament summary',
-          body: aiOverview,
-          slot: 'insight' as const,
-        },
         {
           id: 'tour-kpis',
           kind: 'kpi-row' as const,
@@ -521,22 +538,15 @@ export function buildEnglandPages() {
             'eng-spain',
           ],
           slot: 'metrics' as const,
+          grid: { x: 0, y: 0, w: 12, h: 4 },
         },
         {
-          id: 'tour-radar',
-          kind: 'chart' as const,
-          title: 'Performance profile',
-          chartId: 'england-radar',
-          sourceRefs: [
-            'eng-haiti',
-            'eng-denmark',
-            'eng-china',
-            'eng-nigeria',
-            'eng-colombia',
-            'eng-australia',
-            'eng-spain',
-          ],
-          slot: 'main' as const,
+          id: 'tour-ai',
+          kind: 'ai-summary' as const,
+          title: 'Tournament summary',
+          body: aiOverview,
+          slot: 'insight' as const,
+          grid: { x: 0, y: 4, w: 12, h: 4 },
         },
         {
           id: 'tour-goals',
@@ -553,6 +563,7 @@ export function buildEnglandPages() {
             'eng-spain',
           ],
           slot: 'chart-a' as const,
+          grid: { x: 0, y: 8, w: 6, h: 7 },
         },
         {
           id: 'tour-poss',
@@ -569,6 +580,24 @@ export function buildEnglandPages() {
             'eng-spain',
           ],
           slot: 'chart-b' as const,
+          grid: { x: 6, y: 8, w: 6, h: 7 },
+        },
+        {
+          id: 'tour-radar',
+          kind: 'chart' as const,
+          title: 'Performance profile',
+          chartId: 'england-radar',
+          sourceRefs: [
+            'eng-haiti',
+            'eng-denmark',
+            'eng-china',
+            'eng-nigeria',
+            'eng-colombia',
+            'eng-australia',
+            'eng-spain',
+          ],
+          slot: 'main' as const,
+          grid: { x: 0, y: 15, w: 8, h: 7 },
         },
         {
           id: 'tour-note',
@@ -577,6 +606,7 @@ export function buildEnglandPages() {
           body: analystNoteSample,
           preserveOnRefresh: true,
           slot: 'notes' as const,
+          grid: { x: 8, y: 15, w: 4, h: 7 },
         },
       ],
     },
@@ -591,19 +621,21 @@ export function buildAustraliaPages() {
       layout: 'summary-dashboard' as const,
       objects: [
         {
-          id: 'aus-ai',
-          kind: 'ai-summary' as const,
-          title: 'Host run — what mattered',
-          body: 'Australia’s ceiling was the Canada 4–0: high press + early width created a +2.1 xG swing. The semi-final vs England flipped that script — rest-defense spacing opened after 60′, and England’s second and third goals came from the same half-space corridor.',
-          slot: 'insight' as const,
-        },
-        {
           id: 'aus-kpis',
           kind: 'kpi-row' as const,
           title: 'Tournament metrics',
           metricHint: 'australia',
           sourceRefs: ['eng-australia'],
           slot: 'metrics' as const,
+          grid: { x: 0, y: 0, w: 12, h: 4 },
+        },
+        {
+          id: 'aus-ai',
+          kind: 'ai-summary' as const,
+          title: 'Host run — what mattered',
+          body: 'Australia’s ceiling was the Canada 4–0: high press + early width created a +2.1 xG swing. The semi-final vs England flipped that script — rest-defense spacing opened after 60′, and England’s second and third goals came from the same half-space corridor.',
+          slot: 'insight' as const,
+          grid: { x: 0, y: 4, w: 12, h: 4 },
         },
         {
           id: 'aus-goals',
@@ -611,6 +643,7 @@ export function buildAustraliaPages() {
           title: 'Goals by match',
           chartId: 'australia-goals-bar',
           slot: 'main' as const,
+          grid: { x: 0, y: 8, w: 8, h: 7 },
         },
         {
           id: 'aus-note',
@@ -618,6 +651,7 @@ export function buildAustraliaPages() {
           title: 'Executive takeaway',
           body: 'Peak efficiency vs Canada; transition vulnerability exposed in the semi-final. For future host cycles, prioritize rest-defense drills when the mid-block sits deeper than PPDA 11.',
           slot: 'notes' as const,
+          grid: { x: 8, y: 8, w: 4, h: 7 },
         },
       ],
     },
@@ -626,6 +660,22 @@ export function buildAustraliaPages() {
       name: 'Match progression',
       layout: 'analytics-split' as const,
       objects: [
+        {
+          id: 'aus-press',
+          kind: 'ai-summary' as const,
+          title: 'Pressing arc',
+          body: 'PPDA stayed under 10 through the quarter-final, then rose to 12.4 in the semi — England found switches into the vacated half-spaces once Australia’s first press fatigued.',
+          slot: 'metrics' as const,
+          grid: { x: 0, y: 0, w: 12, h: 4 },
+        },
+        {
+          id: 'aus-compare',
+          kind: 'chart' as const,
+          title: 'Attacking contribution',
+          chartId: 'wwc-attack-stacked',
+          slot: 'chart-a' as const,
+          grid: { x: 0, y: 4, w: 6, h: 8 },
+        },
         {
           id: 'aus-table',
           kind: 'table' as const,
@@ -640,20 +690,7 @@ export function buildAustraliaPages() {
             ['England', 'SF', 'L 1–3', '1.1', 'Transition vulnerability exposed.'],
           ],
           slot: 'main' as const,
-        },
-        {
-          id: 'aus-press',
-          kind: 'ai-summary' as const,
-          title: 'Pressing arc',
-          body: 'PPDA stayed under 10 through the quarter-final, then rose to 12.4 in the semi — England found switches into the vacated half-spaces once Australia’s first press fatigued.',
-          slot: 'metrics' as const,
-        },
-        {
-          id: 'aus-compare',
-          kind: 'chart' as const,
-          title: 'Attacking contribution',
-          chartId: 'wwc-attack-stacked',
-          slot: 'chart-a' as const,
+          grid: { x: 6, y: 4, w: 6, h: 8 },
         },
       ],
     },
@@ -668,6 +705,7 @@ export function buildAustraliaPages() {
           title: 'Player watchlist',
           body: 'Raso’s width carried creation when Kerr’s minutes were limited. Gorry’s progressive carries were the reliable bridge through the first press line.',
           slot: 'insight' as const,
+          grid: { x: 0, y: 0, w: 12, h: 4 },
         },
         {
           id: 'aus-players',
@@ -675,6 +713,7 @@ export function buildAustraliaPages() {
           title: 'Matildas spotlights',
           metricHint: 'australia',
           slot: 'main' as const,
+          grid: { x: 0, y: 4, w: 12, h: 8 },
         },
       ],
     },
@@ -689,19 +728,21 @@ export function buildSpainPages() {
       layout: 'summary-dashboard' as const,
       objects: [
         {
-          id: 'esp-ai',
-          kind: 'ai-summary' as const,
-          title: 'Champions profile',
-          body: 'Spain controlled 63% possession and converted knockout xG at 1.4 goals per 1.0 xG — the most efficient finishing rate among finalists. Structured chance creation from half-spaces, not volume crossing, defined the title run.',
-          slot: 'insight' as const,
-        },
-        {
           id: 'esp-kpis',
           kind: 'kpi-row' as const,
           title: 'Tournament metrics',
           metricHint: 'spain',
           sourceRefs: ['eng-spain'],
           slot: 'metrics' as const,
+          grid: { x: 0, y: 0, w: 12, h: 4 },
+        },
+        {
+          id: 'esp-ai',
+          kind: 'ai-summary' as const,
+          title: 'Champions profile',
+          body: 'Spain controlled 63% possession and converted knockout xG at 1.4 goals per 1.0 xG — the most efficient finishing rate among finalists. Structured chance creation from half-spaces, not volume crossing, defined the title run.',
+          slot: 'insight' as const,
+          grid: { x: 0, y: 4, w: 12, h: 4 },
         },
         {
           id: 'esp-chart',
@@ -709,6 +750,7 @@ export function buildSpainPages() {
           title: 'Chance creation (xG)',
           chartId: 'spain-xg-bar',
           slot: 'main' as const,
+          grid: { x: 0, y: 8, w: 8, h: 7 },
         },
         {
           id: 'esp-exec',
@@ -716,6 +758,7 @@ export function buildSpainPages() {
           title: 'Why Spain won',
           body: 'They never abandoned positional play under scoreboard pressure. England’s late width forced a deeper Spanish mid-block, but Spain still created the higher-quality late look that decided the final.',
           slot: 'notes' as const,
+          grid: { x: 8, y: 8, w: 4, h: 7 },
         },
       ],
     },
@@ -725,19 +768,13 @@ export function buildSpainPages() {
       layout: 'analytics-split' as const,
       objects: [
         {
-          id: 'esp-attack-chart',
-          kind: 'chart' as const,
-          title: 'Chance creation (xG)',
-          chartId: 'spain-xg-bar',
-          slot: 'main' as const,
-        },
-        {
           id: 'esp-pass',
           kind: 'metric' as const,
           title: 'Possession',
           metricValue: '63%',
           metricHint: 'Tournament average · +9pp vs England',
           slot: 'metrics' as const,
+          grid: { x: 0, y: 0, w: 4, h: 4 },
         },
         {
           id: 'esp-attack-ai',
@@ -745,6 +782,15 @@ export function buildSpainPages() {
           title: 'Creation pattern',
           body: 'Primary threat: third-man combinations into the right half-space, then cutbacks. Cross share stayed under 18% of entries — unusual for a tournament winner.',
           slot: 'notes' as const,
+          grid: { x: 4, y: 0, w: 8, h: 4 },
+        },
+        {
+          id: 'esp-attack-chart',
+          kind: 'chart' as const,
+          title: 'Chance creation (xG)',
+          chartId: 'spain-xg-bar',
+          slot: 'main' as const,
+          grid: { x: 0, y: 4, w: 6, h: 7 },
         },
         {
           id: 'esp-compare',
@@ -752,6 +798,7 @@ export function buildSpainPages() {
           title: 'Attacking contribution',
           chartId: 'wwc-attack-stacked',
           slot: 'chart-a' as const,
+          grid: { x: 6, y: 4, w: 6, h: 7 },
         },
       ],
     },
@@ -771,6 +818,7 @@ export function buildSpainPages() {
           matchStatus: 'FT',
           matchMeta: 'Final · Sydney · 20 Aug 2023',
           slot: 'header' as const,
+          grid: { x: 0, y: 0, w: 12, h: 3 },
         },
         {
           id: 'esp-final-video',
@@ -779,12 +827,14 @@ export function buildSpainPages() {
           body: '86′ chance conversion · Final third',
           metricHint: '1:04',
           slot: 'media' as const,
+          grid: { x: 0, y: 3, w: 6, h: 6 },
         },
         {
           id: 'esp-final-events',
           kind: 'event-list' as const,
           title: 'Key events',
           slot: 'events' as const,
+          grid: { x: 6, y: 3, w: 6, h: 6 },
           events: [
             { id: 'se1', minute: "29'", text: 'Yellow — England midfielder', tone: 'card' as const },
             { id: 'se2', minute: "70'", text: 'England introduce width', tone: 'sub' as const },
@@ -798,6 +848,7 @@ export function buildSpainPages() {
           title: 'Average positions',
           chartId: 'england-pitch',
           slot: 'side' as const,
+          grid: { x: 0, y: 9, w: 4, h: 7 },
         },
         {
           id: 'esp-final-momentum',
@@ -805,6 +856,7 @@ export function buildSpainPages() {
           title: 'Match momentum',
           chartId: 'england-spain-momentum',
           slot: 'chart-a' as const,
+          grid: { x: 4, y: 9, w: 4, h: 7 },
         },
         {
           id: 'esp-final-shots',
@@ -812,6 +864,7 @@ export function buildSpainPages() {
           title: 'Shot outcomes',
           chartId: 'england-shot-donut',
           slot: 'chart-b' as const,
+          grid: { x: 8, y: 9, w: 4, h: 7 },
         },
         {
           id: 'esp-final-xg',
@@ -819,6 +872,7 @@ export function buildSpainPages() {
           title: 'Chance quality',
           chartId: 'england-xg-scatter',
           slot: 'chart-c' as const,
+          grid: { x: 0, y: 16, w: 12, h: 7 },
         },
       ],
     },
@@ -838,6 +892,7 @@ export function buildPlayerComparisonPages() {
           title: 'England watchlist — role fit',
           body: 'Three complementary profiles: Mercer finishes, Blake progresses, Quinn protects. Selection hinges on whether the next opponent forces a mid-block or a high press.',
           slot: 'header' as const,
+          grid: { x: 0, y: 0, w: 12, h: 4 },
         },
         {
           id: 'cmp-table',
@@ -859,6 +914,7 @@ export function buildPlayerComparisonPages() {
             'eng-spain',
           ],
           slot: 'main' as const,
+          grid: { x: 0, y: 4, w: 8, h: 8 },
         },
         {
           id: 'cmp-ai',
@@ -866,6 +922,7 @@ export function buildPlayerComparisonPages() {
           title: 'Who to start',
           body: 'Mercer leads finishing output (0.82 goals/90). Blake balances creation and progression — best vs mid-blocks. Quinn anchors defensive actions when protecting a lead after 70′.',
           slot: 'side' as const,
+          grid: { x: 8, y: 4, w: 4, h: 8 },
         },
         {
           id: 'cmp-radar',
@@ -882,6 +939,7 @@ export function buildPlayerComparisonPages() {
             'eng-spain',
           ],
           slot: 'chart-a' as const,
+          grid: { x: 0, y: 12, w: 6, h: 8 },
         },
         {
           id: 'cmp-players',
@@ -889,6 +947,7 @@ export function buildPlayerComparisonPages() {
           title: 'Spotlight cards',
           metricHint: 'england',
           slot: 'chart-b' as const,
+          grid: { x: 6, y: 12, w: 6, h: 8 },
         },
       ],
     },
@@ -903,18 +962,20 @@ export function buildKnockoutPages() {
       layout: 'summary-dashboard' as const,
       objects: [
         {
-          id: 'ko-ai',
-          kind: 'ai-summary' as const,
-          title: 'Knockout stage patterns',
-          body: 'Across 15 knockout matches, average xG fell from 2.1 (group) to 1.4. Clean sheets rose to 53%. The decisive games were decided after 75′ or on penalties — preparation should prioritize late-game rest defense and set-piece volume.',
-          slot: 'insight' as const,
-        },
-        {
           id: 'ko-kpis',
           kind: 'kpi-row' as const,
           title: 'Knockout metrics',
           metricHint: 'knockout',
           slot: 'metrics' as const,
+          grid: { x: 0, y: 0, w: 12, h: 4 },
+        },
+        {
+          id: 'ko-ai',
+          kind: 'ai-summary' as const,
+          title: 'Knockout stage patterns',
+          body: 'Across 15 knockout matches, average xG fell from 2.1 (group) to 1.4. Clean sheets rose to 53%. The decisive games were decided after 75′ or on penalties — preparation should prioritize late-game rest defense and set-piece volume.',
+          slot: 'insight' as const,
+          grid: { x: 0, y: 4, w: 12, h: 4 },
         },
         {
           id: 'ko-chart',
@@ -922,6 +983,7 @@ export function buildKnockoutPages() {
           title: 'Attacking contribution by stage',
           chartId: 'wwc-attack-stacked',
           slot: 'main' as const,
+          grid: { x: 0, y: 8, w: 8, h: 7 },
         },
         {
           id: 'ko-note',
@@ -929,6 +991,7 @@ export function buildKnockoutPages() {
           title: 'Scouting implication',
           body: 'Expect lower chance quality and tighter defensive spacing. Favor squads that can create without open transitions — Spain’s half-space combinations are the reference pattern.',
           slot: 'notes' as const,
+          grid: { x: 8, y: 8, w: 4, h: 7 },
         },
       ],
     },
@@ -937,6 +1000,22 @@ export function buildKnockoutPages() {
       name: 'Path to the final',
       layout: 'analytics-split' as const,
       objects: [
+        {
+          id: 'ko-h2h',
+          kind: 'comparison' as const,
+          title: 'England vs Spain — tournament',
+          body: 'Head-to-head across the competition cycle.',
+          slot: 'metrics' as const,
+          grid: { x: 0, y: 0, w: 6, h: 6 },
+        },
+        {
+          id: 'ko-form',
+          kind: 'chart' as const,
+          title: 'Form into the final',
+          chartId: 'england-spain-form',
+          slot: 'chart-a' as const,
+          grid: { x: 6, y: 0, w: 6, h: 6 },
+        },
         {
           id: 'ko-table',
           kind: 'table' as const,
@@ -948,20 +1027,7 @@ export function buildKnockoutPages() {
             ['ESP–ENG Final', '1–0', '1.8–0.9', '86′ conversion after England width push'],
           ],
           slot: 'main' as const,
-        },
-        {
-          id: 'ko-h2h',
-          kind: 'comparison' as const,
-          title: 'England vs Spain — tournament',
-          body: 'Head-to-head across the competition cycle.',
-          slot: 'metrics' as const,
-        },
-        {
-          id: 'ko-form',
-          kind: 'chart' as const,
-          title: 'Form into the final',
-          chartId: 'england-spain-form',
-          slot: 'chart-a' as const,
+          grid: { x: 0, y: 6, w: 12, h: 7 },
         },
       ],
     },

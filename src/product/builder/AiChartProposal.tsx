@@ -4,6 +4,7 @@ import { Plus, Sparkles } from 'lucide-react';
 
 import { renderChartById } from '../charts';
 import type { ChartProposal } from '../types';
+import { ICON_SIZE } from '../../iconSize';
 
 type Props = {
   proposal: ChartProposal;
@@ -52,7 +53,7 @@ export function AiChartProposal({ proposal, onAddToReport, onFollowUp }: Props) 
       <Caption>{proposal.caption}</Caption>
       <Preview aria-label={proposal.title}>{renderChartById(proposal.chartId)}</Preview>
       <Actions>
-        <Button size="sm" startIcon={<Plus size={16} />} onClick={onAddToReport}>
+        <Button size="sm" startIcon={<Plus size={ICON_SIZE} />} onClick={onAddToReport}>
           Add to report
         </Button>
         {onFollowUp && (
@@ -60,7 +61,7 @@ export function AiChartProposal({ proposal, onAddToReport, onFollowUp }: Props) 
             size="sm"
             intent="secondary"
             variant="outline"
-            startIcon={<Sparkles size={16} />}
+            startIcon={<Sparkles size={ICON_SIZE} />}
             onClick={onFollowUp}
           >
             Create a data analysis

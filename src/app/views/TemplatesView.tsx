@@ -10,7 +10,7 @@ import {
   ModalFooter,
   SimpleCard,
 } from '@cake-admin/cakeand';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 
 import { templateCategories } from '../../demos/wwc2023/templates';
 import { useAppState } from '../AppState';
@@ -34,6 +34,7 @@ import {
   Strong,
   TitleBlock,
 } from '../ui.styles';
+import { ICON_SIZE } from '../../iconSize';
 
 const Intro = styled.div`
   display: grid;
@@ -169,7 +170,6 @@ const FactLabel = styled.span`
 export function TemplatesView() {
   const {
     templates,
-    openHome,
     startSetup,
     startCustomBuild,
     previewTemplateId,
@@ -208,18 +208,6 @@ export function TemplatesView() {
   return (
     <ScrollArea>
       <Intro>
-        <ActionRow>
-          <Button
-            size="sm"
-            intent="secondary"
-            variant="ghost"
-            startIcon={<ArrowLeft size={16} />}
-            onClick={openHome}
-          >
-            Back
-          </Button>
-        </ActionRow>
-
         <PageHeader>
           <TitleBlock>
             <PageTitle>Templates</PageTitle>
@@ -230,16 +218,16 @@ export function TemplatesView() {
           </TitleBlock>
           <HeaderActions>
             <Button
-              size="sm"
+              size="md"
               intent="secondary"
               variant="outline"
-              startIcon={<Sparkles size={16} />}
+              startIcon={<Sparkles size={ICON_SIZE} />}
               onClick={startCustomBuild}
             >
               Custom AI guided build
             </Button>
-            <Button size="sm" onClick={() => startSetup('blank')}>
-              Blank report
+            <Button size="md" startIcon={<Plus size={ICON_SIZE} />} onClick={() => startSetup('blank')}>
+              New report
             </Button>
           </HeaderActions>
         </PageHeader>
@@ -268,7 +256,7 @@ export function TemplatesView() {
         onChange={setCategory}
         ariaLabel="Template types"
         leadingIconFor={(cat) =>
-          cat === 'Recommended' ? <Sparkles size={14} /> : undefined
+          cat === 'Recommended' ? <Sparkles size={ICON_SIZE} /> : undefined
         }
       />
 
@@ -301,7 +289,7 @@ export function TemplatesView() {
                     <MediaFrame>
                       {template.recommended && (
                         <MediaBadge>
-                          <Chip size="sm" type="info" leadingIcon={<Sparkles size={12} />}>
+                          <Chip size="sm" type="info" leadingIcon={<Sparkles size={ICON_SIZE} />}>
                             Recommended
                           </Chip>
                         </MediaBadge>
@@ -359,7 +347,7 @@ export function TemplatesView() {
                 <MetaRow>
                   <Strong>{template.name}</Strong>
                   {template.recommended && (
-                    <Chip size="sm" type="info" leadingIcon={<Sparkles size={12} />}>
+                    <Chip size="sm" type="info" leadingIcon={<Sparkles size={ICON_SIZE} />}>
                       Recommended
                     </Chip>
                   )}
@@ -408,7 +396,7 @@ export function TemplatesView() {
               <PreviewMedia>
                 {preview.recommended && (
                   <MediaBadge>
-                    <Chip size="sm" type="info" leadingIcon={<Sparkles size={12} />}>
+                    <Chip size="sm" type="info" leadingIcon={<Sparkles size={ICON_SIZE} />}>
                       Recommended
                     </Chip>
                   </MediaBadge>

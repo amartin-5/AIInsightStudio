@@ -28,6 +28,7 @@ import {
   Muted,
   Strong,
 } from '../ui.styles';
+import { ICON_SIZE, ICON_SIZE_LG } from '../../iconSize';
 
 type StepId = 'trigger' | 'template' | 'finish';
 
@@ -476,7 +477,7 @@ export function AutomationComposer() {
         <Header>
           <HeaderCopy>
             <Eyebrow>
-              <Workflow size={14} aria-hidden />
+              <Workflow size={ICON_SIZE} aria-hidden />
               {isEdit ? 'Edit automation' : 'New automation'}
             </Eyebrow>
             <Title id="automation-composer-title">
@@ -507,7 +508,7 @@ export function AutomationComposer() {
             </StepRail>
             <IconButton
               label="Close"
-              icon={<X />}
+              icon={<X size={ICON_SIZE_LG} />}
               size="sm"
               intent="secondary"
               variant="ghost"
@@ -538,7 +539,7 @@ export function AutomationComposer() {
                   return (
                     <TriggerOption key={option.kind} $selected={selected}>
                       <ChoiceIcon $selected={selected}>
-                        <Icon size={20} aria-hidden />
+                        <Icon size={ICON_SIZE_LG} aria-hidden />
                       </ChoiceIcon>
                       <TriggerCopy>
                         <Radio value={option.kind} label={option.title} />
@@ -689,7 +690,7 @@ export function AutomationComposer() {
 
               <PreviewCard aria-label="Automation summary">
                 <PreviewTitle>
-                  <Workflow size={18} aria-hidden />
+                  <Workflow size={ICON_SIZE} aria-hidden />
                   <Strong>Ready to run</Strong>
                 </PreviewTitle>
                 <BodyText>
@@ -722,7 +723,7 @@ export function AutomationComposer() {
           <Button
             intent="secondary"
             variant="ghost"
-            startIcon={<ArrowLeft size={16} />}
+            startIcon={<ArrowLeft size={ICON_SIZE} />}
             onClick={goBack}
           >
             {step === 'trigger' ? 'Cancel' : 'Back'}
@@ -730,7 +731,7 @@ export function AutomationComposer() {
           <ActionRow>
             {step !== 'finish' ? (
               <Button
-                endIcon={<ArrowRight size={16} />}
+                endIcon={<ArrowRight size={ICON_SIZE} />}
                 disabled={!canContinue}
                 onClick={goNext}
               >

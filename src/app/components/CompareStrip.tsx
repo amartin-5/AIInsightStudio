@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { TeamCrest } from '../../product/teams/TeamCrest';
 import { useAppState } from '../AppState';
 import { BodyText, MetaRow, Muted, Strong } from '../ui.styles';
+import { ICON_SIZE } from '../../iconSize';
 
 const Form = styled.div`
   display: flex;
@@ -72,7 +73,7 @@ export function CompareForm() {
   return (
     <Form aria-label="Compare settings">
       <MetaRow>
-        <Columns2 size={16} aria-hidden />
+        <Columns2 size={ICON_SIZE} aria-hidden />
         <BodyText>Pick two sides to compare in this report.</BodyText>
       </MetaRow>
 

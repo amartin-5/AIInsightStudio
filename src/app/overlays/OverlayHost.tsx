@@ -39,6 +39,7 @@ import {
   TableWrap,
 } from '../ui.styles';
 import { AutomationComposer } from './AutomationComposer';
+import { ICON_SIZE } from '../../iconSize';
 
 export function OverlayHost() {
   const {
@@ -128,7 +129,7 @@ export function OverlayHost() {
         <SideDrawer aria-label="Share report">
           <DrawerHeader>
             <Strong>Share report</Strong>
-            <IconButton label="Close" icon={<X />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
+            <IconButton label="Close" icon={<X size={ICON_SIZE} />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
           </DrawerHeader>
           <DrawerBody>
             <BodyText>People with access</BodyText>
@@ -182,7 +183,7 @@ export function OverlayHost() {
         <SideDrawer aria-label="Export report">
           <DrawerHeader>
             <Strong>Export</Strong>
-            <IconButton label="Close" icon={<X />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
+            <IconButton label="Close" icon={<X size={ICON_SIZE} />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
           </DrawerHeader>
           <DrawerBody>
             <ListStack>
@@ -225,7 +226,7 @@ export function OverlayHost() {
         <SideDrawer aria-label="Report settings">
           <DrawerHeader>
             <Strong>Report settings</Strong>
-            <IconButton label="Close" icon={<X />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
+            <IconButton label="Close" icon={<X size={ICON_SIZE} />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
           </DrawerHeader>
           <DrawerBody>
             <BodyText>Data sources to use</BodyText>
@@ -273,7 +274,7 @@ export function OverlayHost() {
         <SideDrawer aria-label="Schedule refresh">
           <DrawerHeader>
             <Strong>Schedule refresh</Strong>
-            <IconButton label="Close" icon={<X />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
+            <IconButton label="Close" icon={<X size={ICON_SIZE} />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
           </DrawerHeader>
           <DrawerBody>
             <Dropdown
@@ -337,7 +338,7 @@ export function OverlayHost() {
         <SideDrawer aria-label="What changed">
           <DrawerHeader>
             <Strong>Report updated</Strong>
-            <IconButton label="Close" icon={<X />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
+            <IconButton label="Close" icon={<X size={ICON_SIZE} />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
           </DrawerHeader>
           <DrawerBody>
             <BodyText>12 objects refreshed · 3 significant changes found · 2 analyst notes preserved · 1 object requires review</BodyText>
@@ -372,7 +373,7 @@ export function OverlayHost() {
         <SideDrawer aria-label="Pin to report">
           <DrawerHeader>
             <Strong>Pin to</Strong>
-            <IconButton label="Close" icon={<X />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
+            <IconButton label="Close" icon={<X size={ICON_SIZE} />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
           </DrawerHeader>
           <DrawerBody>
             {(activeReport?.pages ?? []).map((page) => (
@@ -391,7 +392,7 @@ export function OverlayHost() {
         <SideDrawer aria-label="Add object">
           <DrawerHeader>
             <Strong>Add object</Strong>
-            <IconButton label="Close" icon={<X />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
+            <IconButton label="Close" icon={<X size={ICON_SIZE} />} size="xs" intent="secondary" variant="ghost" onClick={() => setPanel(null)} />
           </DrawerHeader>
           <DrawerBody>
             <Button
@@ -452,7 +453,7 @@ export function OverlayHost() {
             ? `${lineageTarget.title ?? lineageObject?.title ?? 'Selected object'} · ${lineageTarget.metricKey}`
             : (lineageTarget?.title ?? lineageObject?.title ?? 'Selected object')
         }
-        modalIconSlot={<Database />}
+        modalIconSlot={<Database size={ICON_SIZE} />}
         showClose
         footer={
           <ModalFooter

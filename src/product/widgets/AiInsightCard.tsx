@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { Sparkles } from 'lucide-react';
+import { ICON_SIZE } from '../../iconSize';
 
 type Props = {
   eyebrow?: string;
@@ -65,7 +66,7 @@ export function AiInsightCard({
   return (
     <Root>
       <Eyebrow>
-        <Sparkles size={14} aria-hidden />
+        <Sparkles size={ICON_SIZE} aria-hidden />
         {eyebrow}
       </Eyebrow>
       <Title>{title}</Title>

@@ -18,6 +18,7 @@ import {
   UtilityCluster,
 } from './shell.styles';
 import { WindowControls } from './WindowControls';
+import { ICON_SIZE, ICON_SIZE_LG } from '../iconSize';
 
 /**
  * Shell header utilities — search, notifications, account menu, window chrome.
@@ -30,7 +31,7 @@ export function AppHeader() {
       <HeaderCenter>
         <SearchField>
           <SearchIconSlot aria-hidden>
-            <Search />
+            <Search size={ICON_SIZE} />
           </SearchIconSlot>
           <SearchInput
             type="search"
@@ -48,7 +49,7 @@ export function AppHeader() {
           <NotificationWrap>
             <IconButton
               label="Notifications"
-              icon={<Bell />}
+              icon={<Bell size={ICON_SIZE_LG} />}
               size="sm"
               intent="secondary"
               variant="ghost"
@@ -86,7 +87,7 @@ export function AppHeader() {
                       <MenuItem
                         showLeftSlot
                         showRightSlot={false}
-                        leftSlot={<Settings />}
+                        leftSlot={<Settings size={ICON_SIZE} />}
                         onClick={() => setNav('settings')}
                       >
                         Settings
@@ -96,7 +97,7 @@ export function AppHeader() {
                       <MenuItem
                         showLeftSlot
                         showRightSlot={false}
-                        leftSlot={<LogOut />}
+                        leftSlot={<LogOut size={ICON_SIZE} />}
                         onClick={signOut}
                       >
                         Log out

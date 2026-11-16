@@ -9,6 +9,7 @@ import {
   type WidgetCategory,
   type WidgetLibraryEntry,
 } from '../widgets';
+import { ICON_SIZE } from '../../iconSize';
 
 type Props = {
   onPick: (entry: WidgetLibraryEntry) => void;
@@ -130,7 +131,7 @@ export function WidgetLibraryPicker({ onPick }: Props) {
             placeholder="Search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            startIcon={<Search size={16} />}
+            startIcon={<Search size={ICON_SIZE} />}
             size="sm"
           />
         </SearchWrap>
@@ -151,7 +152,7 @@ export function WidgetLibraryPicker({ onPick }: Props) {
               size="sm"
               intent="secondary"
               variant="outline"
-              startIcon={<Plus size={14} />}
+              startIcon={<Plus size={ICON_SIZE} />}
               onClick={() => onPick(entry)}
             >
               Add to report

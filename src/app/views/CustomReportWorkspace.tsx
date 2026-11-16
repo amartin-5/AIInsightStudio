@@ -44,6 +44,7 @@ import {
   ToolbarTitle,
   WrapButtonSlot,
 } from '../ui.styles';
+import { ICON_SIZE } from '../../iconSize';
 
 const MatchHeader = styled.div`
   display: flex;
@@ -156,7 +157,7 @@ export function CustomReportWorkspace() {
             {!aiCollapsed && <Strong>AI guide</Strong>}
             <IconButton
               label={aiCollapsed ? 'Expand AI panel' : 'Collapse AI panel'}
-              icon={aiCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+              icon={aiCollapsed ? <PanelLeftOpen size={ICON_SIZE} /> : <PanelLeftClose size={ICON_SIZE} />}
               size="xs"
               intent="secondary"
               variant="ghost"
@@ -221,8 +222,8 @@ export function CustomReportWorkspace() {
                       <ActionRow>
                         <IconButton
                           label="Copy answer"
-                          icon={<Copy size={16} strokeWidth={2} />}
-                          size="sm"
+                          icon={<Copy size={ICON_SIZE} />}
+                          size="xs"
                           intent="secondary"
                           variant="ghost"
                           onClick={() => navigator.clipboard?.writeText(message.content)}
@@ -238,7 +239,7 @@ export function CustomReportWorkspace() {
                   aria-label="Chat with Insight Studio"
                   placeholder="Chat with Insight Studio"
                   value={draft}
-                  startIcon={<Sparkles size={16} />}
+                  startIcon={<Sparkles size={ICON_SIZE} />}
                   onChange={(e) => setDraft(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && draft.trim()) {
@@ -251,7 +252,7 @@ export function CustomReportWorkspace() {
                   fullWidth
                   intent="secondary"
                   variant="tonal"
-                  startIcon={<LayoutGrid size={16} />}
+                  startIcon={<LayoutGrid size={ICON_SIZE} />}
                   onClick={() => openLibrary()}
                 >
                   View widget library
@@ -275,7 +276,7 @@ export function CustomReportWorkspace() {
             <ActionRow>
               <IconButton
                 label="Export as PDF"
-                icon={<Download size={16} />}
+                icon={<Download size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant="ghost"
@@ -283,7 +284,7 @@ export function CustomReportWorkspace() {
               />
               <IconButton
                 label={activeReport.compare?.enabled ? 'Comparing' : 'Compare'}
-                icon={<Columns2 size={16} />}
+                icon={<Columns2 size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant={activeReport.compare?.enabled ? 'tonal' : 'ghost'}
@@ -294,7 +295,7 @@ export function CustomReportWorkspace() {
               />
               <IconButton
                 label="Present"
-                icon={<Maximize2 size={16} />}
+                icon={<Maximize2 size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant="ghost"
@@ -302,7 +303,7 @@ export function CustomReportWorkspace() {
               />
               <IconButton
                 label="Comments"
-                icon={<MessageSquare size={16} />}
+                icon={<MessageSquare size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant="ghost"

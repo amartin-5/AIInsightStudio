@@ -32,6 +32,7 @@ import {
 import { DropdownMenu } from 'radix-ui';
 import styled from 'styled-components';
 
+import { ICON_SIZE, ICON_SIZE_LG } from '../../iconSize';
 import { ReportPageCanvas } from '../../product/ReportPageCanvas';
 import { TeamCrest } from '../../product/teams/TeamCrest';
 import { useAppState } from '../AppState';
@@ -116,7 +117,7 @@ export function WorkspaceView() {
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         {statusMessage && !presentMode && (
           <StatusBanner role="status" aria-live="polite">
-            <Sparkles size={16} aria-hidden />
+            <Sparkles size={ICON_SIZE} aria-hidden />
             {statusMessage}
           </StatusBanner>
         )}
@@ -172,7 +173,7 @@ export function WorkspaceView() {
               <ActionRow>
                 <IconButton
                   label="Pin to report"
-                  icon={<Pin />}
+                  icon={<Pin size={ICON_SIZE} />}
                   size="xs"
                   intent="secondary"
                   variant="ghost"
@@ -186,8 +187,8 @@ export function WorkspaceView() {
                 />
                 <IconButton
                   label="Copy answer"
-                  icon={<Copy size={16} strokeWidth={2} />}
-                  size="sm"
+                  icon={<Copy size={ICON_SIZE} />}
+                  size="xs"
                   intent="secondary"
                   variant="ghost"
                   onClick={() => navigator.clipboard?.writeText(message.content)}
@@ -210,7 +211,7 @@ export function WorkspaceView() {
         />
         <IconButton
           label="Send"
-          icon={<Send />}
+          icon={<Send size={ICON_SIZE_LG} />}
           size="sm"
           intent="primary"
           variant="fill"
@@ -225,7 +226,7 @@ export function WorkspaceView() {
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {statusMessage && (
         <StatusBanner role="status" aria-live="polite">
-          <Sparkles size={16} aria-hidden />
+          <Sparkles size={ICON_SIZE} aria-hidden />
           {statusMessage}
         </StatusBanner>
       )}
@@ -238,7 +239,7 @@ export function WorkspaceView() {
                 {!aiCollapsed && (
                   <IconButton
                     label="Float chat over report"
-                    icon={<SquareStack />}
+                    icon={<SquareStack size={ICON_SIZE} />}
                     size="xs"
                     intent="secondary"
                     variant="ghost"
@@ -250,7 +251,13 @@ export function WorkspaceView() {
                 )}
                 <IconButton
                   label={aiCollapsed ? 'Expand AI panel' : 'Collapse AI panel'}
-                  icon={aiCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+                  icon={
+                    aiCollapsed ? (
+                      <PanelLeftOpen size={ICON_SIZE} />
+                    ) : (
+                      <PanelLeftClose size={ICON_SIZE} />
+                    )
+                  }
                   size="xs"
                   intent="secondary"
                   variant="ghost"
@@ -285,7 +292,7 @@ export function WorkspaceView() {
               {floating && (
                 <IconButton
                   label="Dock chat to side"
-                  icon={<PanelLeftOpen size={16} />}
+                  icon={<PanelLeftOpen size={ICON_SIZE} />}
                   size="xs"
                   intent="secondary"
                   variant="ghost"
@@ -297,7 +304,7 @@ export function WorkspaceView() {
               )}
               <IconButton
                 label="Refresh"
-                icon={<RefreshCw size={16} />}
+                icon={<RefreshCw size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant="ghost"
@@ -305,7 +312,7 @@ export function WorkspaceView() {
               />
               <IconButton
                 label="Share"
-                icon={<Share2 size={16} />}
+                icon={<Share2 size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant="ghost"
@@ -313,7 +320,7 @@ export function WorkspaceView() {
               />
               <IconButton
                 label="Export"
-                icon={<Download size={16} />}
+                icon={<Download size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant="ghost"
@@ -321,7 +328,7 @@ export function WorkspaceView() {
               />
               <IconButton
                 label={activeReport.compare?.enabled ? 'Comparing' : 'Compare'}
-                icon={<Columns2 size={16} />}
+                icon={<Columns2 size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant={activeReport.compare?.enabled ? 'tonal' : 'ghost'}
@@ -332,7 +339,7 @@ export function WorkspaceView() {
               />
               <IconButton
                 label="Present"
-                icon={<Maximize2 size={16} />}
+                icon={<Maximize2 size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant="ghost"
@@ -340,7 +347,7 @@ export function WorkspaceView() {
               />
               <IconButton
                 label="Report settings"
-                icon={<Settings size={16} />}
+                icon={<Settings size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant="ghost"
@@ -348,7 +355,7 @@ export function WorkspaceView() {
               />
               <IconButton
                 label={editMode ? 'Exit edit mode' : 'Edit'}
-                icon={<Pencil size={16} />}
+                icon={<Pencil size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant={editMode ? 'tonal' : 'ghost'}
@@ -374,7 +381,7 @@ export function WorkspaceView() {
                 size="sm"
                 intent="secondary"
                 variant="ghost"
-                startIcon={<Plus size={16} />}
+                startIcon={<Plus size={ICON_SIZE} />}
                 onClick={addPage}
               >
                 Add page
@@ -391,7 +398,7 @@ export function WorkspaceView() {
                   <DropdownMenu.Trigger asChild>
                     <IconButton
                       label="Page options"
-                      icon={<MoreHorizontal size={16} />}
+                      icon={<MoreHorizontal size={ICON_SIZE} />}
                       size="xs"
                       intent="secondary"
                       variant="ghost"
@@ -404,7 +411,7 @@ export function WorkspaceView() {
                           <MenuItem
                             showLeftSlot
                             showRightSlot={false}
-                            leftSlot={<Pencil size={16} />}
+                            leftSlot={<Pencil size={ICON_SIZE} />}
                             onClick={() => {
                               const name = window.prompt('Rename page', page.name);
                               if (name) renamePage(page.id, name);
@@ -417,7 +424,7 @@ export function WorkspaceView() {
                           <MenuItem
                             showLeftSlot
                             showRightSlot={false}
-                            leftSlot={<Copy size={16} />}
+                            leftSlot={<Copy size={ICON_SIZE} />}
                             onClick={() => duplicatePage(page.id)}
                           >
                             Duplicate
@@ -427,7 +434,7 @@ export function WorkspaceView() {
                           <MenuItem
                             showLeftSlot
                             showRightSlot={false}
-                            leftSlot={<ChevronLeft size={16} />}
+                            leftSlot={<ChevronLeft size={ICON_SIZE} />}
                             onClick={() => movePage(page.id, 'up')}
                           >
                             Move left
@@ -437,7 +444,7 @@ export function WorkspaceView() {
                           <MenuItem
                             showLeftSlot
                             showRightSlot={false}
-                            leftSlot={<ChevronRight size={16} />}
+                            leftSlot={<ChevronRight size={ICON_SIZE} />}
                             onClick={() => movePage(page.id, 'down')}
                           >
                             Move right
@@ -447,7 +454,7 @@ export function WorkspaceView() {
                           <MenuItem
                             showLeftSlot
                             showRightSlot={false}
-                            leftSlot={<Trash2 size={16} />}
+                            leftSlot={<Trash2 size={ICON_SIZE} />}
                             onClick={() => {
                               if (window.confirm(`Remove page “${page.name}”?`)) {
                                 removePage(page.id);
@@ -464,7 +471,7 @@ export function WorkspaceView() {
               </EditBarGroup>
               <Button
                 size="sm"
-                startIcon={<Plus size={16} />}
+                startIcon={<Plus size={ICON_SIZE} />}
                 onClick={() => setPanel('widget-library')}
               >
                 Add object
@@ -498,7 +505,7 @@ export function WorkspaceView() {
               <HeaderActions>
                 <IconButton
                   label="Dock chat to side"
-                  icon={<PanelLeftOpen />}
+                  icon={<PanelLeftOpen size={ICON_SIZE} />}
                   size="xs"
                   intent="secondary"
                   variant="ghost"
@@ -509,7 +516,7 @@ export function WorkspaceView() {
                 />
                 <IconButton
                   label="Minimize chat"
-                  icon={<PanelLeftClose />}
+                  icon={<PanelLeftClose size={ICON_SIZE} />}
                   size="xs"
                   intent="secondary"
                   variant="ghost"
@@ -525,7 +532,7 @@ export function WorkspaceView() {
           <FloatingChatFab>
             <IconButton
               label="Open AI chat"
-              icon={<MessageSquare />}
+              icon={<MessageSquare size={ICON_SIZE_LG} />}
               size="md"
               intent="primary"
               variant="fill"

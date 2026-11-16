@@ -30,7 +30,6 @@ import {
   PageHeader,
   PageSubtitle,
   PageTitle,
-  ScrollArea,
   Section,
   SectionTitle,
   SetupGrid,
@@ -50,15 +49,70 @@ type NotificationSettings = {
   mentionAlerts: boolean;
 };
 
+/** Fills the workspace: sticky header + sticky nav, scrolling panel only. */
+const SettingsPage = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  padding: var(--space-500) var(--space-800) 0;
+`;
+
+const StickyPageHeader = styled(PageHeader)`
+  flex: none;
+  margin-bottom: var(--space-500);
+`;
+
+const SettingsTabs = styled(VerticalTabs)`
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  /* VerticalTabs defaults to flex-start; stretch so the card column fills the page. */
+  align-items: stretch !important;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+`;
+
 const SettingsLayout = styled.div`
   display: grid;
   grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
   gap: var(--space-600);
-  align-items: start;
+  align-items: stretch;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
   min-width: 0;
 
   @media (max-width: 840px) {
     grid-template-columns: 1fr;
+    overflow: auto;
+  }
+`;
+
+const StickyNav = styled.div`
+  align-self: start;
+  width: 100%;
+  min-width: 0;
+`;
+
+const ContentScroll = styled.div`
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding-bottom: var(--space-800);
+
+  /* Every tab panel shares the same full-width card column. */
+  & > * {
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 `;
 
@@ -66,7 +120,16 @@ const PanelStack = styled.div`
   display: flex;
   flex-direction: column;
   gap: var(--space-500);
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
+  box-sizing: border-box;
+`;
+
+const SettingsCard = styled(SurfaceCard)`
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 `;
 
 const SettingRow = styled.div`
@@ -155,28 +218,31 @@ export function SettingsView() {
   };
 
   return (
-    <ScrollArea>
-      <PageHeader>
+    <SettingsPage>
+      <StickyPageHeader>
         <TitleBlock>
           <PageTitle>Settings</PageTitle>
           <PageSubtitle>
             Manage your profile, notification delivery, and Insight Studio preferences.
           </PageSubtitle>
         </TitleBlock>
-      </PageHeader>
+      </StickyPageHeader>
 
-      <VerticalTabs value={tab} onValueChange={(value) => setTab(value as SettingsTab)}>
+      <SettingsTabs value={tab} onValueChange={(value) => setTab(value as SettingsTab)}>
         <SettingsLayout>
-          <VerticalTabsList aria-label="Settings sections">
-            <VerticalTabItem value="profile">Profile</VerticalTabItem>
-            <VerticalTabItem value="notifications">Notifications</VerticalTabItem>
-            <VerticalTabItem value="preferences">Preferences</VerticalTabItem>
-            <VerticalTabItem value="privacy">Privacy</VerticalTabItem>
-          </VerticalTabsList>
+          <StickyNav>
+            <VerticalTabsList aria-label="Settings sections">
+              <VerticalTabItem value="profile">Profile</VerticalTabItem>
+              <VerticalTabItem value="notifications">Notifications</VerticalTabItem>
+              <VerticalTabItem value="preferences">Preferences</VerticalTabItem>
+              <VerticalTabItem value="privacy">Privacy</VerticalTabItem>
+            </VerticalTabsList>
+          </StickyNav>
 
+          <ContentScroll>
           <VerticalTabsContent value="profile">
             <PanelStack>
-              <SurfaceCard as="div">
+              <SettingsCard as="div">
                 <Section>
                   <SectionTitle>Profile</SectionTitle>
                   <BodyText>
@@ -291,13 +357,13 @@ export function SettingsView() {
                     Reset
                   </Button>
                 </ActionRow>
-              </SurfaceCard>
+              </SettingsCard>
             </PanelStack>
           </VerticalTabsContent>
 
           <VerticalTabsContent value="notifications">
             <PanelStack>
-              <SurfaceCard as="div">
+              <SettingsCard as="div">
                 <Section>
                   <SectionTitle>Delivery</SectionTitle>
                   <BodyText>Choose where Insight Studio sends alerts.</BodyText>
@@ -332,9 +398,9 @@ export function SettingsView() {
                     />
                   </SettingRow>
                 </FieldStack>
-              </SurfaceCard>
+              </SettingsCard>
 
-              <SurfaceCard as="div">
+              <SettingsCard as="div">
                 <Section>
                   <SectionTitle>What to notify me about</SectionTitle>
                 </Section>
@@ -411,13 +477,13 @@ export function SettingsView() {
                     Save notifications
                   </Button>
                 </ActionRow>
-              </SurfaceCard>
+              </SettingsCard>
             </PanelStack>
           </VerticalTabsContent>
 
           <VerticalTabsContent value="preferences">
             <PanelStack>
-              <SurfaceCard as="div">
+              <SettingsCard as="div">
                 <Section>
                   <SectionTitle>App preferences</SectionTitle>
                   <BodyText>Defaults for how Insight Studio opens and presents content.</BodyText>
@@ -504,13 +570,13 @@ export function SettingsView() {
                 <ActionRow>
                   <Button onClick={() => save('Preferences')}>Save preferences</Button>
                 </ActionRow>
-              </SurfaceCard>
+              </SettingsCard>
             </PanelStack>
           </VerticalTabsContent>
 
           <VerticalTabsContent value="privacy">
             <PanelStack>
-              <SurfaceCard as="div">
+              <SettingsCard as="div">
                 <Section>
                   <SectionTitle>Privacy & sharing</SectionTitle>
                   <BodyText>Control how your activity and new reports are shared by default.</BodyText>
@@ -560,11 +626,12 @@ export function SettingsView() {
                 <ActionRow>
                   <Button onClick={() => save('Privacy settings')}>Save privacy</Button>
                 </ActionRow>
-              </SurfaceCard>
+              </SettingsCard>
             </PanelStack>
           </VerticalTabsContent>
+          </ContentScroll>
         </SettingsLayout>
-      </VerticalTabs>
-    </ScrollArea>
+      </SettingsTabs>
+    </SettingsPage>
   );
 }

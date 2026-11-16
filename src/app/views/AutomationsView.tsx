@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { Badge, Button, Switch } from '@cake-admin/cakeand';
 import { Plus, Workflow } from 'lucide-react';
 import styled from 'styled-components';
@@ -5,6 +6,7 @@ import styled from 'styled-components';
 import { TeamCrest } from '../../product/teams/TeamCrest';
 import type { Automation } from '../../product/types';
 import { useAppState } from '../AppState';
+import { CatalogToolbar } from '../components/CatalogToolbar';
 import {
   ActionRow,
   BodyText,
@@ -21,6 +23,16 @@ import {
   SurfaceCard,
   TitleBlock,
 } from '../ui.styles';
+import { ICON_SIZE, ICON_SIZE_LG } from '../../iconSize';
+
+type StatusFilter = 'all' | 'active' | 'paused';
+type SortKey = 'name' | 'status';
+
+const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'active', label: 'Active' },
+  { value: 'paused', label: 'Paused' },
+];
 
 const EmptyState = styled.div`
   display: grid;
@@ -70,8 +82,46 @@ export function AutomationsView() {
     simulateFullTime,
     automationPending,
   } = useAppState();
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [sort, setSort] = useState<SortKey>('name');
 
   const activeCount = snapshot.automations.filter((a) => a.enabled).length;
+
+  const filtered = useMemo(() => {
+    let list = [...snapshot.automations];
+
+    if (statusFilter === 'active') list = list.filter((a) => a.enabled);
+    else if (statusFilter === 'paused') list = list.filter((a) => !a.enabled);
+
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      list = list.filter((a) => {
+        const haystack = [
+          a.name,
+          automationTriggerLabel(a),
+          a.templateName,
+          a.team,
+          a.requirements,
+          a.lastMatch,
+          a.enabled ? 'active' : 'paused',
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+
+    list.sort((a, b) => {
+      if (sort === 'status') {
+        if (a.enabled !== b.enabled) return a.enabled ? -1 : 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    return list;
+  }, [snapshot.automations, statusFilter, query, sort]);
 
   return (
     <ScrollArea>
@@ -97,15 +147,35 @@ export function AutomationsView() {
           >
             {automationPending ? 'Generating…' : 'Simulate full time'}
           </Button>
-          <Button startIcon={<Plus size={16} />} onClick={() => openAutomationEditor()}>
+          <Button startIcon={<Plus size={ICON_SIZE} />} onClick={() => openAutomationEditor()}>
             New automation
           </Button>
         </ActionRow>
       </PageHeader>
 
+      <CatalogToolbar
+        filterOptions={STATUS_FILTERS}
+        filterValue={statusFilter}
+        onFilterChange={(value) => setStatusFilter(value as StatusFilter)}
+        filterAriaLabel="Automation status"
+        searchValue={query}
+        onSearchChange={setQuery}
+        searchPlaceholder="Search automations"
+        searchAriaLabel="Search automations"
+        sortValue={sort}
+        onSortChange={(value) => setSort(value as SortKey)}
+        sortOptions={[
+          { value: 'name', label: 'A–Z' },
+          { value: 'status', label: 'Status' },
+        ]}
+      />
+
       <MetaRow style={{ marginBottom: 'var(--space-400)' }}>
         <Muted>
           {activeCount} active · {snapshot.automations.length} total
+          {filtered.length !== snapshot.automations.length
+            ? ` · ${filtered.length} shown`
+            : ''}
           {' · '}
           Post-match runs wait after FT (demo delay is short)
         </Muted>
@@ -115,7 +185,7 @@ export function AutomationsView() {
         {snapshot.automations.length === 0 && (
           <EmptyState>
             <EmptyIcon aria-hidden>
-              <Workflow size={20} />
+              <Workflow size={ICON_SIZE_LG} />
             </EmptyIcon>
             <Strong>No automations yet</Strong>
             <BodyText>
@@ -126,7 +196,26 @@ export function AutomationsView() {
           </EmptyState>
         )}
 
-        {snapshot.automations.map((automation) => (
+        {snapshot.automations.length > 0 && filtered.length === 0 && (
+          <EmptyState>
+            <EmptyIcon aria-hidden>
+              <Workflow size={ICON_SIZE_LG} />
+            </EmptyIcon>
+            <Strong>No automations match</Strong>
+            <BodyText>Try another filter or clear the search.</BodyText>
+            <Button
+              intent="secondary"
+              onClick={() => {
+                setQuery('');
+                setStatusFilter('all');
+              }}
+            >
+              Clear filters
+            </Button>
+          </EmptyState>
+        )}
+
+        {filtered.map((automation) => (
           <SurfaceCard key={automation.id} as="div">
             <CardBody>
               <CardTop>

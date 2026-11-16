@@ -33,6 +33,7 @@ import { KpiStatRow } from './widgets/KpiStatRow';
 import { MatchScoreboard } from './widgets/MatchScoreboard';
 import { VideoWidget } from './widgets/VideoWidget';
 import type { ReportObject } from './types';
+import { ICON_SIZE } from '../iconSize';
 
 type Props = {
   pageId: string;
@@ -103,7 +104,7 @@ export function ReportObjectView({ pageId, object }: Props) {
             {canShowSources && !presentMode && (
               <IconButton
                 label={`View sources for ${object.title}`}
-                icon={<Database size={16} />}
+                icon={<Database size={ICON_SIZE} />}
                 size="xs"
                 intent="secondary"
                 variant="ghost"
@@ -115,7 +116,7 @@ export function ReportObjectView({ pageId, object }: Props) {
                 <DropdownMenu.Trigger asChild>
                   <IconButton
                     label={`Object actions for ${object.title}`}
-                    icon={<MoreHorizontal size={16} />}
+                    icon={<MoreHorizontal size={ICON_SIZE} />}
                     size="xs"
                     intent="secondary"
                     variant="ghost"
@@ -128,7 +129,7 @@ export function ReportObjectView({ pageId, object }: Props) {
                         <MenuItem
                           showLeftSlot
                           showRightSlot={false}
-                          leftSlot={<Sparkles size={16} />}
+                          leftSlot={<Sparkles size={ICON_SIZE} />}
                           onClick={() => askAiAboutObject(object.title)}
                         >
                           Ask AI
@@ -138,7 +139,7 @@ export function ReportObjectView({ pageId, object }: Props) {
                         <MenuItem
                           showLeftSlot
                           showRightSlot={false}
-                          leftSlot={<ArrowUp size={16} />}
+                          leftSlot={<ArrowUp size={ICON_SIZE} />}
                           onClick={() => moveObject(pageId, object.id, 'up')}
                         >
                           Move up
@@ -148,7 +149,7 @@ export function ReportObjectView({ pageId, object }: Props) {
                         <MenuItem
                           showLeftSlot
                           showRightSlot={false}
-                          leftSlot={<ArrowDown size={16} />}
+                          leftSlot={<ArrowDown size={ICON_SIZE} />}
                           onClick={() => moveObject(pageId, object.id, 'down')}
                         >
                           Move down
@@ -158,7 +159,7 @@ export function ReportObjectView({ pageId, object }: Props) {
                         <MenuItem
                           showLeftSlot
                           showRightSlot={false}
-                          leftSlot={<Trash2 size={16} />}
+                          leftSlot={<Trash2 size={ICON_SIZE} />}
                           onClick={() => removeObject(pageId, object.id)}
                         >
                           Remove

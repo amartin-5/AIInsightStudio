@@ -20,6 +20,7 @@ import {
   SurfaceCard,
   TitleBlock,
 } from '../ui.styles';
+import { ICON_SIZE } from '../../iconSize';
 
 const generationLabels = [
   'Preparing template',
@@ -92,7 +93,7 @@ export function SetupView() {
               size="sm"
               intent="secondary"
               variant="ghost"
-              startIcon={<ArrowLeft size={16} />}
+              startIcon={<ArrowLeft size={ICON_SIZE} />}
               onClick={openTemplates}
             >
               Back to templates

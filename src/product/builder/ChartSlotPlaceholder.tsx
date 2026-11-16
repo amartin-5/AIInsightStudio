@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { Plus } from 'lucide-react';
+import { ICON_SIZE_LG } from '../../iconSize';
 
 type Props = {
   label?: string;
@@ -72,7 +73,7 @@ export function ChartSlotPlaceholder({
     <Root type="button" $selected={selected} onClick={onClick} aria-pressed={selected}>
       <Label>{label}</Label>
       <IconWell aria-hidden>
-        <Plus size={24} />
+        <Plus size={ICON_SIZE_LG} />
       </IconWell>
     </Root>
   );

@@ -2,6 +2,7 @@ import { IconButton } from '@cake-admin/cakeand';
 import { Minus, Square, X } from 'lucide-react';
 
 import { WindowControlCluster } from './shell.styles';
+import { ICON_SIZE } from '../iconSize';
 
 /**
  * Decorative Windows chrome. Non-functional for this demo shell.
@@ -12,7 +13,7 @@ export function WindowControls() {
     <WindowControlCluster aria-hidden>
       <IconButton
         label="Minimize"
-        icon={<Minus />}
+        icon={<Minus size={ICON_SIZE} />}
         size="xs"
         intent="secondary"
         variant="ghost"
@@ -21,7 +22,7 @@ export function WindowControls() {
       />
       <IconButton
         label="Maximize"
-        icon={<Square />}
+        icon={<Square size={ICON_SIZE} />}
         size="xs"
         intent="secondary"
         variant="ghost"
@@ -30,7 +31,7 @@ export function WindowControls() {
       />
       <IconButton
         label="Close"
-        icon={<X />}
+        icon={<X size={ICON_SIZE} />}
         size="xs"
         intent="secondary"
         variant="ghost"

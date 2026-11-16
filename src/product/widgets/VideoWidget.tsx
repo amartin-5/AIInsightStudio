@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { Play } from 'lucide-react';
+import { ICON_SIZE_LG } from '../../iconSize';
 
 type Props = {
   title: string;
@@ -150,7 +151,7 @@ export function VideoWidget({
         <PitchHint aria-hidden />
         {live && <Live>LIVE</Live>}
         <PlayBadge aria-hidden>
-          <Play size={22} fill="currentColor" />
+          <Play size={ICON_SIZE_LG} fill="currentColor" />
         </PlayBadge>
         {duration && <Duration>{duration}</Duration>}
       </Frame>

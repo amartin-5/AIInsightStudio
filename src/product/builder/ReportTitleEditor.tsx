@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { IconButton, TextInput } from '@cake-admin/cakeand';
 import { Check, Pencil, X } from 'lucide-react';
+import { ICON_SIZE } from '../../iconSize';
 
 type Props = {
   value: string;
@@ -97,13 +98,13 @@ export function ReportTitleEditor({ value, onChange, editable = true }: Props) {
         />
         <IconButton
           label="Save report name"
-          icon={<Check />}
+          icon={<Check size={ICON_SIZE} />}
           size="xs"
           onClick={commit}
         />
         <IconButton
           label="Cancel rename"
-          icon={<X />}
+          icon={<X size={ICON_SIZE} />}
           size="xs"
           intent="secondary"
           variant="ghost"
@@ -120,7 +121,7 @@ export function ReportTitleEditor({ value, onChange, editable = true }: Props) {
       </TitleButton>
       <IconButton
         label="Rename report"
-        icon={<Pencil />}
+        icon={<Pencil size={ICON_SIZE} />}
         size="xs"
         intent="secondary"
         variant="ghost"

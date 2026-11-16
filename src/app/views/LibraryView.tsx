@@ -35,6 +35,7 @@ import {
   Strong,
   TitleBlock,
 } from '../ui.styles';
+import { ICON_SIZE, ICON_SIZE_LG } from '../../iconSize';
 
 const LibraryGrid = styled.div`
   display: grid;
@@ -304,7 +305,7 @@ export function LibraryView() {
                       size="sm"
                       intent="secondary"
                       variant="outline"
-                      startIcon={<Plus size={14} />}
+                      startIcon={<Plus size={ICON_SIZE} />}
                       onClick={() => addToReport(entry)}
                     >
                       Add to a report
@@ -313,14 +314,14 @@ export function LibraryView() {
                       size="sm"
                       intent="secondary"
                       variant="tonal"
-                      startIcon={<FilePlus2 size={14} />}
+                      startIcon={<FilePlus2 size={ICON_SIZE} />}
                       onClick={createNewReport}
                     >
                       Create a new report
                     </Button>
                     <IconButton
                       label={`Open full screen sample of ${entry.title}`}
-                      icon={<Expand />}
+                      icon={<Expand size={ICON_SIZE_LG} />}
                       size="sm"
                       intent="secondary"
                       variant="outline"
@@ -356,7 +357,7 @@ export function LibraryView() {
                   size="sm"
                   intent="secondary"
                   variant="outline"
-                  startIcon={<Plus size={14} />}
+                  startIcon={<Plus size={ICON_SIZE} />}
                   onClick={() => {
                     if (!preview) return;
                     addToReport(preview);
@@ -365,7 +366,7 @@ export function LibraryView() {
                 >
                   Add to a report
                 </Button>
-                <Button size="sm" startIcon={<FilePlus2 size={14} />} onClick={createNewReport}>
+                <Button size="sm" startIcon={<FilePlus2 size={ICON_SIZE} />} onClick={createNewReport}>
                   Create a new report
                 </Button>
               </ActionRow>

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 import { useAppState } from '../AppState';
 import { ActionRow, Muted, Strong } from '../ui.styles';
+import { ICON_SIZE, ICON_SIZE_LG } from '../../iconSize';
 
 const Bar = styled.div`
   display: flex;
@@ -11,9 +12,12 @@ const Bar = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: var(--space-300);
-  padding: var(--space-300) var(--space-400);
+  flex: none;
+  padding: var(--space-200) var(--space-400);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
-  background: var(--color-surfaces-canvas);
+  background: var(--color-surfaces-container-blur-high);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   min-width: 0;
 `;
 
@@ -65,7 +69,7 @@ export function PresentChrome() {
         ))}
         <IconButton
           label="Previous page"
-          icon={<ChevronLeft />}
+          icon={<ChevronLeft size={ICON_SIZE_LG} />}
           size="sm"
           intent="secondary"
           variant="ghost"
@@ -73,7 +77,7 @@ export function PresentChrome() {
         />
         <IconButton
           label="Next page"
-          icon={<ChevronRight />}
+          icon={<ChevronRight size={ICON_SIZE_LG} />}
           size="sm"
           intent="secondary"
           variant="ghost"
@@ -83,7 +87,7 @@ export function PresentChrome() {
           size="sm"
           intent="secondary"
           variant="outline"
-          startIcon={<Minimize2 size={16} />}
+          startIcon={<Minimize2 size={ICON_SIZE} />}
           onClick={() => setPresentMode(false)}
         >
           Exit

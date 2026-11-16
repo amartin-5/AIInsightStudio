@@ -26,9 +26,11 @@ const showFullLabelText = css`
     overflow-wrap: break-word;
   }
 
-  /* Restore HelloPC selection-control geometry if any ancestor rule fought it. */
-  button[role='radio'],
-  button[role='checkbox'] {
+  /* Restore HelloPC Radio/Checkbox indicator geometry if an ancestor rule fought it.
+     Skip ContentSwitcher segments — those are also role=radio but carry text labels
+     inside nested spans, and must keep content-sized widths. */
+  button[role='radio']:not(:has(span span)),
+  button[role='checkbox']:not(:has(span span)) {
     width: var(--space-500) !important;
     height: var(--space-500) !important;
     min-width: var(--space-500);
@@ -37,8 +39,8 @@ const showFullLabelText = css`
     overflow: visible !important;
   }
 
-  button[role='radio'] > span,
-  button[role='checkbox'] > span {
+  button[role='radio']:not(:has(span span)) > span,
+  button[role='checkbox']:not(:has(span span)) > span {
     width: var(--space-300) !important;
     height: var(--space-300) !important;
     min-width: var(--space-300);
@@ -49,7 +51,7 @@ const showFullLabelText = css`
     box-sizing: border-box;
   }
 
-  button[role='checkbox'] > span {
+  button[role='checkbox']:not(:has(span span)) > span {
     width: var(--space-350) !important;
     height: var(--space-350) !important;
     min-width: var(--space-350);
@@ -477,6 +479,7 @@ export const Toolbar = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: var(--space-200) var(--space-300);
+  flex: none;
   padding: var(--space-250) var(--space-400);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
   background: var(--color-surfaces-container-blur-high);
@@ -497,9 +500,14 @@ export const PageTabs = styled.div`
   display: flex;
   gap: var(--space-100);
   align-items: center;
-  padding: var(--space-200) var(--space-500);
+  flex: none;
+  box-sizing: border-box;
+  /* Equal block padding — kept intact via flex:none so the pane cannot crush it. */
+  padding: var(--space-200) var(--space-400);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
   background: var(--color-surfaces-container-blur-high);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   overflow-x: auto;
   min-width: 0;
 
@@ -517,7 +525,8 @@ export const EditBar = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: var(--space-300);
-  padding: var(--space-300) var(--space-500);
+  flex: none;
+  padding: var(--space-200) var(--space-400);
   border-bottom: var(--stroke-100) solid var(--color-stroke-border);
   background: var(--color-primary-primary-overlay);
   min-width: 0;
@@ -538,6 +547,8 @@ export const ReportCanvas = styled.div<{ $editing?: boolean }>`
   /* Only the report page scrolls — widgets/charts never scroll themselves. */
   overflow-x: hidden;
   overflow-y: auto;
+  /* Solid surface so canvas inset does not visually merge with PageTabs padding. */
+  background: var(--color-surfaces-canvas);
   padding: ${(p) =>
     p.$editing ? 'var(--space-600) var(--space-800)' : 'var(--space-400)'};
   display: block;
